@@ -85,6 +85,17 @@ def _normalizar(v):
 
 
 class Tierra:
+    @staticmethod
+    def _cargar_fuente(tam, negrita=False):
+        """Usa DejaVu local si existe; Consolas es el respaldo en Windows."""
+        ruta = os.path.join(DIR, "assets", "fonts", "DejaVuSansMono.ttf")
+        try:
+            fuente = pygame.font.Font(ruta, tam)
+            fuente.set_bold(bool(negrita))
+            return fuente
+        except (OSError, pygame.error):
+            return pygame.font.SysFont("Consolas", tam, bold=negrita)
+
     def __init__(self, ancho, alto):
         self.ancho = ancho
         self.alto = alto
@@ -193,9 +204,9 @@ class Tierra:
         self._click_pos = None
         self._movido = 0.0
 
-        self._fuente_titulo = pygame.font.SysFont("Consolas", 20, bold=True)
-        self._fuente = pygame.font.SysFont("Consolas", 14)
-        self._fuente_pequena = pygame.font.SysFont("Consolas", 12)
+        self._fuente_titulo = self._cargar_fuente(20, negrita=True)
+        self._fuente = self._cargar_fuente(14)
+        self._fuente_pequena = self._cargar_fuente(12)
 
         self._cargar_texturas()
         self._halo_base = self._crear_halo(HALO_BASE / 3.6)
@@ -1152,6 +1163,8 @@ class Tierra:
             "historicos" if self.eonet_modo == "activos" else "activos"
         )
         self._aplicar_cache_eonet()
+        if not self.mostrar_eventos:
+            return
         cache = self._eonet_cache[self.eonet_modo]
         if (cache["eventos"] is None
                 or time.time() - cache["ts"] >= TTL_NASA["eonet"]):
@@ -1171,7 +1184,7 @@ class Tierra:
         if not forzar and datos is not None and ahora - ts < TTL_NASA[tipo]:
             return
 
-        if tipo in ("neows", "apod") and not self.nasa.tiene_clave:
+        if tipo == "neows" and not self.nasa.tiene_clave:
             mensaje = "Falta NASA_API_KEY en tierra/.env."
             if self.nasa_error.get(tipo) != mensaje:
                 self.nasa_error[tipo] = mensaje

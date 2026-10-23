@@ -554,17 +554,18 @@ class NasaService:
         return bool(self.api_key)
 
     def solicitar(self, tipo, **kwargs):
-        """Lanza una consulta en un hilo daemon.
+        """Lanza una consulta en segundo plano.
 
-        Devuelve ``True`` si el hilo arrancó y ``False`` si ya había una
-        consulta igual en curso, si el servicio se cerró o si falta la clave.
-        Las consultas ``satelite`` se pueden solapar para que un cambio de
-        selección no tenga que esperar a una descarga anterior.
+        Devuelve ``True`` si arrancó y ``False`` si ya había una consulta
+        igual en curso, si el servicio se cerró o si falta la clave para
+        NeoWs. APOD funciona sin clave mediante su página oficial. Las
+        consultas ``satelite`` usan un pool de dos hilos y pueden solaparse
+        para que un cambio de selección no espere a una descarga anterior.
         """
         if self._cerrado or (tipo in self._en_vuelo and tipo != "satelite"):
             return False
 
-        if tipo in ("neows", "apod") and not self.tiene_clave:
+        if tipo == "neows" and not self.tiene_clave:
             self._cola.put((tipo, None, "Falta NASA_API_KEY en tierra/.env."))
             return False
 
@@ -599,7 +600,7 @@ class NasaService:
             yield tipo, datos, error
 
     def cerrar(self):
-        """Cierra el servicio y cancela las descargas satelitales pendientes."""
+        """Cierra el servicio y cancela las descargas satelitales en cola."""
         self._cerrado = True
         self._ejecutor_satelite.shutdown(wait=False, cancel_futures=True)
 
@@ -827,7 +828,10 @@ class NasaService:
         }
 
     def _fetch_apod(self):
-        """Información de APOD; usa la web oficial si la API falla."""
+        """Información de APOD; usa la web si no hay clave o la API falla."""
+        if not self.tiene_clave:
+            return self._fetch_apod_web()
+
         error_api = None
         try:
             datos = _get_json(
