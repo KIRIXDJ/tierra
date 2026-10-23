@@ -2192,14 +2192,20 @@ class Tierra:
             f"{datos.get('total', 0)} NEOs · 7 días · distancia lunar / tamaño",
             self._fuente_pequena, COLOR_TEXTO, x, y, ancho, 1,
         )
+        y = self._texto_panel(
+            surface,
+            "PHA = clasificación técnica por tamaño y distancia orbital, "
+            "no predicción de impacto.",
+            self._fuente_pequena, COLOR_SECUNDARIO, x, y, ancho, 2,
+        )
 
         for objeto in datos.get("objetos", [])[:max_objetos]:
             peligroso = bool(objeto.get("peligroso"))
             if peligroso:
-                etiqueta = "¡ALERTA PELIGROSO!"
+                etiqueta = "PHA (clasif. NASA)"
                 color_estado = COLOR_ALERTA
             else:
-                etiqueta = "Órbita segura"
+                etiqueta = "No PHA"
                 color_estado = COLOR_SEGURO
 
             badge = self._fuente_pequena.render(etiqueta, True, color_estado)
