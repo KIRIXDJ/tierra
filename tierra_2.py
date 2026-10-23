@@ -1242,7 +1242,27 @@ class Tierra:
             self.satelite_full_tex.pop(clave, None)
         else:
             self.satelite_full_tex[clave] = (antes_full, despues_full)
-            self._recortar_cache_texturas_satelite()
+        self._recortar_cache_texturas_satelite()
+
+    def _recortar_cache_texturas_satelite(self, maximo=6):
+        """Limita las cachés satelitales sin descartar la selección actual."""
+        protegidas = set()
+        if self.evento_sel:
+            protegidas.add(self._clave_satelite(self.evento_sel))
+        if self.visor_satelite_evento:
+            protegidas.add(self._clave_satelite(
+                self.visor_satelite_evento, self.visor_satelite_recorte
+            ))
+
+        for cache in (self.satelite_full_tex, self.satelite_tex,
+                      self.satelite_cache):
+            while len(cache) > maximo:
+                sobrante = next(
+                    (clave for clave in cache if clave not in protegidas), None
+                )
+                if sobrante is None:
+                    break
+                cache.pop(sobrante)
 
     def _procesar_satelite(self, datos, error):
         """Cachea cada descarga; solo la selección actual se pinta."""
