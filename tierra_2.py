@@ -742,7 +742,7 @@ class Tierra:
         """Anillo orbital del satélite fijado, oculto tras el globo."""
         if self.satelite_sel_catnr is None:
             return
-        clave = (self.satelite_sel_catnr, int(pygame.time.get_ticks() // 100))
+        clave = (self.satelite_sel_catnr, int(pygame.time.get_ticks() // 15000))
         if self._orbita_cache[0] != clave:
             self._orbita_cache = (
                 clave,
@@ -901,12 +901,13 @@ class Tierra:
 
         ancho = 372
         fila_alto = 18
-        cabecera = 52
+        simplificado = not self.rastreador.sgp4_disponible
+        cabecera = 68 if simplificado else 52
         max_filas = max(2, (self.alto - 300) // fila_alto)
         visibles = self.satelites[:max_filas]
         alto = cabecera + fila_alto * len(visibles)
         if not visibles:
-            alto = 90
+            alto = max(90, cabecera + 38)
         recortados = len(self.satelites) - len(visibles)
         if recortados > 0:
             alto += 18
@@ -932,6 +933,13 @@ class Tierra:
             self._fuente_pequena.render(estado, True, color_estado),
             (rect.x + 30, rect.y + 30),
         )
+        if simplificado:
+            pantalla.blit(
+                self._fuente_pequena.render(
+                    "PROPAGADOR SIMPLIFICADO", True, COLOR_MARCADOR
+                ),
+                (rect.x + 16, rect.y + 45),
+            )
 
         if not visibles:
             mensaje = (
@@ -941,7 +949,7 @@ class Tierra:
             y = self._texto_panel(
                 pantalla, mensaje, self._fuente_pequena,
                 COLOR_ALERTA if self.rastreador.error else COLOR_SECUNDARIO,
-                rect.x + 16, rect.y + 52, rect.width - 32, 2,
+                rect.x + 16, rect.y + cabecera, rect.width - 32, 2,
             )
             return
 

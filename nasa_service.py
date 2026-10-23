@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime as dt
 import html as html_lib
 import io
+import json
 import math
 import os
 import queue
@@ -72,8 +73,10 @@ SAT_CAPAS = (
 CELESTRAK_GP_URL = "https://celestrak.org/NORAD/elements/gp.php"
 CELESTRAK_GRUPOS = ("stations", "science", "resource", "weather")
 CELESTRAK_PAUSA = 1.1
-TLE_TTL = 30 * 60.0
+TLE_TTL = 2 * 60 * 60.0
 TLE_REINTENTO = 60.0
+TLE_CACHE_PATH = DIR / "cache" / "tle.json"
+TLE_CACHE_MAX_EDAD = 24 * 60 * 60.0
 MU_TIERRA = 398600.4418
 RADIO_TIERRA_KM = 6371.0088
 RADIO_ECUATORIAL_KM = 6378.137
@@ -1502,6 +1505,7 @@ class RastreadorSatelites:
         self._ttl = max(60.0, float(ttl))
         self._lock = threading.Lock()
         self._hilo = None
+        self._hilo_tle = None
         self._parado = threading.Event()
         self._tles = []
         self._ts_tle = 0.0
@@ -1509,6 +1513,7 @@ class RastreadorSatelites:
         self._error = None
         self._cargando = False
         self._reintento_ts = 0.0
+        self._cargar_cache_tle()
 
     @property
     def cargando(self):
@@ -1529,18 +1534,26 @@ class RastreadorSatelites:
         return max(0.0, time.time() - self._ts_tle)
 
     @property
+    def sgp4_disponible(self):
+        return _Satrec is not None
+
+    @property
     def iniciado(self):
         return self._hilo is not None and self._hilo.is_alive()
 
     def iniciar(self):
-        """Arranca el hilo de descarga y propagación (idempotente)."""
+        """Arranca el muestreo y la descarga TLE en hilos independientes."""
         if self.iniciado:
             return
         self._parado.clear()
         self._hilo = threading.Thread(
             target=self._bucle, daemon=True, name="tierra-satelites"
         )
+        self._hilo_tle = threading.Thread(
+            target=self._bucle_tle, daemon=True, name="tierra-satelites-tle"
+        )
         self._hilo.start()
+        self._hilo_tle.start()
 
     def cerrar(self):
         self._parado.set()
@@ -1608,6 +1621,72 @@ class RastreadorSatelites:
         )
         return estado
 
+    def _cargar_cache_tle(self):
+        """Recupera TLE recientes del disco para arrancar sin red."""
+        try:
+            with TLE_CACHE_PATH.open("r", encoding="utf-8") as archivo:
+                guardado = json.load(archivo)
+            ts = float(guardado.get("ts") or 0.0)
+            if not ts or time.time() - ts > TLE_CACHE_MAX_EDAD:
+                return
+            registros = {}
+            for item in guardado.get("tles", []):
+                try:
+                    registros[int(item["catnr"])] = item
+                except (KeyError, TypeError, ValueError):
+                    continue
+
+            tles = []
+            for config in self._config:
+                item = registros.get(int(config["catnr"]))
+                if not item:
+                    continue
+                try:
+                    tles.append(_registro_tle(
+                        config,
+                        _texto(item.get("objeto")),
+                        _texto(item.get("linea1")),
+                        _texto(item.get("linea2")),
+                    ))
+                except Exception:
+                    continue
+            if tles:
+                with self._lock:
+                    self._tles = tles
+                    self._ts_tle = min(ts, time.time())
+        except (OSError, ValueError, TypeError):
+            return
+
+    @staticmethod
+    def _guardar_cache_tle(tles, ts):
+        """Guarda línea1/línea2 y un timestamp para el próximo arranque."""
+        registros = []
+        for tle in tles:
+            try:
+                registros.append({
+                    "catnr": int(tle["catnr"]),
+                    "objeto": _texto(tle.get("objeto")),
+                    "linea1": str(tle["linea1"]),
+                    "linea2": str(tle["linea2"]),
+                })
+            except (KeyError, TypeError, ValueError):
+                continue
+        if not registros:
+            return
+        try:
+            TLE_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            temporal = TLE_CACHE_PATH.with_suffix(".tmp")
+            with temporal.open("w", encoding="utf-8") as archivo:
+                json.dump(
+                    {"ts": float(ts), "tles": registros},
+                    archivo,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
+            os.replace(temporal, TLE_CACHE_PATH)
+        except OSError:
+            return
+
     def _actualizar_tle(self):
         edad = time.time() - self._ts_tle
         ttl = self._ttl
@@ -1630,6 +1709,7 @@ class RastreadorSatelites:
                 self._error = "Error inesperado al descargar los TLE."
                 self._reintento_ts = time.time() + TLE_REINTENTO
         else:
+            ahora = time.time()
             with self._lock:
                 combinados = {tle["catnr"]: tle for tle in self._tles}
                 combinados.update({tle["catnr"]: tle for tle in datos})
@@ -1638,8 +1718,10 @@ class RastreadorSatelites:
                     for config in self._config
                     if config["catnr"] in combinados
                 ]
-                self._ts_tle = time.time()
+                self._ts_tle = ahora
                 self._error = None
+                tles_guardar = list(self._tles)
+            self._guardar_cache_tle(tles_guardar, ahora)
         finally:
             self._cargando = False
 
@@ -1663,12 +1745,17 @@ class RastreadorSatelites:
             estados.append(registro)
         return estados
 
+    def _bucle_tle(self):
+        """Descarga TLE sin detener el hilo que muestrea las órbitas."""
+        while not self._parado.is_set():
+            self._actualizar_tle()
+            self._parado.wait(2.0)
+
     def _bucle(self):
         while not self._parado.is_set():
             try:
-                self._actualizar_tle()
                 if not self._tles:
-                    self._parado.wait(2.0)
+                    self._parado.wait(1.0)
                     continue
 
                 t0 = time.time()
