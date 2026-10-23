@@ -71,6 +71,9 @@ CATEGORIAS_EONET = {
 TTL_NASA = {"eonet": 300.0, "neows": 6 * 3600.0, "apod": 3600.0}
 TTL_SATELITE = 6 * 3600.0
 COOLDOWN_NASA = 60.0
+CATEGORIAS_METRICA_SATELITE = frozenset({
+    "wildfires", "floods", "landslides", "drought",
+})
 VISOR_ZOOM_MIN = 1.0
 VISOR_ZOOM_MAX = 4.0
 VISOR_ZOOM_PASO = 1.25
@@ -1718,23 +1721,29 @@ class Tierra:
 
         y += lado + 6
 
-        cambio = float(datos.get("cambio_pct") or 0.0)
-        severidad = float(datos.get("severidad") or 0.0)
-        if cambio >= 25.0:
-            color_cambio = COLOR_ALERTA
-        elif cambio >= 8.0:
-            color_cambio = COLOR_MARCADOR
-        else:
-            color_cambio = COLOR_SEGURO
-        y = self._texto_panel(
-            surface, f"Impacto ambiental estimado por matriz: {cambio:.1f}%",
-            self._fuente_pequena, color_cambio, x, y, ancho, 1,
-        )
-        y = self._texto_panel(
-            surface,
-            f"de cambio territorial · severidad {severidad:.1f}/100",
-            self._fuente_pequena, COLOR_TEXTO, x, y, ancho, 1,
-        )
+        if evento.get("categoria") in CATEGORIAS_METRICA_SATELITE:
+            cambio = float(datos.get("cambio_pct") or 0.0)
+            severidad = float(datos.get("severidad") or 0.0)
+            if cambio >= 25.0:
+                color_cambio = COLOR_ALERTA
+            elif cambio >= 8.0:
+                color_cambio = COLOR_MARCADOR
+            else:
+                color_cambio = COLOR_SEGURO
+            y = self._texto_panel(
+                surface, f"Cambio visual estimado: {cambio:.1f}%",
+                self._fuente_pequena, color_cambio, x, y, ancho, 1,
+            )
+            y = self._texto_panel(
+                surface,
+                f"Severidad visual estimada: {severidad:.1f}/100",
+                self._fuente_pequena, COLOR_TEXTO, x, y, ancho, 1,
+            )
+            y = self._texto_panel(
+                surface,
+                "Heurística visual; nubes y humo pueden afectar el resultado.",
+                self._fuente_pequena, COLOR_SECUNDARIO, x, y, ancho, 2,
+            )
         cobertura = int(round(float(datos.get("cobertura") or 0.0) * 100))
         capa = self._nombre_capa_satelite(datos.get("capa"))
         y = self._texto_panel(

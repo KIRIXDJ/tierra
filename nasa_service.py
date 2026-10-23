@@ -58,7 +58,7 @@ SAT_DELTA = 1.0
 SAT_RECORTE = 2.0 * SAT_DELTA
 SAT_RECORTES = (2.0, 1.0, 0.5)
 SAT_THRESHOLD = 28.0
-SAT_MIN_COBERTURA = 0.20
+SAT_MIN_COBERTURA = 0.35
 SAT_TIMEOUT = (10, 45)
 SAT_CAPAS = (
     "MODIS_Terra_CorrectedReflectance_TrueColor",
@@ -173,17 +173,29 @@ def _fecha_evento(evento):
         raise NasaError("La fecha del evento no es válida para la comparación satelital.") from None
 
 
+def _fecha_evento_inicio(evento):
+    """Primera fecha conocida del evento; respaldo para cachés antiguas."""
+    valor = evento.get("fecha_inicio") if isinstance(evento, dict) else ""
+    if not valor:
+        return _fecha_evento(evento)
+    try:
+        return dt.date.fromisoformat(str(valor)[:10])
+    except ValueError:
+        return _fecha_evento(evento)
+
+
 def _fechas_satelite(evento):
-    """Devuelve la fecha Antes (fecha-2) y candidatos Después (fecha+1, fecha)."""
-    fecha = _fecha_evento(evento)
+    """Antes = inicio-2; Después = fin+1 o fin, sin superar hoy."""
+    fecha_inicio = _fecha_evento_inicio(evento)
+    fecha_fin = _fecha_evento(evento)
     hoy = dt.date.today()
-    antes = fecha - dt.timedelta(days=2)
+    antes = fecha_inicio - dt.timedelta(days=2)
     if antes > hoy:
         raise NasaError("El evento todavía no tiene dos días de historial satelital.")
 
     despues = []
     for delta in (1, 0):
-        candidato = fecha + dt.timedelta(days=delta)
+        candidato = fecha_fin + dt.timedelta(days=delta)
         if candidato <= hoy and candidato not in despues:
             despues.append(candidato)
     if not despues:
@@ -335,9 +347,10 @@ def comparar_imagenes_satelitales(antes, despues):
 
     Acepta matrices NumPy o imágenes Pillow con cualquier resolución; ambas se
     normalizan a 256x256. Devuelve un diccionario serializable con el porcentaje
-    de píxeles alterados, la severidad ponderada y la cobertura válida. La
-    heurística combina diferencia RGB, pérdida de verdor y oscurecimiento para
-    no depender únicamente de cambios de brillo o nubosidad.
+    de píxeles alterados, la severidad ponderada, la cobertura válida y la
+    cobertura de nubes. La heurística combina diferencia RGB, pérdida de verdor
+    y oscurecimiento; los píxeles brillantes y poco saturados se excluyen por
+    considerarse nubes.
     """
     imagen_antes = _imagen_analisis(antes)
     imagen_despues = _imagen_analisis(despues)
@@ -346,8 +359,16 @@ def comparar_imagenes_satelitales(antes, despues):
 
     luma_a = a[..., 0] * 0.299 + a[..., 1] * 0.587 + a[..., 2] * 0.114
     luma_b = b[..., 0] * 0.299 + b[..., 1] * 0.587 + b[..., 2] * 0.114
-    validos = (luma_a > 6.0) & (luma_b > 6.0)
+
+    def nublado(rgb):
+        brillo = rgb.min(axis=2)
+        saturacion = rgb.max(axis=2) - brillo
+        return (brillo > 200.0) & (saturacion <= 25.0)
+
+    nubes = nublado(a) | nublado(b)
+    validos = (luma_a > 6.0) & (luma_b > 6.0) & ~nubes
     cobertura = float(validos.mean())
+    cobertura_nubes = float(nubes.mean())
     if cobertura < SAT_MIN_COBERTURA:
         raise NasaError("Las imágenes satelitales no tienen cobertura suficiente para comparar.")
 
@@ -371,6 +392,7 @@ def comparar_imagenes_satelitales(antes, despues):
         "cambio_pct": round(cambio_pct, 1),
         "severidad": round(severidad, 1),
         "cobertura": round(cobertura, 3),
+        "cobertura_nubes": round(cobertura_nubes, 3),
         "pixeles_alterados": pixeles_alterados,
         "pixeles_validos": pixeles_validos,
         "metodo": "diferencia_rgb+perdida_verdor+oscurecimiento",
@@ -636,6 +658,10 @@ class NasaService:
                 "lat": float(lat),
                 "lon": float(lon),
                 "fecha": _fecha_corta(ultima.get("date")),
+                "fecha_inicio": (
+                    _fecha_corta(geometrias[0].get("date"))
+                    if geometrias else ""
+                ),
                 "link": _texto(evento.get("link")),
                 "magnitud": ultima.get("magnitudeValue"),
                 "unidad": _texto(ultima.get("magnitudeUnit")),
@@ -651,9 +677,10 @@ class NasaService:
 
         Se prueban capas MODIS/VIIRS hasta encontrar una que tenga cobertura
         en las dos fechas. La misma capa se usa en ambas imágenes para evitar
-        comparar sensores distintos. El Antes siempre es ``fecha - 2 días``; el
-        Después intenta ``fecha + 1 día`` y, si no hay cobertura, la fecha exacta
-        del evento.
+        comparar sensores distintos. El Antes usa ``fecha_inicio - 2 días``; el
+        Después intenta ``fecha_fin + 1 día`` y, si no hay cobertura, la fecha
+        exacta de cierre del evento. Si el evento es de hoy y GIBS aún no tiene
+        su imagen, se devuelve un mensaje específico.
 
         ``recorte`` es el ancho geográfico en grados. La vista normal usa 2°;
         los niveles de 1° y 0.5° permiten acercarse sin cambiar de capa.
@@ -670,6 +697,8 @@ class NasaService:
 
         recorte = round(max(0.1, min(20.0, _f(recorte, SAT_RECORTE))), 2)
         antes, candidatos_despues = _fechas_satelite(evento)
+        fecha_fin = _fecha_evento(evento)
+        hoy = dt.date.today()
         bbox = _bbox_satelite(lat, lon, recorte)
         imagenes = {}
 
@@ -729,6 +758,8 @@ class NasaService:
                 resultado.update(metricas)
                 return resultado
 
+        if fecha_fin == hoy:
+            raise NasaError("Imagen de hoy aún no disponible en GIBS.")
         fechas = " / ".join(fecha.isoformat() for fecha in candidatos_despues)
         raise NasaError(
             f"Sin cobertura satelital para {antes.isoformat()} y {fechas}."
