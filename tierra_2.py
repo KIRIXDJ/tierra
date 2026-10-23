@@ -1,3 +1,4 @@
+import datetime
 import io
 import math
 import os
@@ -15,6 +16,7 @@ try:
         RADIO_TIERRA_KM,
         RastreadorSatelites,
         SAT_RECORTES,
+        _gmst,
     )
 except ImportError:
     from .nasa_service import (
@@ -23,6 +25,7 @@ except ImportError:
         RADIO_TIERRA_KM,
         RastreadorSatelites,
         SAT_RECORTES,
+        _gmst,
     )
 
 
@@ -194,6 +197,7 @@ class Tierra:
         self._halo_rp = -1
         self._surf_final = None
         self._M = self._matriz()
+        self._actualizar_sol()
         self._r = -1
         self._r_pantalla = self._radio()
         self._construir_geometria()
@@ -453,6 +457,35 @@ class Tierra:
 
         cx, cy = self._centro()
         return (cx - self._r_pantalla, cy - self._r_pantalla)
+
+    def _actualizar_sol(self):
+        """Ubica el punto subsolar real y lo lleva al espacio de vista."""
+        ahora = datetime.datetime.now(datetime.timezone.utc)
+        jd = 2440587.5 + ahora.timestamp() / 86400.0
+        n = jd - 2451545.0
+        L = math.radians((280.460 + 0.9856474 * n) % 360)
+        g = math.radians((357.528 + 0.9856003 * n) % 360)
+        lam = (
+            L
+            + math.radians(1.915) * math.sin(g)
+            + math.radians(0.020) * math.sin(2 * g)
+        )
+        eps = math.radians(23.439 - 4e-7 * n)
+        dec = math.asin(math.sin(eps) * math.sin(lam))
+        ra = math.atan2(math.cos(eps) * math.sin(lam), math.cos(lam))
+        lon = ra - _gmst(jd)
+        mundo = np.array(
+            [
+                math.cos(dec) * math.sin(lon),
+                math.sin(dec),
+                math.cos(dec) * math.cos(lon),
+            ],
+            dtype=np.float32,
+        )
+        self.sol = _normalizar(self._M.T @ mundo)
+        self._h_vec = _normalizar(
+            self.sol + np.array([0.0, 0.0, 1.0], dtype=np.float32)
+        )
 
     def _proyectar(self, lat, lon):
         la = math.radians(lat)
@@ -2069,6 +2102,7 @@ class Tierra:
 
         self.zoom += (self.zoom_objetivo - self.zoom) * min(1.0, dt * 8.0)
         self._M = self._matriz()
+        self._actualizar_sol()
         self._construir_geometria()
         if abs(self.zoom - self.zoom_objetivo) < 0.002 and self._halo_rp != self._r_pantalla:
             self._actualizar_halo()
