@@ -23,6 +23,7 @@ import os
 import queue
 import re
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import time
 from pathlib import Path
 
@@ -544,6 +545,9 @@ class NasaService:
         self._cola = queue.Queue()
         self._en_vuelo = set()
         self._cerrado = False
+        self._ejecutor_satelite = ThreadPoolExecutor(
+            max_workers=2, thread_name_prefix="nasa-satelite"
+        )
 
     @property
     def tiene_clave(self):
@@ -567,8 +571,14 @@ class NasaService:
         # Las comparaciones satelitales pueden solaparse: si Jefe cambia de
         # evento, la nueva descarga no espera a que termine la anterior. La UI
         # cachea cada resultado por clave y solo muestra la selección actual.
-        if tipo != "satelite":
-            self._en_vuelo.add(tipo)
+        if tipo == "satelite":
+            try:
+                self._ejecutor_satelite.submit(self._ejecutar, tipo, kwargs)
+            except RuntimeError:
+                return False
+            return True
+
+        self._en_vuelo.add(tipo)
         hilo = threading.Thread(
             target=self._ejecutar,
             args=(tipo, kwargs),
@@ -589,8 +599,9 @@ class NasaService:
             yield tipo, datos, error
 
     def cerrar(self):
-        """Marca el servicio como cerrado; los hilos son daemon."""
+        """Cierra el servicio y cancela las descargas satelitales pendientes."""
         self._cerrado = True
+        self._ejecutor_satelite.shutdown(wait=False, cancel_futures=True)
 
     def _ejecutar(self, tipo, kwargs):
         try:
