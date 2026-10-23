@@ -165,13 +165,16 @@ class Tierra:
         self.visor_satelite_abierto = False
         self.visor_satelite_evento = None
         self.visor_satelite_recorte = SAT_RECORTES[0]
+        self.visor_satelite_lado = 0
         self.visor_satelite_zoom = VISOR_ZOOM_MIN
         self.visor_satelite_pan = [0.0, 0.0]
         self.visor_satelite_arrastrando = False
         self.visor_satelite_movido = 0.0
         self.visor_satelite_rect = pygame.Rect(0, 0, 0, 0)
+        self.visor_satelite_clave_mostrada = None
         self._visor_cache_key = None
         self._visor_cache = None
+        self._visor_rects = {}
 
         self._nasa_version = 0
         self._nasa_panel = None
@@ -1286,6 +1289,8 @@ class Tierra:
             protegidas.add(self._clave_satelite(
                 self.visor_satelite_evento, self.visor_satelite_recorte
             ))
+        if self.visor_satelite_clave_mostrada:
+            protegidas.add(self.visor_satelite_clave_mostrada)
 
         for cache in (self.satelite_full_tex, self.satelite_tex,
                       self.satelite_cache):
@@ -1743,6 +1748,390 @@ class Tierra:
             )
         return y
 
+    def _abrir_visor_satelite(self, lado=0):
+        """Abre el visor ampliado sobre la selección actual."""
+        if not self.evento_sel:
+            return
+        self.visor_satelite_evento = self.evento_sel
+        self.visor_satelite_recorte = SAT_RECORTES[0]
+        self.visor_satelite_lado = 1 if lado else 0
+        self.visor_satelite_zoom = VISOR_ZOOM_MIN
+        self.visor_satelite_pan = [0.0, 0.0]
+        self.visor_satelite_arrastrando = False
+        self.visor_satelite_movido = 0.0
+        self.visor_satelite_abierto = True
+        clave = self._clave_satelite(self.evento_sel)
+        self.visor_satelite_clave_mostrada = (
+            clave if clave in self.satelite_full_tex else None
+        )
+        self.visor_satelite_rect = pygame.Rect(0, 0, 0, 0)
+        self._visor_cache_key = None
+        self._visor_cache = None
+        self._visor_rects = {}
+        self._click_panel = False
+
+    def _cerrar_visor_satelite(self):
+        self.visor_satelite_abierto = False
+        self.visor_satelite_evento = None
+        self.visor_satelite_arrastrando = False
+        self.visor_satelite_rect = pygame.Rect(0, 0, 0, 0)
+        self.visor_satelite_clave_mostrada = None
+        self._visor_cache_key = None
+        self._visor_cache = None
+        self._visor_rects = {}
+
+    def _intentar_abrir_visor(self, pos, boton=1):
+        """Traduce el hitbox interno del panel a coordenadas de pantalla."""
+        if not self._satelite_hitbox or not self.evento_sel:
+            return False
+        hb = self._satelite_hitbox
+        x = self._nasa_panel_rect.x + hb.x
+        y = (
+            self._nasa_panel_rect.y
+            + self._panel_body_top
+            + hb.y
+            - self._panel_scroll
+        )
+        if pos[1] < self._nasa_panel_rect.y + self._panel_body_top:
+            return False
+        rect = pygame.Rect(x, y, hb.width, hb.height)
+        if not rect.collidepoint(pos):
+            return False
+        lado = 1 if boton == 3 or pos[0] >= rect.centerx else 0
+        self._abrir_visor_satelite(lado)
+        return True
+
+    def _cambiar_recorte_visor(self, recorte):
+        recorte = round(float(recorte), 2)
+        if abs(recorte - self.visor_satelite_recorte) < 1e-6:
+            return
+        self.visor_satelite_recorte = recorte
+        self.visor_satelite_zoom = VISOR_ZOOM_MIN
+        self.visor_satelite_pan = [0.0, 0.0]
+        self.visor_satelite_arrastrando = False
+        self._visor_cache_key = None
+        self._solicitar_satelite(recorte=recorte)
+
+    def _limitar_pan_visor(self):
+        vista = self.visor_satelite_rect
+        if vista.width <= 0:
+            return
+        escala = max(1, int(round(vista.width * self.visor_satelite_zoom)))
+        max_pan = max(0, (escala - vista.width) // 2)
+        self.visor_satelite_pan[0] = max(
+            -max_pan, min(max_pan, self.visor_satelite_pan[0])
+        )
+        self.visor_satelite_pan[1] = max(
+            -max_pan, min(max_pan, self.visor_satelite_pan[1])
+        )
+
+    def _boton_visor(self, pantalla, rect, texto, activo, color=COLOR_ACENTO):
+        fondo = (9, 34, 52) if activo else (7, 17, 29)
+        pygame.draw.rect(pantalla, fondo, rect, border_radius=5)
+        pygame.draw.rect(
+            pantalla, color if activo else (36, 66, 96), rect, 1,
+            border_radius=5,
+        )
+        etiqueta = self._fuente_pequena.render(
+            texto, True, color if activo else COLOR_TEXTO
+        )
+        pantalla.blit(
+            etiqueta,
+            (
+                rect.centerx - etiqueta.get_width() // 2,
+                rect.centery - etiqueta.get_height() // 2,
+            ),
+        )
+
+    def _manejar_evento_visor(self, ev):
+        """El visor es modal: consume los eventos del globo mientras está abierto."""
+        if ev.type == pygame.KEYDOWN:
+            if ev.key == pygame.K_ESCAPE:
+                self._cerrar_visor_satelite()
+            return True
+
+        if ev.type == pygame.MOUSEBUTTONDOWN:
+            if ev.button not in (1, 3):
+                return True
+            rects = self._visor_rects
+            if rects.get("cerrar") and rects["cerrar"].collidepoint(ev.pos):
+                self._cerrar_visor_satelite()
+                return True
+            if rects.get("antes") and rects["antes"].collidepoint(ev.pos):
+                self.visor_satelite_lado = 0
+                return True
+            if rects.get("despues") and rects["despues"].collidepoint(ev.pos):
+                self.visor_satelite_lado = 1
+                return True
+            for recorte, rect in rects.get("recortes", ()):
+                if rect.collidepoint(ev.pos):
+                    self._cambiar_recorte_visor(recorte)
+                    return True
+            panel = rects.get("panel")
+            vista = self.visor_satelite_rect
+            if not panel or not panel.collidepoint(ev.pos):
+                self._cerrar_visor_satelite()
+                return True
+            if ev.button == 1 and vista.collidepoint(ev.pos):
+                self.visor_satelite_arrastrando = True
+                self.visor_satelite_movido = 0.0
+            return True
+
+        if ev.type == pygame.MOUSEBUTTONUP:
+            if ev.button == 1:
+                self.visor_satelite_arrastrando = False
+            return True
+
+        if ev.type == pygame.MOUSEMOTION and self.visor_satelite_arrastrando:
+            dx, dy = ev.rel
+            self.visor_satelite_movido += abs(dx) + abs(dy)
+            self.visor_satelite_pan[0] += dx
+            self.visor_satelite_pan[1] += dy
+            self._limitar_pan_visor()
+            return True
+
+        if ev.type == pygame.MOUSEWHEEL:
+            if ev.y:
+                self.visor_satelite_zoom = max(
+                    VISOR_ZOOM_MIN,
+                    min(
+                        VISOR_ZOOM_MAX,
+                        self.visor_satelite_zoom * (VISOR_ZOOM_PASO ** ev.y),
+                    ),
+                )
+                self._visor_cache_key = None
+                self._limitar_pan_visor()
+            return True
+
+        return True
+
+    def _dibujar_visor_satelite(self, pantalla):
+        """Dibuja el modal con precarga de la imagen y sus controles."""
+        if not self.visor_satelite_abierto or not self.visor_satelite_evento:
+            return
+        ancho, alto = pantalla.get_size()
+        vw = min(ancho - 48, 1400)
+        vh = min(alto - 48, 920)
+        panel = pygame.Rect((ancho - vw) // 2, (alto - vh) // 2, vw, vh)
+        self._visor_rects = {"panel": panel}
+
+        velo = pygame.Surface((ancho, alto), pygame.SRCALPHA)
+        velo.fill((2, 6, 14, 225))
+        pantalla.blit(velo, (0, 0))
+        pygame.draw.rect(pantalla, (5, 12, 22), panel, border_radius=12)
+        pygame.draw.rect(pantalla, (36, 66, 96), panel, 1, border_radius=12)
+
+        margen = 20
+        evento = self.visor_satelite_evento
+        pantalla.blit(
+            self._fuente_titulo.render("VISOR SATELITAL", True, COLOR_ACENTO),
+            (panel.x + margen, panel.y + 12),
+        )
+        titulo = self._recortar(
+            evento.get("titulo", ""), self._fuente, panel.width - 110
+        )
+        pantalla.blit(
+            self._fuente.render(titulo, True, COLOR_TEXTO),
+            (panel.x + margen, panel.y + 38),
+        )
+
+        cerrar = pygame.Rect(panel.right - 44, panel.y + 12, 28, 28)
+        self._visor_rects["cerrar"] = cerrar
+        self._boton_visor(pantalla, cerrar, "X", True, COLOR_ALERTA)
+
+        antes = pygame.Rect(panel.x + margen, panel.y + 68, 106, 28)
+        despues = pygame.Rect(antes.right + 8, antes.y, 116, 28)
+        self._visor_rects["antes"] = antes
+        self._visor_rects["despues"] = despues
+        self._boton_visor(
+            pantalla, antes, "ANTES", self.visor_satelite_lado == 0,
+            COLOR_ACENTO,
+        )
+        self._boton_visor(
+            pantalla, despues, "DESPUÉS", self.visor_satelite_lado == 1,
+            COLOR_MARCADOR,
+        )
+
+        area_img = pygame.Rect(
+            panel.x + margen,
+            panel.y + 96,
+            panel.width - margen * 2,
+            max(1, panel.height - 96 - 94),
+        )
+        lado = max(1, min(area_img.width, area_img.height))
+        vista = pygame.Rect(
+            area_img.centerx - lado // 2,
+            area_img.centery - lado // 2,
+            lado,
+            lado,
+        )
+        self.visor_satelite_rect = vista
+
+        recorte = self.visor_satelite_recorte
+        clave = self._clave_satelite(evento, recorte)
+        actual = self.satelite_full_tex.get(clave)
+        datos_actual = self._datos_satelite(clave)
+        error_actual = self.satelite_error.get(clave)
+        cargando_actual = clave in self.satelite_en_vuelo
+
+        if actual is not None:
+            clave_mostrada = clave
+            self.visor_satelite_clave_mostrada = clave
+        else:
+            clave_mostrada = self.visor_satelite_clave_mostrada
+        texturas = self.satelite_full_tex.get(clave_mostrada)
+        datos_mostrados = (
+            self._datos_satelite(clave_mostrada) or datos_actual
+        )
+
+        pygame.draw.rect(pantalla, (2, 7, 14), vista)
+        if texturas is not None:
+            indice = 1 if self.visor_satelite_lado else 0
+            textura = texturas[indice]
+            escala = max(1, int(round(vista.width * self.visor_satelite_zoom)))
+            escala = min(4096, escala)
+            clave_cache = (clave_mostrada, indice, vista.width, escala)
+            if (clave_cache != self._visor_cache_key
+                    or self._visor_cache is None):
+                try:
+                    self._visor_cache = pygame.transform.smoothscale(
+                        textura, (escala, escala)
+                    )
+                except pygame.error:
+                    self._visor_cache = pygame.transform.scale(
+                        textura, (escala, escala)
+                    )
+                self._visor_cache_key = clave_cache
+            self._limitar_pan_visor()
+            px = (
+                vista.centerx - escala // 2
+                + int(self.visor_satelite_pan[0])
+            )
+            py = (
+                vista.centery - escala // 2
+                + int(self.visor_satelite_pan[1])
+            )
+            pantalla.set_clip(vista)
+            pantalla.blit(self._visor_cache, (px, py))
+            pantalla.set_clip(None)
+
+            etiqueta = "ANTES" if indice == 0 else "DESPUÉS"
+            fecha = ""
+            if datos_mostrados:
+                fecha = datos_mostrados.get(
+                    "antes_fecha" if indice == 0 else "despues_fecha", ""
+                )
+            texto_fecha = f"{etiqueta} · {fecha}" if fecha else etiqueta
+            color_lado = COLOR_ACENTO if indice == 0 else COLOR_MARCADOR
+            img = self._fuente_pequena.render(texto_fecha, True, color_lado)
+            fondo = pygame.Surface(
+                (img.get_width() + 12, img.get_height() + 6),
+                pygame.SRCALPHA,
+            )
+            fondo.fill((4, 12, 22, 220))
+            pos = (vista.x + 8, vista.y + 8)
+            pantalla.blit(fondo, pos)
+            pygame.draw.rect(
+                pantalla, color_lado,
+                (pos[0], pos[1], fondo.get_width(), fondo.get_height()), 1,
+            )
+            pantalla.blit(img, (pos[0] + 6, pos[1] + 3))
+
+            if cargando_actual:
+                carga = f"CARGANDO RECORTE {recorte:g}°"
+                img = self._fuente_pequena.render(carga, True, COLOR_ACENTO)
+                fondo = pygame.Surface(
+                    (img.get_width() + 12, img.get_height() + 6),
+                    pygame.SRCALPHA,
+                )
+                fondo.fill((4, 12, 22, 225))
+                pos = (
+                    vista.centerx - fondo.get_width() // 2,
+                    vista.y + 8,
+                )
+                pantalla.blit(fondo, pos)
+                pygame.draw.rect(
+                    pantalla, COLOR_ACENTO,
+                    (pos[0], pos[1], fondo.get_width(), fondo.get_height()), 1,
+                )
+                pantalla.blit(img, (pos[0] + 6, pos[1] + 3))
+
+            if error_actual:
+                texto_error = self._recortar(
+                    error_actual, self._fuente_pequena, vista.width - 16
+                )
+                img = self._fuente_pequena.render(
+                    texto_error, True, COLOR_ALERTA
+                )
+                pantalla.blit(img, (vista.x + 8, vista.bottom - 22))
+        else:
+            if error_actual:
+                mensaje = error_actual
+                color = COLOR_ALERTA
+            elif cargando_actual:
+                mensaje = "CARGANDO IMAGEN SATELITAL..."
+                color = COLOR_SECUNDARIO
+            else:
+                mensaje = "IMAGEN AMPLIADA NO DISPONIBLE"
+                color = COLOR_SECUNDARIO
+            lineas = self._envolver(
+                mensaje, self._fuente, vista.width - 32, 3
+            )
+            alto_total = len(lineas) * self._fuente.get_linesize()
+            ly = vista.centery - alto_total // 2
+            for linea in lineas:
+                img = self._fuente.render(linea, True, color)
+                pantalla.blit(
+                    img, (vista.centerx - img.get_width() // 2, ly)
+                )
+                ly += self._fuente.get_linesize()
+
+        pygame.draw.rect(
+            pantalla, COLOR_ACENTO if self.visor_satelite_lado == 0
+            else COLOR_MARCADOR, vista, 1,
+        )
+
+        capa = self._nombre_capa_satelite(
+            datos_mostrados.get("capa") if datos_mostrados else ""
+        )
+        info = f"GIBS · {capa or 'sin capa'} · recorte {recorte:g}°"
+        if datos_mostrados:
+            cobertura = int(round(
+                float(datos_mostrados.get("cobertura") or 0.0) * 100
+            ))
+            info += f" · cobertura {cobertura}%"
+        info = self._recortar(
+            info, self._fuente_pequena, panel.width - margen * 2
+        )
+        pantalla.blit(
+            self._fuente_pequena.render(info, True, COLOR_SECUNDARIO),
+            (panel.x + margen, panel.bottom - 82),
+        )
+
+        y_botones = panel.bottom - 56
+        etiqueta = self._fuente_pequena.render("RECORTE", True, COLOR_SECUNDARIO)
+        pantalla.blit(etiqueta, (panel.x + margen, y_botones + 7))
+        bx = panel.x + margen + etiqueta.get_width() + 8
+        self._visor_rects["recortes"] = []
+        for valor in SAT_RECORTES:
+            rect = pygame.Rect(bx, y_botones, 68, 26)
+            activo = abs(valor - recorte) < 1e-6
+            self._boton_visor(pantalla, rect, f"{valor:g}°", activo)
+            self._visor_rects["recortes"].append((valor, rect))
+            bx = rect.right + 6
+
+        ayuda = (
+            f"Zoom {self.visor_satelite_zoom:.1f}x · "
+            "Rueda: zoom · Arrastrar: mover · ESC: cerrar"
+        )
+        ayuda = self._recortar(
+            ayuda, self._fuente_pequena, panel.width - margen * 2
+        )
+        pantalla.blit(
+            self._fuente_pequena.render(ayuda, True, COLOR_SECUNDARIO),
+            (panel.x + margen, panel.bottom - 18),
+        )
+
     @staticmethod
     def _formatear_distancia_ld(distancia_ld):
         if distancia_ld is None:
@@ -2135,10 +2524,14 @@ class Tierra:
         self._dibujar_panel_nasa(pantalla)
         self._dibujar_panel_satelites(pantalla)
         self._dibujar_etiquetas_satelites(pantalla)
+        self._dibujar_visor_satelite(pantalla)
 
     def manejar_evento(self, ev):
         if ev.type == pygame.QUIT:
             return False
+
+        if self.visor_satelite_abierto:
+            return self._manejar_evento_visor(ev)
 
         if ev.type == pygame.KEYDOWN:
             if ev.key in (pygame.K_ESCAPE, pygame.K_q):
@@ -2170,21 +2563,24 @@ class Tierra:
                 self.zoom_objetivo = max(ZOOM_MIN, self.zoom_objetivo / 1.12)
 
         elif ev.type == pygame.MOUSEBUTTONDOWN:
+            if (ev.button == 1 and self.mostrar_satelites
+                    and self._satelites_panel_rect.collidepoint(ev.pos)):
+                self._click_panel = True
+                self._arrastrando = False
+                catnr = self._catnr_fila(ev.pos)
+                if catnr is not None:
+                    self.satelite_sel_catnr = (
+                        None if self.satelite_sel_catnr == catnr else catnr
+                    )
+                return True
+            if (ev.button in (1, 3)
+                    and self._nasa_panel_rect.collidepoint(ev.pos)):
+                if ev.button == 1:
+                    self._click_panel = True
+                self._arrastrando = False
+                self._intentar_abrir_visor(ev.pos, ev.button)
+                return True
             if ev.button == 1:
-                if (self.mostrar_satelites
-                        and self._satelites_panel_rect.collidepoint(ev.pos)):
-                    self._click_panel = True
-                    self._arrastrando = False
-                    catnr = self._catnr_fila(ev.pos)
-                    if catnr is not None:
-                        self.satelite_sel_catnr = (
-                            None if self.satelite_sel_catnr == catnr else catnr
-                        )
-                    return True
-                if self._nasa_panel_rect.collidepoint(ev.pos):
-                    self._click_panel = True
-                    self._arrastrando = False
-                    return True
                 self._click_panel = False
                 self._arrastrando = True
                 self._click_pos = ev.pos
@@ -2193,11 +2589,11 @@ class Tierra:
                 self._enfocando = False
 
         elif ev.type == pygame.MOUSEBUTTONUP:
+            if ev.button in (1, 3) and self._click_panel:
+                self._click_panel = False
+                self._click_pos = None
+                return True
             if ev.button == 1:
-                if self._click_panel:
-                    self._click_panel = False
-                    self._click_pos = None
-                    return True
                 self._arrastrando = False
                 if self._click_pos is not None and self._movido < 6.0:
                     satelite = (
@@ -2268,6 +2664,10 @@ class Tierra:
         self._panel_scroll = 0
         self._satelites_panel_rect = pygame.Rect(0, 0, 0, 0)
         self._satelites_filas = []
+        self.visor_satelite_rect = pygame.Rect(0, 0, 0, 0)
+        self._visor_rects = {}
+        self._visor_cache_key = None
+        self._visor_cache = None
         self._crear_estrellas()
         self._r = -1
         self._construir_geometria()
@@ -2284,9 +2684,11 @@ class Tierra:
         self.satelite_sel_catnr = None
         self.satelite_hover_catnr = None
         self._panel_scroll = 0
+        self._cerrar_visor_satelite()
         self._nasa_version += 1
 
     def cerrar(self):
+        self._cerrar_visor_satelite()
         self.nasa.cerrar()
         self.rastreador.cerrar()
 
