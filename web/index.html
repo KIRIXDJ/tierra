@@ -35,6 +35,7 @@
   #chips button { background: var(--panel); border: 1px solid var(--borde); color: var(--texto);
     font: inherit; font-size: 11px; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
   #chips button:hover { border-color: var(--cian); color: var(--cian); }
+  #chips button.capa.activa { border-color: var(--ambar); color: var(--ambar); }
 
   #leyenda { position: fixed; left: 26px; bottom: 26px; width: 236px;
     background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
@@ -90,6 +91,9 @@
   <button data-lat="18" data-lon="-72">Caribe</button>
   <button data-lat="14" data-lon="0">Sahel</button>
   <button data-lat="48" data-lon="10">Europa</button>
+  <button id="capa-incendios" class="capa">Incendios</button>
+  <button id="capa-tormentas" class="capa">Tormentas</button>
+  <button id="capa-activos" class="capa">Activos 7 d</button>
 </div>
 <aside id="leyenda"></aside>
 <aside id="panel">
@@ -656,6 +660,9 @@ function abrirPanel(celda) {
     const kilometros = Math.round(res * 111);
     document.getElementById('panel-coords').textContent =
       `${celda[0]}°, ${celda[1]}° · celda de ${res}° (~${kilometros} km)`;
+    const eventos = contarEventos(celda);
+    document.getElementById('panel-eventos').textContent =
+      `${eventos.incendios} incendios · ${eventos.tormentas} tormentas cerca (2016–2025)`;
   }
   document.getElementById('panel-error').classList.remove('visible');
   document.getElementById('panel-aviso').textContent = '';
@@ -671,7 +678,6 @@ function mostrarCargando() {
   document.getElementById('panel-insignia').textContent = 'Consultando NASA POWER';
   document.getElementById('panel-insignia').className = '';
   document.getElementById('panel-cambio').textContent = '';
-  document.getElementById('panel-eventos').textContent = '';
   document.getElementById('panel-error').classList.remove('visible');
 }
 
@@ -825,6 +831,146 @@ document.getElementById('panel-reintentar').addEventListener('click', () => {
   }
 });
 
+const capas = { incendios: false, tormentas: false, activos: false };
+const objetosCapas = {};
+
+function vectorDe(lat, lon) {
+  const la = lat * Math.PI / 180;
+  const lo = lon * Math.PI / 180;
+  return new THREE.Vector3(
+    Math.cos(la) * Math.cos(lo),
+    Math.sin(la),
+    -Math.cos(la) * Math.sin(lo),
+  );
+}
+
+function crearCapa(categoria, campo, color) {
+  const posiciones = [];
+  const colores = [];
+  malla.celdas.forEach((celda) => {
+    const conteo = celda[campo] || 0;
+    if (!conteo) {
+      return;
+    }
+    const punto = vectorDe(celda[0], celda[1]).multiplyScalar(1.02);
+    posiciones.push(punto.x, punto.y, punto.z);
+    const intensidad = Math.min(1, 0.35 + conteo / 20);
+    colores.push(color[0] * intensidad, color[1] * intensidad, color[2] * intensidad);
+  });
+  const geometria = new THREE.BufferGeometry();
+  geometria.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+  geometria.setAttribute('color', new THREE.Float32BufferAttribute(colores, 3));
+  const material = new THREE.PointsMaterial({
+    size: 0.03, vertexColors: true, transparent: true, opacity: 0.95,
+    depthWrite: false, sizeAttenuation: true,
+  });
+  const puntos = new THREE.Points(geometria, material);
+  puntos.visible = false;
+  escena.add(puntos);
+  objetosCapas[categoria] = puntos;
+  return puntos;
+}
+
+crearCapa('incendios', 14, [1, 0.55, 0.2]);
+crearCapa('tormentas', 15, [0.35, 0.9, 1]);
+
+function contarEventos(celda) {
+  let incendios = 0;
+  let tormentas = 0;
+  if (!celda) {
+    return { incendios, tormentas };
+  }
+  malla.celdas.forEach((otra) => {
+    let deltaLon = Math.abs(otra[1] - celda[1]);
+    if (deltaLon > 180) {
+      deltaLon = 360 - deltaLon;
+    }
+    if (Math.abs(otra[0] - celda[0]) <= res + 0.1 && deltaLon <= res + 0.1) {
+      incendios += otra[14] || 0;
+      tormentas += otra[15] || 0;
+    }
+  });
+  return { incendios, tormentas };
+}
+
+function puntosIncendios() {
+  const capa = objetosCapas.incendios;
+  return capa ? capa.geometry.attributes.position.count : 0;
+}
+
+function puntosTormentas() {
+  const capa = objetosCapas.tormentas;
+  return capa ? capa.geometry.attributes.position.count : 0;
+}
+
+async function cargarActivos() {
+  if (objetosCapas.activos) {
+    objetosCapas.activos.visible = true;
+    return;
+  }
+  try {
+    const respuesta = await fetch(
+      'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=7',
+    );
+    if (!respuesta.ok) {
+      throw new Error('http');
+    }
+    const datos = await respuesta.json();
+    const posiciones = [];
+    (datos.events || []).forEach((evento) => {
+      const geometrias = evento.geometry || [];
+      const ultima = geometrias[geometrias.length - 1] || {};
+      if (ultima.type !== 'Point') {
+        return;
+      }
+      const [lon, lat] = ultima.coordinates || [];
+      if (typeof lat !== 'number' || typeof lon !== 'number') {
+        return;
+      }
+      const punto = vectorDe(lat, lon).multiplyScalar(1.03);
+      posiciones.push(punto.x, punto.y, punto.z);
+    });
+    const geometria = new THREE.BufferGeometry();
+    geometria.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.028, color: 0xfff2a8, transparent: true, opacity: 0.9,
+      depthWrite: false, sizeAttenuation: true,
+    });
+    const puntos = new THREE.Points(geometria, material);
+    escena.add(puntos);
+    objetosCapas.activos = puntos;
+  } catch (error) {
+    capas.activos = false;
+    document.getElementById('capa-activos').classList.remove('activa');
+    objetosCapas.activos = null;
+  }
+}
+
+function alternarCapa(nombre) {
+  if (nombre === 'activos') {
+    capas.activos = !capas.activos;
+    document.getElementById('capa-activos').classList.toggle('activa', capas.activos);
+    if (capas.activos) {
+      cargarActivos();
+    } else if (objetosCapas.activos) {
+      objetosCapas.activos.visible = false;
+    }
+    return;
+  }
+  if (nombre !== 'incendios' && nombre !== 'tormentas') {
+    return;
+  }
+  capas[nombre] = !capas[nombre];
+  if (objetosCapas[nombre]) {
+    objetosCapas[nombre].visible = capas[nombre];
+  }
+  document.getElementById('capa-' + nombre).classList.toggle('activa', capas[nombre]);
+}
+
+document.getElementById('capa-incendios').addEventListener('click', () => alternarCapa('incendios'));
+document.getElementById('capa-tormentas').addEventListener('click', () => alternarCapa('tormentas'));
+document.getElementById('capa-activos').addEventListener('click', () => alternarCapa('activos'));
+
 window.__tierra = {
   listo: false,
   estado,
@@ -837,6 +983,10 @@ window.__tierra = {
   volarA,
   seleccionar,
   cerrarPanel,
+  alternarCapa,
+  capas,
+  puntosIncendios,
+  puntosTormentas,
   globo: { escena, camara, renderer, controles, texturas, THREE },
 };
 

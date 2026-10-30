@@ -86,3 +86,14 @@ class TestGlobo(unittest.TestCase):
         pag.evaluate("window.__tierra.seleccionar(77.5, 17.5)")
         pag.wait_for_selector("#panel.visible")
         self.assertIn("Sin datos", pag.inner_text("#panel-insignia"))
+
+    def test_capas_eventos(self):
+        pag = self.nav.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_capas.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.evaluate("window.__tierra.alternarCapa('incendios')")
+        self.assertTrue(pag.evaluate("window.__tierra.capas.incendios"))
+        self.assertGreater(pag.evaluate("window.__tierra.puntosIncendios()"), 0)
+        pag.evaluate("window.__tierra.seleccionar(17.5, -72.5)")
+        pag.wait_for_selector("#panel.visible")
+        self.assertIn("incendios", pag.inner_text("#panel-eventos"))
