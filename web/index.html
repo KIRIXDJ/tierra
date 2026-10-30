@@ -1163,6 +1163,12 @@ async function activarManos() {
 
 document.getElementById('manos-boton').addEventListener('click', activarManos);
 
+window.addEventListener('keydown', (evento) => {
+  if (evento.key === 'Escape') {
+    cerrarPanel();
+  }
+});
+
 window.__tierra = {
   listo: false,
   estado,

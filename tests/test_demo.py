@@ -126,3 +126,30 @@ class TestGlobo(unittest.TestCase):
         pag.wait_for_selector("#manos-aviso.visible", timeout=15000)
         self.assertFalse(pag.evaluate("window.__manos.activo"))
         self.assertIn("cámara", pag.inner_text("#manos-aviso"))
+
+    def test_error_de_red_y_escape(self):
+        pag = self.nav.new_page()
+        pag.route("**/power.larc.nasa.gov/**", lambda r: r.abort())
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_error.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.evaluate("window.__tierra.seleccionar(17.5, -72.5)")
+        pag.wait_for_selector("#panel-error.visible", timeout=15000)
+        self.assertIn("No pudimos", pag.inner_text("#panel-error"))
+        pag.keyboard.press("Escape")
+        self.assertFalse(pag.evaluate("document.querySelector('#panel').classList.contains('visible')"))
+
+    def test_sin_desbordamiento(self):
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_resp.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        self.assertLessEqual(
+            pag.evaluate("document.scrollingElement.scrollWidth"),
+            pag.evaluate("window.innerWidth"))
+
+    def test_texturas_caidas(self):
+        pag = self.nav.new_page()
+        pag.route("**/raw.githubusercontent.com/**", lambda r: r.abort())
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_sintex.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=30000)
+        self.assertFalse(pag.evaluate("window.__tierra.globo.texturas.ok"))
+        self.assertTrue(pag.evaluate("window.__tierra.globo.escena.children.length > 0"))
