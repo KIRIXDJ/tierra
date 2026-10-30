@@ -37,6 +37,20 @@
   #chips button:hover { border-color: var(--cian); color: var(--cian); }
   #chips button.capa.activa { border-color: var(--ambar); color: var(--ambar); }
 
+  #manos-hud { position: fixed; right: 26px; bottom: 26px; width: 180px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 6px; text-align: center; }
+  #manos-hud[hidden] { display: none; }
+  #manos-hud video { display: none; }
+  #manos-lienzo { width: 100%; height: auto; display: block; border-radius: 6px;
+    background: #050a12; transform: scaleX(-1); }
+  #manos-estado { display: block; margin-top: 4px; font-size: 10px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--secundario); }
+  #manos-aviso { display: none; position: fixed; right: 26px; bottom: 26px;
+    width: 260px; background: var(--panel); border: 1px solid rgba(255, 107, 107, .5);
+    border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #ffc9c9; line-height: 1.45; }
+  #manos-aviso.visible { display: block; }
+
   #leyenda { position: fixed; left: 26px; bottom: 26px; width: 236px;
     background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
     padding: 12px 14px; font-size: 11px; color: var(--secundario); backdrop-filter: blur(8px); }
@@ -94,6 +108,16 @@
   <button id="capa-incendios" class="capa">Incendios</button>
   <button id="capa-tormentas" class="capa">Tormentas</button>
   <button id="capa-activos" class="capa">Activos 7 d</button>
+  <button id="manos-boton">Manos</button>
+</div>
+<div id="manos-hud" hidden>
+  <video id="manos-video" playsinline muted></video>
+  <canvas id="manos-lienzo" width="180" height="135"></canvas>
+  <span id="manos-estado">inactivo</span>
+</div>
+<div id="manos-aviso">
+  No pudimos abrir la cámara. Revisa los permisos del navegador y que no la esté
+  usando otro programa; el ratón y el teclado siguen funcionando.
 </div>
 <aside id="leyenda"></aside>
 <aside id="panel">
@@ -125,7 +149,8 @@
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/vision_bundle.mjs"
   }
 }
 </script>
@@ -783,13 +808,13 @@ async function seleccionar(lat, lon) {
   }
 }
 
-function latLonDe(evento) {
+function latLonEn(x, y) {
   if (!esferaGlobo) {
     return null;
   }
-  const x = (evento.clientX / window.innerWidth) * 2 - 1;
-  const y = -(evento.clientY / window.innerHeight) * 2 + 1;
-  rayo.setFromCamera({ x, y }, camara);
+  const nx = (x / window.innerWidth) * 2 - 1;
+  const ny = -(y / window.innerHeight) * 2 + 1;
+  rayo.setFromCamera({ x: nx, y: ny }, camara);
   const golpes = rayo.intersectObject(esferaGlobo, false);
   if (!golpes.length) {
     return null;
@@ -799,6 +824,10 @@ function latLonDe(evento) {
     lat: Math.asin(punto.y) * 180 / Math.PI,
     lon: Math.atan2(-punto.z, punto.x) * 180 / Math.PI,
   };
+}
+
+function latLonDe(evento) {
+  return latLonEn(evento.clientX, evento.clientY);
 }
 
 let esferaGlobo = null;
@@ -970,6 +999,169 @@ function alternarCapa(nombre) {
 document.getElementById('capa-incendios').addEventListener('click', () => alternarCapa('incendios'));
 document.getElementById('capa-tormentas').addEventListener('click', () => alternarCapa('tormentas'));
 document.getElementById('capa-activos').addEventListener('click', () => alternarCapa('activos'));
+
+const manos = { activo: false, gesto: 'idle', simular: null };
+window.__manos = manos;
+
+const videoManos = document.getElementById('manos-video');
+const lienzoManos = document.getElementById('manos-lienzo');
+const contextoManos = lienzoManos.getContext('2d');
+let detectorManos = null;
+let flujoManos = null;
+let ultimaDeteccion = 0;
+let pinchPrevio = false;
+let ultimaSeleccion = 0;
+let ultimaSimulacion = 0;
+
+const ETIQUETAS_GESTO = {
+  idle: 'inactivo',
+  point: 'apuntando',
+  pinch: 'pinza',
+  zoom: 'zoom',
+};
+
+function xy(punto) {
+  return Array.isArray(punto)
+    ? { x: punto[0], y: punto[1], z: punto[2] || 0 }
+    : { x: punto.x, y: punto.y, z: punto.z || 0 };
+}
+
+function distancia(a, b) {
+  const pa = xy(a);
+  const pb = xy(b);
+  return Math.hypot(pa.x - pb.x, pa.y - pb.y, pa.z - pb.z);
+}
+
+function gestoDe(lista) {
+  if (lista.length >= 2) {
+    return 'zoom';
+  }
+  if (!lista.length) {
+    return 'idle';
+  }
+  const mano = lista[0];
+  const tamano = distancia(mano[0], mano[9]) || 1e-6;
+  const pinza = distancia(mano[4], mano[8]) / tamano;
+  return pinza < 0.45 ? 'pinch' : 'point';
+}
+
+function dibujarManos(lista) {
+  contextoManos.clearRect(0, 0, lienzoManos.width, lienzoManos.height);
+  if (!lista.length) {
+    return;
+  }
+  const mano = lista[0];
+  contextoManos.strokeStyle = 'rgba(53, 214, 255, 0.8)';
+  contextoManos.lineWidth = 2;
+  mano.forEach((punto) => {
+    const p = xy(punto);
+    contextoManos.beginPath();
+    contextoManos.arc(
+      p.x * lienzoManos.width,
+      p.y * lienzoManos.height,
+      2.5, 0, Math.PI * 2,
+    );
+    contextoManos.stroke();
+  });
+}
+
+function cursorDesde(lista) {
+  if (!lista.length) {
+    return null;
+  }
+  const punta = xy(lista[0][8]);
+  return {
+    x: (1 - punta.x) * window.innerWidth,
+    y: punta.y * window.innerHeight,
+  };
+}
+
+function procesarManos(lista, punto) {
+  manos.gesto = gestoDe(lista);
+  document.getElementById('manos-estado').textContent = ETIQUETAS_GESTO[manos.gesto];
+  dibujarManos(lista);
+  if (manos.gesto === 'pinch' && !pinchPrevio && Date.now() - ultimaSeleccion > 150) {
+    ultimaSeleccion = Date.now();
+    const donde = punto || cursorDesde(lista);
+    if (donde) {
+      const coordenada = latLonEn(donde.x, donde.y);
+      if (coordenada) {
+        seleccionar(coordenada.lat, coordenada.lon);
+      }
+    }
+  }
+  pinchPrevio = manos.gesto === 'pinch';
+}
+
+manos.simular = (lista, punto) => {
+  ultimaSimulacion = Date.now();
+  procesarManos(lista || [], punto);
+};
+
+async function bucleManos() {
+  if (!manos.activo) {
+    return;
+  }
+  const ahora = performance.now();
+  if (videoManos.readyState >= 2 && ahora - ultimaDeteccion > 80
+      && Date.now() - ultimaSimulacion > 400) {
+    ultimaDeteccion = ahora;
+    const resultado = detectorManos.detectForVideo(videoManos, ahora);
+    procesarManos(resultado.landmarks || []);
+  }
+  requestAnimationFrame(bucleManos);
+}
+
+function desactivarManos() {
+  manos.activo = false;
+  if (flujoManos) {
+    flujoManos.getTracks().forEach((pista) => pista.stop());
+    flujoManos = null;
+  }
+  document.getElementById('manos-hud').hidden = true;
+  document.getElementById('manos-boton').classList.remove('activa');
+  document.getElementById('manos-estado').textContent = ETIQUETAS_GESTO.idle;
+}
+
+async function activarManos() {
+  if (manos.activo) {
+    desactivarManos();
+    return;
+  }
+  try {
+    if (!detectorManos) {
+      const { HandLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
+      const fileset = await FilesetResolver.forVisionTasks(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/wasm',
+      );
+      detectorManos = await HandLandmarker.createFromOptions(fileset, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'CPU',
+        },
+        runningMode: 'VIDEO',
+        numHands: 2,
+      });
+    }
+    flujoManos = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480 },
+    });
+    videoManos.srcObject = flujoManos;
+    await videoManos.play();
+    manos.activo = true;
+    document.getElementById('manos-boton').classList.add('activa');
+    document.getElementById('manos-hud').hidden = false;
+    document.getElementById('manos-aviso').classList.remove('visible');
+    document.getElementById('manos-estado').textContent = ETIQUETAS_GESTO.point;
+    bucleManos();
+  } catch (error) {
+    manos.activo = false;
+    document.getElementById('manos-aviso').classList.add('visible');
+    document.getElementById('manos-boton').classList.remove('activa');
+  }
+}
+
+document.getElementById('manos-boton').addEventListener('click', activarManos);
 
 window.__tierra = {
   listo: false,

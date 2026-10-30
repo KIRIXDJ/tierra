@@ -97,3 +97,32 @@ class TestGlobo(unittest.TestCase):
         pag.evaluate("window.__tierra.seleccionar(17.5, -72.5)")
         pag.wait_for_selector("#panel.visible")
         self.assertIn("incendios", pag.inner_text("#panel-eventos"))
+
+    def test_modo_manos(self):
+        ctx = self.nav.new_context(permissions=["camera"])
+        pag = ctx.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_manos.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.click("#manos-boton")
+        pag.wait_for_function("window.__manos && window.__manos.activo", timeout=40000)
+        mano = [[0.5, 0.7, 0.0] for _ in range(21)]
+        mano[0] = [0.5, 0.7, 0.0]
+        mano[9] = [0.5, 0.55, 0.0]
+        mano[4] = [0.50, 0.50, 0.0]
+        mano[8] = [0.51, 0.51, 0.0]
+        pag.evaluate("(m) => window.__manos.simular([m])", mano)
+        self.assertEqual(pag.evaluate("window.__manos.gesto"), "pinch")
+        self.assertEqual(pag.inner_text("#manos-estado").lower(), "pinza")
+        ctx.close()
+
+    def test_camara_denegada(self):
+        pag = self.nav.new_page()
+        pag.add_init_script(
+            "navigator.mediaDevices.getUserMedia = "
+            "() => Promise.reject(new DOMException('denegado', 'NotAllowedError'))")
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_manos2.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.click("#manos-boton")
+        pag.wait_for_selector("#manos-aviso.visible", timeout=15000)
+        self.assertFalse(pag.evaluate("window.__manos.activo"))
+        self.assertIn("cámara", pag.inner_text("#manos-aviso"))
