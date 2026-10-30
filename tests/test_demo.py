@@ -31,3 +31,35 @@ class TestGlobo(unittest.TestCase):
         self.assertGreater(pag.evaluate("window.__tierra.globo.escena.children.length"), 3)
         self.assertEqual(errores, [])
         pag.close()
+
+    def test_malla_y_variables(self):
+        pag = self.nav.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_malla.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        self.assertEqual(pag.evaluate("window.__tierra.datos.celdas.length"), 4)
+        idx = pag.evaluate("window.__tierra.indiceCelda(18.9, -70.7)")
+        self.assertGreaterEqual(idx, 0)
+        color = pag.evaluate(f"window.__tierra.colorCelda({idx})")
+        self.assertEqual(color[3], 255)
+        pag.evaluate("window.__tierra.cambiarVariable('PRECTOTCORR')")
+        self.assertEqual(pag.evaluate("window.__tierra.estado.variable"), "PRECTOTCORR")
+        self.assertIn("Lluvia", pag.inner_text("#leyenda"))
+
+    def test_bordes_y_sin_dato(self):
+        pag = self.nav.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_malla2.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        self.assertEqual(pag.evaluate("window.__tierra.indiceCelda(89.9, 180)"),
+                         pag.evaluate("window.__tierra.indiceCelda(87.5, -180)"))
+        pag.evaluate("window.__tierra.cambiarVariable('PRECTOTCORR')")
+        idx = pag.evaluate("window.__tierra.indiceCelda(78.9, 15.1)")
+        color = pag.evaluate(f"window.__tierra.colorCelda({idx})")
+        self.assertEqual(color[:3], [128, 128, 128])
+        amazonia = pag.evaluate("window.__tierra.indiceCelda(-3, -62)")
+        color = pag.evaluate(f"window.__tierra.colorCelda({amazonia})")
+        self.assertEqual(color[3], 77)  # no significativa al 30 %
+        pag.evaluate("window.__tierra.estado.soloSignificativas = true; window.__tierra.repintar()")
+        color = pag.evaluate(f"window.__tierra.colorCelda({amazonia})")
+        self.assertEqual(color[3], 0)
+        color = pag.evaluate(f"window.__tierra.colorCelda({idx})")
+        self.assertEqual(color[3], 0)

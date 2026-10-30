@@ -22,6 +22,30 @@
   #marca { position: fixed; top: 22px; left: 26px; pointer-events: none; }
   #marca h1 { font-size: 22px; letter-spacing: 0.32em; font-weight: 600; color: var(--cian); }
   #marca p { font-size: 12px; color: var(--secundario); letter-spacing: 0.08em; margin-top: 4px; }
+
+  #variables { position: fixed; top: 22px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; background: var(--panel); padding: 6px;
+    border: 1px solid var(--borde); border-radius: 10px; backdrop-filter: blur(8px); }
+  #variables button { background: transparent; border: 0; color: var(--secundario);
+    font: inherit; font-size: 12px; padding: 7px 12px; border-radius: 7px; cursor: pointer; }
+  #variables button:hover { color: var(--texto); }
+  #variables button.activa { background: rgba(53, 214, 255, 0.14); color: var(--cian); }
+
+  #chips { position: fixed; top: 22px; right: 26px; display: flex; gap: 6px; }
+  #chips button { background: var(--panel); border: 1px solid var(--borde); color: var(--texto);
+    font: inherit; font-size: 11px; padding: 6px 10px; border-radius: 999px; cursor: pointer; }
+  #chips button:hover { border-color: var(--cian); color: var(--cian); }
+
+  #leyenda { position: fixed; left: 26px; bottom: 26px; width: 236px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+    padding: 12px 14px; font-size: 11px; color: var(--secundario); backdrop-filter: blur(8px); }
+  #leyenda strong { display: block; color: var(--texto); font-size: 12px; margin-bottom: 2px; }
+  #leyenda .barra { height: 8px; border-radius: 4px; margin: 8px 0 4px; }
+  #leyenda .extremos { display: flex; justify-content: space-between; font-family: ui-monospace, Consolas, monospace; }
+  #leyenda .nota { margin-top: 6px; line-height: 1.4; }
+  #filtro { display: flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--texto); }
+  #filtro input { accent-color: var(--cian); }
+
   #aviso { position: fixed; inset: 0; display: grid; place-items: center;
     background: var(--fondo); color: var(--texto); padding: 32px; text-align: center; }
   #aviso[hidden] { display: none; }
@@ -35,6 +59,15 @@
   <h1>TIERRA</h1>
   <p id="subtitulo">Detective de tendencias · NASA POWER 1984–2025</p>
 </header>
+<nav id="variables"></nav>
+<div id="chips">
+  <button data-lat="78" data-lon="15">Ártico</button>
+  <button data-lat="-3" data-lon="-62">Amazonía</button>
+  <button data-lat="18" data-lon="-72">Caribe</button>
+  <button data-lat="14" data-lon="0">Sahel</button>
+  <button data-lat="48" data-lon="10">Europa</button>
+</div>
+<aside id="leyenda"></aside>
 <div id="aviso" hidden>
   <div>
     <h2>Este navegador no puede dibujar el globo</h2>
@@ -92,6 +125,191 @@ controles.rotateSpeed = 0.5;
 controles.zoomSpeed = 0.7;
 controles.minDistance = 1.35;
 controles.maxDistance = 5.5;
+
+const VARIABLES_DEFECTO = [
+  { id: 'T2M', nombre: 'Temperatura', unidad: '°C/década', dominio: 0.8 },
+  { id: 'PRECTOTCORR', nombre: 'Lluvia', unidad: 'mm/año por década', dominio: 80 },
+  { id: 'WS2M', nombre: 'Viento', unidad: 'm/s por década', dominio: 0.15 },
+  { id: 'RH2M', nombre: 'Humedad', unidad: '%/década', dominio: 2 },
+];
+const PALETAS = {
+  T2M: [[43, 108, 255], [245, 247, 250], [255, 59, 48]],
+  PRECTOTCORR: [[181, 101, 29], [245, 247, 250], [30, 136, 229]],
+  WS2M: [[123, 47, 247], [245, 247, 250], [0, 200, 83]],
+  RH2M: [[194, 163, 107], [245, 247, 250], [0, 184, 169]],
+};
+
+const malla = JSON.parse(document.getElementById('malla').textContent);
+const variables = (malla.variables && malla.variables.length)
+  ? malla.variables : VARIABLES_DEFECTO;
+const res = malla.res || 5;
+const columnas = Math.round(360 / res);
+const filas = Math.round(180 / res);
+
+const estado = {
+  variable: variables[0].id,
+  soloSignificativas: false,
+  celda: null,
+};
+
+function interpolar(paleta, t, alfa = 255) {
+  const [izquierda, centro, derecha] = paleta;
+  const desde = t < 0 ? centro : centro;
+  const hacia = t < 0 ? izquierda : derecha;
+  const paso = Math.abs(t);
+  return [
+    Math.round(desde[0] + (hacia[0] - desde[0]) * paso),
+    Math.round(desde[1] + (hacia[1] - desde[1]) * paso),
+    Math.round(desde[2] + (hacia[2] - desde[2]) * paso),
+    alfa,
+  ];
+}
+
+function indiceVariable(id) {
+  return Math.max(0, variables.findIndex((variable) => variable.id === id));
+}
+
+function colorCelda(indice) {
+  const celda = malla.celdas[indice];
+  if (!celda) {
+    return [128, 128, 128, 0];
+  }
+  const posicion = 2 + indiceVariable(estado.variable) * 3;
+  const pendiente = celda[posicion];
+  const p = celda[posicion + 1];
+  if (pendiente === null || pendiente === undefined) {
+    return estado.soloSignificativas ? [128, 128, 128, 0] : [128, 128, 128, 255];
+  }
+  const variable = variables[indiceVariable(estado.variable)];
+  const paleta = PALETAS[variable.id] || PALETAS.T2M;
+  const dominio = variable.dominio || 1;
+  const t = Math.max(-1, Math.min(1, pendiente / dominio));
+  const significativa = p !== null && p !== undefined && p < 0.05;
+  if (estado.soloSignificativas && !significativa) {
+    return interpolar(paleta, t, 0);
+  }
+  return interpolar(paleta, t, significativa ? 255 : 77);
+}
+
+function indiceCelda(lat, lon) {
+  let mejor = -1;
+  let mejorDistancia = Infinity;
+  const longitud = ((lon + 180) % 360 + 360) % 360 - 180;
+  malla.celdas.forEach((celda, indice) => {
+    let delta = Math.abs(celda[1] - longitud);
+    if (delta > 180) {
+      delta = 360 - delta;
+    }
+    const distancia = (celda[0] - lat) ** 2 + delta ** 2;
+    if (distancia < mejorDistancia) {
+      mejorDistancia = distancia;
+      mejor = indice;
+    }
+  });
+  return mejor;
+}
+
+const anchoTextura = 1440;
+const altoTextura = 720;
+const lienzoMalla = document.createElement('canvas');
+lienzoMalla.width = anchoTextura;
+lienzoMalla.height = altoTextura;
+const contexto = lienzoMalla.getContext('2d');
+const texturaMalla = new THREE.CanvasTexture(lienzoMalla);
+texturaMalla.colorSpace = THREE.SRGBColorSpace;
+texturaMalla.magFilter = THREE.LinearFilter;
+texturaMalla.minFilter = THREE.LinearFilter;
+texturaMalla.generateMipmaps = false;
+
+const capaMalla = new THREE.Mesh(
+  new THREE.SphereGeometry(1.004, 128, 96),
+  new THREE.MeshBasicMaterial({
+    map: texturaMalla, transparent: true, depthWrite: false,
+  }),
+);
+capaMalla.renderOrder = 2;
+
+function pintar() {
+  contexto.clearRect(0, 0, anchoTextura, altoTextura);
+  const ancho = anchoTextura / columnas;
+  const alto = altoTextura / filas;
+  malla.celdas.forEach((celda, indice) => {
+    const color = colorCelda(indice);
+    if (color[3] === 0) {
+      return;
+    }
+    const x = ((celda[1] + 180) / 360) * anchoTextura - ancho / 2;
+    const y = ((90 - celda[0]) / 180) * altoTextura - alto / 2;
+    contexto.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    contexto.fillRect(x, y, ancho, alto);
+  });
+  texturaMalla.needsUpdate = true;
+  actualizarLeyenda();
+}
+
+function actualizarLeyenda() {
+  const variable = variables[indiceVariable(estado.variable)];
+  const paleta = PALETAS[variable.id] || PALETAS.T2M;
+  const dominio = variable.dominio || 1;
+  const leyenda = document.getElementById('leyenda');
+  leyenda.innerHTML = `
+    <strong>${variable.nombre} · ${variable.unidad}</strong>
+    <div class="barra" style="background: linear-gradient(90deg, rgb(${paleta[0]}), rgb(${paleta[1]}), rgb(${paleta[2]}))"></div>
+    <div class="extremos"><span>−${dominio}</span><span>0</span><span>+${dominio}</span></div>
+    <label id="filtro"><input type="checkbox" id="solo-significativas"> Solo significativas</label>
+    <div class="nota">Opaco = tendencia significativa (p &lt; 0,05).<br>Gris = sin dato para esta variable.</div>`;
+  const casilla = document.getElementById('solo-significativas');
+  casilla.checked = estado.soloSignificativas;
+  casilla.addEventListener('change', (evento) => {
+    estado.soloSignificativas = evento.target.checked;
+    pintar();
+  });
+}
+
+function cambiarVariable(id) {
+  if (!variables.some((variable) => variable.id === id)) {
+    return;
+  }
+  estado.variable = id;
+  document.querySelectorAll('#variables button').forEach((boton) => {
+    boton.classList.toggle('activa', boton.dataset.variable === id);
+  });
+  pintar();
+}
+
+function repintar() {
+  pintar();
+}
+
+function construirPestanas() {
+  const contenedor = document.getElementById('variables');
+  variables.forEach((variable) => {
+    const boton = document.createElement('button');
+    boton.textContent = variable.nombre;
+    boton.dataset.variable = variable.id;
+    boton.addEventListener('click', () => cambiarVariable(variable.id));
+    contenedor.appendChild(boton);
+  });
+  cambiarVariable(estado.variable);
+}
+
+let destinoCamara = null;
+function volarA(lat, lon) {
+  const radio = camara.position.length();
+  const la = lat * Math.PI / 180;
+  const lo = lon * Math.PI / 180;
+  destinoCamara = new THREE.Vector3(
+    Math.cos(la) * Math.cos(lo),
+    Math.sin(la),
+    -Math.cos(la) * Math.sin(lo),
+  ).multiplyScalar(radio);
+}
+
+document.querySelectorAll('#chips button').forEach((boton) => {
+  boton.addEventListener('click', () => {
+    volarA(Number(boton.dataset.lat), Number(boton.dataset.lon));
+  });
+});
 
 function estrellas() {
   const total = 1600;
@@ -206,6 +424,7 @@ async function montarGlobo() {
     materialGlobo(dia, noche),
   );
   globo.add(esfera);
+  globo.add(capaMalla);
 
   if (nubesTex) {
     const capa = new THREE.Mesh(
@@ -231,6 +450,12 @@ function animar() {
   requestAnimationFrame(animar);
   const t = reloj.getElapsedTime();
   nubes.rotation.y = t * 0.006;
+  if (destinoCamara) {
+    camara.position.lerp(destinoCamara, 0.08);
+    if (camara.position.distanceTo(destinoCamara) < 0.01) {
+      destinoCamara = null;
+    }
+  }
   controles.update();
   renderer.render(escena, camara);
   if (primerFrame && escena.children.length > 0) {
@@ -241,8 +466,15 @@ function animar() {
 
 window.__tierra = {
   listo: false,
-  estado: { variable: 'T2M' },
-  globo: { escena, camara, renderer, controles, texturas },
+  estado,
+  datos: malla,
+  variables,
+  indiceCelda,
+  colorCelda,
+  cambiarVariable,
+  repintar,
+  volarA,
+  globo: { escena, camara, renderer, controles, texturas, THREE },
 };
 
 window.addEventListener('resize', () => {
@@ -250,6 +482,9 @@ window.addEventListener('resize', () => {
   camara.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
+
+construirPestanas();
+pintar();
 
 montarGlobo().finally(() => {
   animar();
