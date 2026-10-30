@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIERRA · visor de manos</title>
+<style>
+  :root { --cian: #35d6ff; --fondo: #03060c; --texto: #dce9f5; --secundario: #6f8aa3; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--fondo); color: var(--texto);
+    font-family: "Segoe UI", system-ui, sans-serif; overflow: hidden; }
+  #lienzo { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+    background: radial-gradient(circle at 50% 45%, #061423 0%, #03060c 62%, #010205 100%); }
+  #marca { position: fixed; top: 24px; left: 28px; pointer-events: none; }
+  #marca h1 { font-size: 18px; letter-spacing: .34em; color: var(--cian); font-weight: 600; }
+  #marca p { margin-top: 4px; font-size: 11px; letter-spacing: .1em; color: var(--secundario); }
+  #estado { position: fixed; bottom: 24px; left: 28px; font-size: 12px;
+    color: var(--secundario); letter-spacing: .08em; }
+  #gesto { position: fixed; bottom: 24px; right: 28px; font-size: 12px;
+    letter-spacing: .16em; text-transform: uppercase; color: var(--cian); }
+  #activar { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: rgba(11, 20, 32, .9); border: 1px solid rgba(53, 214, 255, .5);
+    color: var(--cian); font: inherit; font-size: 13px; letter-spacing: .12em;
+    padding: 12px 22px; border-radius: 999px; cursor: pointer; }
+  #activar:hover { background: rgba(53, 214, 255, .12); }
+  #aviso { position: fixed; inset: auto 28px 70px 28px; text-align: center;
+    font-size: 12px; color: #ffb3b3; display: none; }
+  #aviso.visible { display: block; }
+  video { display: none; }
+</style>
+</head>
+<body>
+<canvas id="lienzo"></canvas>
+<video id="video" playsinline muted></video>
+<header id="marca">
+  <h1>TIERRA</h1>
+  <p>visor de manos · 21 puntos · tiempo real</p>
+</header>
+<button id="activar">Activar cámara</button>
+<div id="estado">cámara apagada</div>
+<div id="gesto">—</div>
+<div id="aviso">No pudimos abrir la cámara. Revisa los permisos del navegador.</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/vision_bundle.mjs"
+  }
+}
+</script>
+
+<script type="module">
+const lienzo = document.getElementById('lienzo');
+const contexto = lienzo.getContext('2d');
+const video = document.getElementById('video');
+const estado = document.getElementById('estado');
+const etiquetaGesto = document.getElementById('gesto');
+const boton = document.getElementById('activar');
+const aviso = document.getElementById('aviso');
+
+const CONEXIONES = [
+  [0, 1], [1, 2], [2, 3], [3, 4],
+  [0, 5], [5, 6], [6, 7], [7, 8],
+  [5, 9], [9, 10], [10, 11], [11, 12],
+  [9, 13], [13, 14], [14, 15], [15, 16],
+  [13, 17], [17, 18], [18, 19], [19, 20],
+  [0, 17],
+];
+
+const DEMO = new URLSearchParams(location.search).has('demo');
+let detector = null;
+let flujo = null;
+let activo = false;
+let ultimaDeteccion = 0;
+let manos = [];
+let inicio = performance.now();
+
+function dimensionar() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  lienzo.width = Math.round(window.innerWidth * dpr);
+  lienzo.height = Math.round(window.innerHeight * dpr);
+  contexto.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function xy(punto) {
+  return Array.isArray(punto)
+    ? { x: punto[0], y: punto[1] }
+    : { x: punto.x, y: punto.y };
+}
+
+function dibujar(manosVisibles) {
+  const ancho = window.innerWidth;
+  const alto = window.innerHeight;
+  contexto.clearRect(0, 0, ancho, alto);
+
+  const lado = Math.min(ancho, alto) * 0.62;
+  const origenX = (ancho - lado) / 2;
+  const origenY = (alto - lado) / 2;
+  const escala = (punto) => {
+    const p = xy(punto);
+    return {
+      x: origenX + (1 - p.x) * lado,
+      y: origenY + p.y * lado,
+    };
+  };
+
+  manosVisibles.forEach((mano) => {
+    contexto.lineCap = 'round';
+    contexto.shadowColor = 'rgba(53, 214, 255, 0.9)';
+    contexto.shadowBlur = 14;
+    contexto.strokeStyle = 'rgba(53, 214, 255, 0.55)';
+    contexto.lineWidth = 2.4;
+    CONEXIONES.forEach(([a, b]) => {
+      const pa = escala(mano[a]);
+      const pb = escala(mano[b]);
+      contexto.beginPath();
+      contexto.moveTo(pa.x, pa.y);
+      contexto.lineTo(pb.x, pb.y);
+      contexto.stroke();
+    });
+
+    mano.forEach((punto, indice) => {
+      const p = escala(punto);
+      const punta = [4, 8, 12, 16, 20].includes(indice);
+      contexto.beginPath();
+      contexto.arc(p.x, p.y, punta ? 6 : 4.5, 0, Math.PI * 2);
+      contexto.fillStyle = punta ? '#eaffff' : '#35d6ff';
+      contexto.fill();
+      contexto.beginPath();
+      contexto.arc(p.x, p.y, punta ? 12 : 9, 0, Math.PI * 2);
+      contexto.strokeStyle = 'rgba(53, 214, 255, 0.35)';
+      contexto.lineWidth = 1;
+      contexto.stroke();
+    });
+  });
+  contexto.shadowBlur = 0;
+}
+
+function gestoDe(lista) {
+  if (lista.length >= 2) return 'zoom';
+  if (!lista.length) return '—';
+  const mano = lista[0];
+  const distancia = (a, b) => {
+    const pa = xy(a); const pb = xy(b);
+    return Math.hypot(pa.x - pb.x, pa.y - pb.y);
+  };
+  const tamano = distancia(mano[0], mano[9]) || 1e-6;
+  return distancia(mano[4], mano[8]) / tamano < 0.45 ? 'pinza' : 'apuntando';
+}
+
+function manoDemo(t) {
+  const base = [
+    [0.50, 0.86], [0.42, 0.80], [0.36, 0.73], [0.32, 0.67], [0.29, 0.62],
+    [0.42, 0.62], [0.41, 0.52], [0.40, 0.45], [0.39, 0.39],
+    [0.50, 0.60], [0.50, 0.48], [0.50, 0.40], [0.50, 0.33],
+    [0.58, 0.62], [0.59, 0.51], [0.60, 0.43], [0.60, 0.37],
+    [0.66, 0.66], [0.68, 0.57], [0.70, 0.50], [0.71, 0.45],
+  ];
+  const vaiven = Math.sin(t * 0.0011) * 0.018;
+  const respiracion = Math.sin(t * 0.0023) * 0.006;
+  return base.map(([x, y], indice) => ({
+    x: x + vaiven * (1 - indice / 28),
+    y: y + respiracion * (indice % 3),
+  }));
+}
+
+function bucle() {
+  requestAnimationFrame(bucle);
+  if (DEMO) {
+    const t = performance.now() - inicio;
+    manos = [manoDemo(t)];
+    estado.textContent = 'modo demo · sin cámara';
+    etiquetaGesto.textContent = 'apuntando';
+    dibujar(manos);
+    return;
+  }
+  if (!activo) return;
+  const ahora = performance.now();
+  if (video.readyState >= 2 && ahora - ultimaDeteccion > 70) {
+    ultimaDeteccion = ahora;
+    const resultado = detector.detectForVideo(video, ahora);
+    manos = resultado.landmarks || [];
+    etiquetaGesto.textContent = gestoDe(manos);
+    estado.textContent = `cámara activa · ${manos.length} mano${manos.length === 1 ? '' : 's'}`;
+    dibujar(manos);
+  }
+}
+
+async function activar() {
+  boton.disabled = true;
+  boton.textContent = 'Cargando…';
+  try {
+    if (!detector) {
+      const { HandLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
+      const fileset = await FilesetResolver.forVisionTasks(
+        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/wasm',
+      );
+      detector = await HandLandmarker.createFromOptions(fileset, {
+        baseOptions: {
+          modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
+          delegate: 'CPU',
+        },
+        runningMode: 'VIDEO',
+        numHands: 2,
+      });
+    }
+    flujo = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+    video.srcObject = flujo;
+    await video.play();
+    activo = true;
+    boton.hidden = true;
+    aviso.classList.remove('visible');
+    estado.textContent = 'cámara activa';
+  } catch (error) {
+    boton.disabled = false;
+    boton.textContent = 'Reintentar';
+    aviso.classList.add('visible');
+  }
+}
+
+window.addEventListener('resize', dimensionar);
+boton.addEventListener('click', activar);
+dimensionar();
+if (DEMO) {
+  boton.hidden = true;
+}
+bucle();
+</script>
+</body>
+</html>

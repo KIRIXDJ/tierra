@@ -38,6 +38,11 @@
   #chips button:hover { border-color: var(--cian); color: var(--cian); }
   #chips button.capa.activa { border-color: var(--ambar); color: var(--ambar); }
 
+  #leyenda-capas { position: fixed; left: 26px; bottom: 210px; max-width: 300px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 8px;
+    padding: 8px 10px; font-size: 11px; color: var(--secundario); line-height: 1.5; }
+  #leyenda-capas[hidden] { display: none; }
+
   #manos-hud { position: fixed; right: 26px; bottom: 26px; width: 180px;
     background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
     padding: 6px; text-align: center; }
@@ -121,6 +126,7 @@
   usando otro programa; el ratón y el teclado siguen funcionando.
 </div>
 <aside id="leyenda"></aside>
+<div id="leyenda-capas" hidden></div>
 <aside id="panel">
   <button id="panel-cerrar" aria-label="Cerrar panel">×</button>
   <h2 id="panel-titulo">Celda</h2>
@@ -871,6 +877,22 @@ document.getElementById('panel-reintentar').addEventListener('click', () => {
 const capas = { incendios: false, tormentas: false, activos: false };
 const objetosCapas = {};
 
+function texturaPunto() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const gradiente = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradiente.addColorStop(0, 'rgba(255,255,255,1)');
+  gradiente.addColorStop(0.5, 'rgba(255,255,255,0.85)');
+  gradiente.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gradiente;
+  g.beginPath();
+  g.arc(32, 32, 32, 0, Math.PI * 2);
+  g.fill();
+  return new THREE.CanvasTexture(c);
+}
+const TEXTURA_PUNTO = texturaPunto();
+
 function vectorDe(lat, lon) {
   const la = lat * Math.PI / 180;
   const lo = lon * Math.PI / 180;
@@ -881,35 +903,56 @@ function vectorDe(lat, lon) {
   );
 }
 
-function crearCapa(categoria, campo, color) {
-  const posiciones = [];
-  const colores = [];
+function crearCapa(categoria, campo, color, minimo) {
+  const valores = malla.celdas
+    .map((celda) => celda[campo] || 0)
+    .filter((valor) => valor >= minimo)
+    .sort((a, b) => a - b);
+  if (!valores.length) {
+    objetosCapas[categoria] = new THREE.Group();
+    escena.add(objetosCapas[categoria]);
+    return;
+  }
+  const cuantil = (q) => valores[Math.min(valores.length - 1, Math.floor(valores.length * q))];
+  const cortes = [cuantil(0.5), cuantil(0.8), cuantil(0.93)];
+  const tamanos = [0.02, 0.03, 0.042, 0.058];
+
+  const grupos = [[], [], [], []];
   malla.celdas.forEach((celda) => {
     const conteo = celda[campo] || 0;
-    if (!conteo) {
+    if (conteo < minimo) {
       return;
     }
+    let cubo = 0;
+    while (cubo < cortes.length && conteo >= cortes[cubo]) {
+      cubo += 1;
+    }
     const punto = vectorDe(celda[0], celda[1]).multiplyScalar(1.02);
-    posiciones.push(punto.x, punto.y, punto.z);
-    const intensidad = Math.min(1, 0.35 + conteo / 20);
-    colores.push(color[0] * intensidad, color[1] * intensidad, color[2] * intensidad);
+    grupos[cubo].push(punto.x, punto.y, punto.z);
   });
-  const geometria = new THREE.BufferGeometry();
-  geometria.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
-  geometria.setAttribute('color', new THREE.Float32BufferAttribute(colores, 3));
-  const material = new THREE.PointsMaterial({
-    size: 0.03, vertexColors: true, transparent: true, opacity: 0.95,
-    depthWrite: false, sizeAttenuation: true,
+
+  const grupo = new THREE.Group();
+  grupos.forEach((posiciones, cubo) => {
+    if (!posiciones.length) {
+      return;
+    }
+    const geometria = new THREE.BufferGeometry();
+    geometria.setAttribute('position', new THREE.Float32BufferAttribute(posiciones, 3));
+    const material = new THREE.PointsMaterial({
+      size: tamanos[cubo], color: new THREE.Color(...color),
+      map: TEXTURA_PUNTO, alphaTest: 0.05,
+      transparent: true, opacity: 0.95, depthWrite: false, sizeAttenuation: true,
+    });
+    grupo.add(new THREE.Points(geometria, material));
   });
-  const puntos = new THREE.Points(geometria, material);
-  puntos.visible = false;
-  escena.add(puntos);
-  objetosCapas[categoria] = puntos;
-  return puntos;
+  grupo.visible = false;
+  escena.add(grupo);
+  objetosCapas[categoria] = grupo;
 }
 
-crearCapa('incendios', 14, [1, 0.55, 0.2]);
-crearCapa('tormentas', 15, [0.35, 0.9, 1]);
+crearCapa('incendios', 14, [1, 0.62, 0.25], 5);
+crearCapa('tormentas', 15, [0.4, 0.9, 1], 2);
+actualizarLeyendaCapas();
 
 function contarEventos(celda) {
   let incendios = 0;
@@ -930,14 +973,21 @@ function contarEventos(celda) {
   return { incendios, tormentas };
 }
 
+function puntosDe(categoria) {
+  const grupo = objetosCapas[categoria];
+  if (!grupo) {
+    return 0;
+  }
+  return grupo.children.reduce(
+    (total, hijo) => total + hijo.geometry.attributes.position.count, 0);
+}
+
 function puntosIncendios() {
-  const capa = objetosCapas.incendios;
-  return capa ? capa.geometry.attributes.position.count : 0;
+  return puntosDe('incendios');
 }
 
 function puntosTormentas() {
-  const capa = objetosCapas.tormentas;
-  return capa ? capa.geometry.attributes.position.count : 0;
+  return puntosDe('tormentas');
 }
 
 async function cargarActivos() {
@@ -1002,6 +1052,20 @@ function alternarCapa(nombre) {
     objetosCapas[nombre].visible = capas[nombre];
   }
   document.getElementById('capa-' + nombre).classList.toggle('activa', capas[nombre]);
+  actualizarLeyendaCapas();
+}
+
+function actualizarLeyendaCapas() {
+  const caja = document.getElementById('leyenda-capas');
+  const lineas = [];
+  if (capas.incendios) {
+    lineas.push(`Incendios · ${puntosIncendios()} zonas · tamaño = eventos 2016–2025`);
+  }
+  if (capas.tormentas) {
+    lineas.push(`Tormentas · ${puntosTormentas()} zonas · tamaño = eventos 2016–2025`);
+  }
+  caja.innerHTML = lineas.join('<br>');
+  caja.hidden = lineas.length === 0;
 }
 
 document.getElementById('capa-incendios').addEventListener('click', () => alternarCapa('incendios'));
