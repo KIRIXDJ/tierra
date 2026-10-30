@@ -63,3 +63,26 @@ class TestGlobo(unittest.TestCase):
         self.assertEqual(color[3], 0)
         color = pag.evaluate(f"window.__tierra.colorCelda({idx})")
         self.assertEqual(color[3], 0)
+
+    def test_panel_con_serie(self):
+        import json
+        pag = self.nav.new_page()
+        fixture = json.loads(Path("tests/fixtures/power_serie.json").read_text(encoding="utf-8"))
+        pag.route("**/power.larc.nasa.gov/**", lambda r: r.fulfill(status=200, json=fixture))
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_panel.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.evaluate("window.__tierra.seleccionar(17.5, -72.5)")
+        pag.wait_for_function(
+            "document.querySelector('#panel-pendiente').textContent.includes('°C/década')",
+            timeout=15000)
+        self.assertIn("Significativo", pag.inner_text("#panel-insignia"))
+        self.assertGreater(pag.evaluate("document.querySelector('#panel-serie').width"), 100)
+
+    def test_celda_sin_dato(self):
+        pag = self.nav.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_sindato.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.evaluate("window.__tierra.cambiarVariable('PRECTOTCORR')")
+        pag.evaluate("window.__tierra.seleccionar(77.5, 17.5)")
+        pag.wait_for_selector("#panel.visible")
+        self.assertIn("Sin datos", pag.inner_text("#panel-insignia"))
