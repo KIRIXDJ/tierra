@@ -40,7 +40,7 @@ class TestGlobo(unittest.TestCase):
         idx = pag.evaluate("window.__tierra.indiceCelda(18.9, -70.7)")
         self.assertGreaterEqual(idx, 0)
         color = pag.evaluate(f"window.__tierra.colorCelda({idx})")
-        self.assertEqual(color[3], 255)
+        self.assertGreaterEqual(color[3], 100)
         pag.evaluate("window.__tierra.cambiarVariable('PRECTOTCORR')")
         self.assertEqual(pag.evaluate("window.__tierra.estado.variable"), "PRECTOTCORR")
         self.assertIn("Lluvia", pag.inner_text("#leyenda"))
@@ -57,7 +57,7 @@ class TestGlobo(unittest.TestCase):
         self.assertEqual(color[:3], [128, 128, 128])
         amazonia = pag.evaluate("window.__tierra.indiceCelda(-3, -62)")
         color = pag.evaluate(f"window.__tierra.colorCelda({amazonia})")
-        self.assertEqual(color[3], 77)  # no significativa al 30 %
+        self.assertLessEqual(color[3], 60)  # no significativa, tenue
         pag.evaluate("window.__tierra.estado.soloSignificativas = true; window.__tierra.repintar()")
         color = pag.evaluate(f"window.__tierra.colorCelda({amazonia})")
         self.assertEqual(color[3], 0)

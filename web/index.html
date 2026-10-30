@@ -257,13 +257,14 @@ function colorCelda(indice) {
   if (estado.soloSignificativas && !significativa) {
     return interpolar(paleta, t, 0);
   }
-  const color = interpolar(paleta, t, significativa ? 255 : 77);
-  const mezcla = 0.18 + 0.82 * Math.min(1, Math.abs(t) * 2.0);
+  const color = interpolar(paleta, t, 255);
+  const intensidad = Math.min(1, Math.abs(t) * 2.0);
+  const mezcla = 0.15 + 0.85 * intensidad;
   return [
     Math.round(11 + (color[0] - 11) * mezcla),
     Math.round(20 + (color[1] - 20) * mezcla),
     Math.round(32 + (color[2] - 32) * mezcla),
-    color[3],
+    Math.round(significativa ? 70 + 120 * intensidad : 22 + 34 * intensidad),
   ];
 }
 
@@ -285,8 +286,9 @@ function indiceCelda(lat, lon) {
   return mejor;
 }
 
-const anchoTextura = 1440;
-const altoTextura = 720;
+// Un píxel por celda: el filtrado lineal del GPU interpola el campo.
+const anchoTextura = columnas;
+const altoTextura = filas;
 const lienzoMalla = document.createElement('canvas');
 lienzoMalla.width = anchoTextura;
 lienzoMalla.height = altoTextura;
@@ -307,17 +309,15 @@ capaMalla.renderOrder = 2;
 
 function pintar() {
   contexto.clearRect(0, 0, anchoTextura, altoTextura);
-  const ancho = anchoTextura / columnas;
-  const alto = altoTextura / filas;
   malla.celdas.forEach((celda, indice) => {
     const color = colorCelda(indice);
     if (color[3] === 0) {
       return;
     }
-    const x = ((celda[1] + 180) / 360) * anchoTextura - ancho / 2;
-    const y = ((90 - celda[0]) / 180) * altoTextura - alto / 2;
+    const x = Math.round(((celda[1] + 180) / 360) * columnas - 0.5);
+    const y = Math.round(((90 - celda[0]) / 180) * filas - 0.5);
     contexto.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
-    contexto.fillRect(x, y, ancho, alto);
+    contexto.fillRect(x, y, 1, 1);
   });
   texturaMalla.needsUpdate = true;
   actualizarLeyenda();
@@ -333,7 +333,7 @@ function actualizarLeyenda() {
     <div class="barra" style="background: linear-gradient(90deg, rgb(${paleta[0]}), rgb(${paleta[1]}), rgb(${paleta[2]}))"></div>
     <div class="extremos"><span>−${dominio}</span><span>0</span><span>+${dominio}</span></div>
     <label id="filtro"><input type="checkbox" id="solo-significativas"> Solo significativas</label>
-    <div class="nota">Opaco = tendencia significativa (p &lt; 0,05).<br>Gris = sin dato para esta variable.</div>`;
+    <div class="nota">Más opaco = tendencia fuerte y significativa (p &lt; 0,05).<br>Gris = sin dato para esta variable.</div>`;
   const casilla = document.getElementById('solo-significativas');
   casilla.checked = estado.soloSignificativas;
   casilla.addEventListener('change', (evento) => {
