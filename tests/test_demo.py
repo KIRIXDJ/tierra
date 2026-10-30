@@ -153,3 +153,12 @@ class TestGlobo(unittest.TestCase):
         pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=30000)
         self.assertFalse(pag.evaluate("window.__tierra.globo.texturas.ok"))
         self.assertTrue(pag.evaluate("window.__tierra.globo.escena.children.length > 0"))
+
+    def test_capa_no_rompe_camara(self):
+        pag = self.nav.new_page()
+        pag.goto(html_de_prueba(Path("tests") / "_tmp_camara.html"))
+        pag.wait_for_function("window.__tierra && window.__tierra.listo")
+        pag.click("#capa-incendios")
+        camara = pag.evaluate("window.__tierra.globo.camara.position.toArray()")
+        self.assertTrue(all(isinstance(v, (int, float)) and v == v for v in camara))
+        self.assertTrue(pag.evaluate("window.__tierra.capas.incendios"))

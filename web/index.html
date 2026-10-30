@@ -388,7 +388,7 @@ function volarA(lat, lon) {
   ).multiplyScalar(radio);
 }
 
-document.querySelectorAll('#chips button').forEach((boton) => {
+document.querySelectorAll('#chips button[data-lat]').forEach((boton) => {
   boton.addEventListener('click', () => {
     volarA(Number(boton.dataset.lat), Number(boton.dataset.lon));
   });
