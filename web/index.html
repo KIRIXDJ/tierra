@@ -80,8 +80,17 @@
     padding: 3px 8px; border-radius: 999px; border: 1px solid var(--borde); color: var(--secundario); }
   #panel-insignia.significativa { color: var(--verde); border-color: rgba(88, 227, 154, .5); }
   #panel-cambio { font-size: 12px; color: var(--secundario); margin-top: 8px; }
+  #panel-decadas { font-size: 11px; color: var(--secundario); margin-top: 4px; }
   #panel-serie { width: 100%; height: 130px; display: block; margin: 14px 0 6px; }
   #panel-eventos { font-size: 12px; color: var(--secundario); margin-top: 6px; }
+  #comparar { margin-top: 10px; width: 100%; background: transparent; color: var(--cian);
+    border: 1px solid var(--borde); border-radius: 7px; padding: 7px 10px;
+    font: inherit; font-size: 12px; cursor: pointer; }
+  #comparar:hover { border-color: var(--cian); }
+  #comparacion { margin-top: 10px; font-size: 11px; color: var(--secundario); line-height: 1.5; }
+  #comparacion .par { display: flex; gap: 8px; margin-bottom: 6px; }
+  #comparacion canvas { width: 50%; border-radius: 6px; border: 1px solid var(--borde); }
+  #comparacion b { color: var(--texto); }
   #panel-aviso { font-size: 11px; color: var(--ambar); margin-top: 8px; }
   #panel-error { display: none; margin-top: 12px; font-size: 12px; color: #ffb3b3; }
   #panel-error.visible { display: block; }
@@ -111,6 +120,7 @@
   <button data-lat="18" data-lon="-72">Caribe</button>
   <button data-lat="14" data-lon="0">Sahel</button>
   <button data-lat="48" data-lon="10">Europa</button>
+  <button id="capa-mapa" class="capa activa">Mapa</button>
   <button id="capa-incendios" class="capa">Incendios</button>
   <button id="capa-tormentas" class="capa">Tormentas</button>
   <button id="capa-activos" class="capa">Activos 7 d</button>
@@ -134,7 +144,10 @@
   <div id="panel-pendiente"></div>
   <div id="panel-insignia"></div>
   <div id="panel-cambio"></div>
+  <div id="panel-decadas"></div>
   <canvas id="panel-serie"></canvas>
+  <button id="comparar">Comparar 2000 / 2025</button>
+  <div id="comparacion"></div>
   <div id="panel-eventos"></div>
   <div id="panel-aviso"></div>
   <div id="panel-error">
@@ -224,6 +237,7 @@ const filas = Math.round(180 / res);
 const estado = {
   variable: variables[0].id,
   soloSignificativas: false,
+  mapa: true,
   celda: null,
 };
 
@@ -292,9 +306,14 @@ function indiceCelda(lat, lon) {
   return mejor;
 }
 
-// Un píxel por celda: el filtrado lineal del GPU interpola el campo.
-const anchoTextura = columnas;
-const altoTextura = filas;
+// Se pinta un píxel por celda y luego se interpola y difumina para que no
+// se vean los escalones de la rejilla de 5°.
+const anchoTextura = 720;
+const altoTextura = 360;
+const lienzoBase = document.createElement('canvas');
+lienzoBase.width = columnas;
+lienzoBase.height = filas;
+const contextoBase = lienzoBase.getContext('2d');
 const lienzoMalla = document.createElement('canvas');
 lienzoMalla.width = anchoTextura;
 lienzoMalla.height = altoTextura;
@@ -314,7 +333,7 @@ const capaMalla = new THREE.Mesh(
 capaMalla.renderOrder = 2;
 
 function pintar() {
-  contexto.clearRect(0, 0, anchoTextura, altoTextura);
+  contextoBase.clearRect(0, 0, columnas, filas);
   malla.celdas.forEach((celda, indice) => {
     const color = colorCelda(indice);
     if (color[3] === 0) {
@@ -322,9 +341,16 @@ function pintar() {
     }
     const x = Math.round(((celda[1] + 180) / 360) * columnas - 0.5);
     const y = Math.round(((90 - celda[0]) / 180) * filas - 0.5);
-    contexto.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
-    contexto.fillRect(x, y, 1, 1);
+    contextoBase.fillStyle = `rgba(${color[0]},${color[1]},${color[2]},${color[3] / 255})`;
+    contextoBase.fillRect(x, y, 1, 1);
   });
+
+  contexto.clearRect(0, 0, anchoTextura, altoTextura);
+  contexto.imageSmoothingEnabled = true;
+  contexto.imageSmoothingQuality = 'high';
+  contexto.filter = 'blur(5px)';
+  contexto.drawImage(lienzoBase, 0, 0, anchoTextura, altoTextura);
+  contexto.filter = 'none';
   texturaMalla.needsUpdate = true;
   actualizarLeyenda();
 }
@@ -691,6 +717,173 @@ function dibujarSerie(serie, pendienteCruda) {
 let datosCelda = null;
 let peticionActual = null;
 
+const GIBS_URL = 'https://wvs.earthdata.nasa.gov/api/v1/snapshot';
+
+function urlSatelite(lat, lon, fecha, recorte, tamano = 512) {
+  const url = new URL(GIBS_URL);
+  url.searchParams.set('REQUEST', 'GetSnapshot');
+  url.searchParams.set('LAYERS', 'MODIS_Terra_CorrectedReflectance_TrueColor');
+  url.searchParams.set('CRS', 'EPSG:4326');
+  url.searchParams.set('TIME', fecha);
+  url.searchParams.set('BBOX', [
+    (lon - recorte / 2).toFixed(3), (lat - recorte / 2).toFixed(3),
+    (lon + recorte / 2).toFixed(3), (lat + recorte / 2).toFixed(3),
+  ].join(','));
+  url.searchParams.set('WIDTH', String(tamano));
+  url.searchParams.set('HEIGHT', String(tamano));
+  url.searchParams.set('FORMAT', 'image/png');
+  return url.toString();
+}
+
+function cargarImagen(url) {
+  return new Promise((resolver, rechazar) => {
+    const imagen = new Image();
+    imagen.crossOrigin = 'anonymous';
+    imagen.onload = () => resolver(imagen);
+    imagen.onerror = () => rechazar(new Error('imagen'));
+    imagen.src = url;
+  });
+}
+
+function analizarPar(antes, despues) {
+  const lado = 128;
+  const crear = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = lado;
+    return canvas;
+  };
+  const ca = crear();
+  const cb = crear();
+  ca.getContext('2d').drawImage(antes, 0, 0, lado, lado);
+  cb.getContext('2d').drawImage(despues, 0, 0, lado, lado);
+  const da = ca.getContext('2d').getImageData(0, 0, lado, lado).data;
+  const db = cb.getContext('2d').getImageData(0, 0, lado, lado).data;
+  let suma = 0;
+  let verdorAntes = 0;
+  let verdorDespues = 0;
+  let nubes = 0;
+  let brillo = 0;
+  for (let i = 0; i < da.length; i += 4) {
+    const [r1, g1, b1] = [da[i], da[i + 1], da[i + 2]];
+    const [r2, g2, b2] = [db[i], db[i + 1], db[i + 2]];
+    suma += (Math.abs(r1 - r2) + Math.abs(g1 - g2) + Math.abs(b1 - b2)) / 3;
+    verdorAntes += g1 - (r1 + b1) / 2;
+    verdorDespues += g2 - (r2 + b2) / 2;
+    brillo += (r1 + g1 + b1) / 3;
+    if (r1 > 228 && g1 > 228 && b1 > 228) {
+      nubes += 1;
+    }
+  }
+  const total = da.length / 4;
+  return {
+    brillo: brillo / total,
+    cambio: 100 * suma / (255 * total),
+    verdor: (verdorAntes - verdorDespues) / total,
+    nubes: 100 * nubes / total,
+    antes: ca,
+    despues: cb,
+  };
+}
+
+const FECHAS_COMPARACION = ['06-15', '07-15', '08-15', '09-15'];
+
+function brilloMedio(imagen) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  g.drawImage(imagen, 0, 0, 64, 64);
+  const datos = g.getImageData(0, 0, 64, 64).data;
+  let total = 0;
+  for (let i = 0; i < datos.length; i += 4) {
+    total += (datos[i] + datos[i + 1] + datos[i + 2]) / 3;
+  }
+  return total / (datos.length / 4);
+}
+
+async function componer(anio, lat, lon) {
+  const intentos = await Promise.all(FECHAS_COMPARACION.map((fecha) =>
+    cargarImagen(urlSatelite(lat, lon, `${anio}-${fecha}`, 1.5, 256)).catch(() => null)));
+  const validas = intentos.filter((imagen) => imagen && brilloMedio(imagen) > 5);
+  if (!validas.length) {
+    return null;
+  }
+  const lado = 256;
+  const capas = validas.map((imagen) => {
+    const c = document.createElement('canvas');
+    c.width = c.height = lado;
+    const g = c.getContext('2d');
+    g.drawImage(imagen, 0, 0, lado, lado);
+    return g.getImageData(0, 0, lado, lado).data;
+  });
+  const salida = document.createElement('canvas');
+  salida.width = salida.height = lado;
+  const contextoSalida = salida.getContext('2d');
+  const compuesta = contextoSalida.createImageData(lado, lado);
+  for (let i = 0; i < compuesta.data.length; i += 4) {
+    let mejor = 0;
+    let menor = Infinity;
+    capas.forEach((capa, indice) => {
+      const luz = capa[i] * 0.299 + capa[i + 1] * 0.587 + capa[i + 2] * 0.114;
+      if (luz < menor) {
+        menor = luz;
+        mejor = indice;
+      }
+    });
+    const fuente = capas[mejor];
+    compuesta.data[i] = fuente[i];
+    compuesta.data[i + 1] = fuente[i + 1];
+    compuesta.data[i + 2] = fuente[i + 2];
+    compuesta.data[i + 3] = 255;
+  }
+  contextoSalida.putImageData(compuesta, 0, 0);
+  return salida;
+}
+
+async function compararImagenes() {
+  const caja = document.getElementById('comparacion');
+  if (estado.celda === null || !malla.celdas[estado.celda]) {
+    return;
+  }
+  const celda = malla.celdas[estado.celda];
+  caja.textContent = 'Componiendo 4 fechas de 2000 y 2025…';
+  try {
+    const [antes, despues] = await Promise.all([
+      componer(2000, celda[0], celda[1]),
+      componer(2025, celda[0], celda[1]),
+    ]);
+    if (!antes || !despues) {
+      caja.textContent = 'Sin cobertura satelital suficiente en este punto.';
+      return;
+    }
+    const resultado = analizarPar(antes, despues);
+    if (resultado.brillo < 6) {
+      caja.textContent = 'Sin cobertura satelital para esas fechas en este punto.';
+      return;
+    }
+    const perdida = resultado.verdor > 0;
+    caja.innerHTML = '';
+    const par = document.createElement('div');
+    par.className = 'par';
+    par.appendChild(resultado.antes);
+    par.appendChild(resultado.despues);
+    caja.appendChild(par);
+    const texto = document.createElement('div');
+    texto.innerHTML =
+      `<b>Cambio visual: ${resultado.cambio.toFixed(1)}%</b><br>` +
+      (perdida ? 'Pérdida de verdor: ' : 'Ganancia de verdor: ') +
+      `${Math.abs(resultado.verdor).toFixed(1)} puntos<br>` +
+      `Nubosidad estimada: ${resultado.nubes.toFixed(0)}%` +
+      (resultado.nubes > 50 ? ' · lectura poco fiable' : '') +
+      '<br><span>MODIS 250 m · composición de 4 fechas (jun–sep) de cada año. ' +
+      'Las nubes y la estación alteran la lectura.</span>';
+    caja.appendChild(texto);
+  } catch (error) {
+    caja.textContent = 'No se pudieron descargar las imágenes de comparación.';
+  }
+}
+
+document.getElementById('comparar').addEventListener('click', compararImagenes);
+
 function abrirPanel(celda) {
   document.getElementById('panel').classList.add('visible');
   document.getElementById('panel-titulo').textContent =
@@ -762,6 +955,17 @@ function pintarPanel(datos, celda, variable) {
     insignia.textContent = `Sin tendencia clara · p = ${p === null ? '—' : p.toFixed(2)}`;
     insignia.className = '';
   }
+
+  const corte = Math.max(5, Math.floor(validos.length / 4));
+  const primeraDecada = validos.slice(0, corte);
+  const ultimaDecada = validos.slice(-corte);
+  const media = (lista) => lista.reduce((a, b) => a + b, 0) / lista.length;
+  const inicial = media(primeraDecada);
+  const final = media(ultimaDecada);
+  const variacion = inicial !== 0 ? (100 * (final - inicial)) / Math.abs(inicial) : 0;
+  document.getElementById('panel-decadas').textContent =
+    `Primeros ${corte} años: ${inicial.toFixed(1)} · últimos ${corte}: ${final.toFixed(1)}` +
+    ` (${variacion >= 0 ? '+' : ''}${variacion.toFixed(0)}%)`;
 
   const decadas = (validos.length - 1) / 10;
   document.getElementById('panel-cambio').textContent =
@@ -1033,6 +1237,15 @@ async function cargarActivos() {
   }
 }
 
+function alternarMapa() {
+  estado.mapa = !estado.mapa;
+  capaMalla.visible = estado.mapa;
+  document.getElementById('capa-mapa').classList.toggle('activa', estado.mapa);
+  document.getElementById('leyenda').style.display = estado.mapa ? '' : 'none';
+}
+
+document.getElementById('capa-mapa').addEventListener('click', alternarMapa);
+
 function alternarCapa(nombre) {
   if (nombre === 'activos') {
     capas.activos = !capas.activos;
@@ -1253,11 +1466,12 @@ window.__tierra = {
   volarA,
   seleccionar,
   cerrarPanel,
+  compararImagenes,
   alternarCapa,
   capas,
   puntosIncendios,
   puntosTormentas,
-  globo: { escena, camara, renderer, controles, texturas, THREE },
+  globo: { escena, camara, renderer, controles, texturas, THREE, capaMalla },
 };
 
 window.addEventListener('resize', () => {
