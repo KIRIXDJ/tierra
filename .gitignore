@@ -1,0 +1,4 @@
+﻿__pycache__/
+tmp_*
+captura_*.png
+.malla_parcial.json
