@@ -1137,6 +1137,11 @@ async function activarManos() {
     return;
   }
   try {
+    flujoManos = await navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480 },
+    });
+    videoManos.srcObject = flujoManos;
+    await videoManos.play();
     if (!detectorManos) {
       const { HandLandmarker, FilesetResolver } = await import('@mediapipe/tasks-vision');
       const fileset = await FilesetResolver.forVisionTasks(
@@ -1151,11 +1156,6 @@ async function activarManos() {
         numHands: 2,
       });
     }
-    flujoManos = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480 },
-    });
-    videoManos.srcObject = flujoManos;
-    await videoManos.play();
     manos.activo = true;
     document.getElementById('manos-boton').classList.add('activa');
     document.getElementById('manos-hud').hidden = false;
