@@ -5,12 +5,27 @@ pendiente de Sen por década, su p de Mann-Kendall y la media. El resultado se
 inyecta en el HTML del demo con ``tools/html_malla.py``.
 """
 
+import argparse
 import concurrent.futures
+import json
 import math
 import statistics
+import sys
+import threading
+import time
+from pathlib import Path
 
-from tools.power_cliente import descargar_celda
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from tools.eventos import ErrorEventos, contar_eventos
+from tools.html_malla import leer_malla, reemplazar_malla
+from tools.power_cliente import ErrorPower, descargar_celda
 from tools.tendencia import mann_kendall, pendiente_decada
+
+RAIZ = Path(__file__).resolve().parent.parent
+HTML = RAIZ / "web" / "index.html"
+PARCIAL = Path(__file__).resolve().parent / ".malla_parcial.json"
 
 ANIO_INI = 1984
 ANIO_FIN = 2025
@@ -133,3 +148,138 @@ def construir_malla(res=5, variables=VARIABLES, descargar=descargar_celda,
         ],
         "celdas": celdas,
     }
+
+
+_ritmo = threading.Lock()
+_ultimo_envio = [0.0]
+
+
+def _esperar_turno(intervalo=0.5):
+    """Espacia las peticiones para no chocar con el límite de POWER."""
+    with _ritmo:
+        espera = _ultimo_envio[0] + intervalo - time.time()
+        if espera > 0:
+            time.sleep(espera)
+        _ultimo_envio[0] = time.time()
+
+
+def _reintentar(funcion, intentos=4, espera=20.0):
+    """Repite una descarga ante fallos de red o límite de peticiones."""
+    ultimo = None
+    for intento in range(intentos):
+        try:
+            return funcion()
+        except ErrorPower as error:
+            ultimo = error
+            time.sleep(espera * (intento + 1))
+    raise ultimo
+
+
+def _verificar():
+    malla = leer_malla(HTML.read_text(encoding="utf-8"))
+    celdas = malla.get("celdas", [])
+    print(f"{len(celdas)} celdas · rejilla {malla.get('res')}°")
+    for celda in celdas:
+        if celda[0] == 17.5 and celda[1] == -72.5:
+            pendiente = celda[2]
+            texto = f"{pendiente:+.3f}" if pendiente is not None else "sin dato"
+            print(f"RD 17.5/-72.5: T2M {texto} °C/década · p {celda[3]}")
+            break
+
+
+def main(argv=None):
+    analizador = argparse.ArgumentParser(
+        description="Genera la malla global de tendencias y la escribe en web/index.html"
+    )
+    analizador.add_argument("--rejilla", type=int, default=5)
+    analizador.add_argument("--concurrencia", type=int, default=6)
+    analizador.add_argument("--reanudar", action="store_true")
+    analizador.add_argument("--verificar", action="store_true")
+    analizador.add_argument("--sin-eventos", action="store_true")
+    argumentos = analizador.parse_args(argv)
+
+    if argumentos.verificar:
+        _verificar()
+        return 0
+
+    if 180 % argumentos.rejilla or 360 % argumentos.rejilla:
+        print("La rejilla debe dividir 180 y 360.")
+        return 1
+
+    parcial = {}
+    if argumentos.reanudar and PARCIAL.exists():
+        parcial = json.loads(PARCIAL.read_text(encoding="utf-8"))
+        print(f"Reanudando con {len(parcial)} celdas ya descargadas.")
+
+    candado = threading.Lock()
+
+    def descargar_con_cache(lat, lon, variables, anio_ini, anio_fin):
+        clave = f"{lat},{lon}"
+        with candado:
+            if clave in parcial:
+                return parcial[clave]
+        def una():
+            _esperar_turno()
+            try:
+                return descargar_celda(lat, lon, variables, anio_ini, anio_fin)
+            except ErrorPower as error:
+                if "limitó" in str(error):
+                    time.sleep(65)
+                raise
+
+        datos = _reintentar(una)
+        with candado:
+            parcial[clave] = datos
+            if len(parcial) % 100 == 0:
+                PARCIAL.write_text(
+                    json.dumps(parcial, ensure_ascii=False, separators=(",", ":")),
+                    encoding="utf-8",
+                )
+                print(f"  punto de control: {len(parcial)} celdas")
+        return datos
+
+    conteos = {}
+    if not argumentos.sin_eventos:
+        print("Contando incendios y tormentas de EONET (2016-2025)...")
+        try:
+            conteos = contar_eventos(2016, 2025, log=lambda anio, n: print(
+                f"  {anio}: {n} eventos acumulados"
+            ))
+            print(f"{len(conteos)} celdas con eventos.")
+        except ErrorEventos as error:
+            print(f"Aviso: sin capa de eventos ({error}).")
+
+    total = len(centros(argumentos.rejilla))
+    inicio = time.time()
+    hechos = [0]
+
+    def log(indice, lat, lon):
+        hechos[0] += 1
+        if hechos[0] % 50 == 0:
+            transcurrido = max(0.1, time.time() - inicio)
+            ritmo = hechos[0] / transcurrido
+            restante = (total - hechos[0]) / max(ritmo, 1e-6)
+            print(
+                f"{hechos[0]}/{total} · {ritmo * 60:.0f} celdas/min"
+                f" · ETA {restante / 60:.0f} min"
+            )
+
+    print(f"Descargando {total} celdas de {argumentos.rejilla}° con"
+          f" concurrencia {argumentos.concurrencia}...")
+    malla = construir_malla(
+        res=argumentos.rejilla,
+        descargar=descargar_con_cache,
+        eventos=conteos,
+        log=log,
+        concurrencia=argumentos.concurrencia,
+    )
+
+    html = HTML.read_text(encoding="utf-8")
+    HTML.write_text(reemplazar_malla(html, malla), encoding="utf-8")
+    PARCIAL.unlink(missing_ok=True)
+    print(f"{len(malla['celdas'])} celdas escritas en {HTML.name}.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

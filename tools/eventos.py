@@ -73,14 +73,12 @@ def _anio(evento):
 
 def descargar_eonet(categoria, desde, hasta, log=None):
     """Eventos de una categoría entre dos años, pedidos año a año."""
-    hoy = dt.date.today()
     eventos = []
     for anio in range(desde, hasta + 1):
-        primero = dt.date(anio, 1, 1)
-        dias = max(1, (hoy - primero).days + 1)
         parametros = {
             "status": "all",
-            "days": dias,
+            "start": f"{anio}-01-01",
+            "end": f"{anio}-12-31",
             "category": categoria,
         }
         for intento in range(2):
