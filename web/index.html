@@ -57,6 +57,10 @@
     border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #ffc9c9; line-height: 1.45; }
   #manos-aviso.visible { display: block; }
 
+  #resumen-global { position: fixed; left: 26px; top: 92px; max-width: 330px;
+    font-size: 11px; line-height: 1.55; color: var(--secundario); pointer-events: none; }
+  #resumen-global b { color: var(--texto); font-weight: 600; }
+
   #leyenda { position: fixed; left: 26px; bottom: 26px; width: 236px;
     background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
     padding: 12px 14px; font-size: 11px; color: var(--secundario); backdrop-filter: blur(8px); }
@@ -135,6 +139,7 @@
   No pudimos abrir la cámara. Revisa los permisos del navegador y que no la esté
   usando otro programa; el ratón y el teclado siguen funcionando.
 </div>
+<div id="resumen-global"></div>
 <aside id="leyenda"></aside>
 <div id="leyenda-capas" hidden></div>
 <aside id="panel">
@@ -234,6 +239,36 @@ const res = malla.res || 5;
 const columnas = Math.round(360 / res);
 const filas = Math.round(180 / res);
 
+function aplicarFDR(alfa = 0.05) {
+  variables.forEach((variable, indice) => {
+    const pares = [];
+    malla.celdas.forEach((celda, posicion) => {
+      const p = celda[2 + indice * 3 + 1];
+      if (p !== null && p !== undefined) {
+        pares.push({ p, posicion });
+      }
+    });
+    pares.sort((a, b) => a.p - b.p);
+    let corte = -1;
+    pares.forEach((par, k) => {
+      if (par.p <= ((k + 1) / pares.length) * alfa) {
+        corte = k;
+      }
+    });
+    variable.fdr = corte >= 0 ? pares[corte].p : 0;
+    variable.significativas = new Set(
+      pares.slice(0, corte + 1).map((par) => par.posicion),
+    );
+  });
+}
+
+function esSignificativa(indice, indiceVariableActual) {
+  const variable = variables[indiceVariableActual];
+  return Boolean(variable && variable.significativas && variable.significativas.has(indice));
+}
+
+aplicarFDR();
+
 const estado = {
   variable: variables[0].id,
   soloSignificativas: false,
@@ -273,7 +308,7 @@ function colorCelda(indice) {
   const paleta = PALETAS[variable.id] || PALETAS.T2M;
   const dominio = variable.dominio || 1;
   const t = Math.max(-1, Math.min(1, pendiente / dominio));
-  const significativa = p !== null && p !== undefined && p < 0.05;
+  const significativa = esSignificativa(indice, indiceVariable(estado.variable));
   if (estado.soloSignificativas && !significativa) {
     return interpolar(paleta, t, 0);
   }
@@ -314,6 +349,11 @@ const lienzoBase = document.createElement('canvas');
 lienzoBase.width = columnas;
 lienzoBase.height = filas;
 const contextoBase = lienzoBase.getContext('2d');
+const SOPORTA_FILTRO = (() => {
+  const prueba = document.createElement('canvas').getContext('2d');
+  prueba.filter = 'blur(1px)';
+  return prueba.filter !== 'none';
+})();
 const lienzoMalla = document.createElement('canvas');
 lienzoMalla.width = anchoTextura;
 lienzoMalla.height = altoTextura;
@@ -348,11 +388,63 @@ function pintar() {
   contexto.clearRect(0, 0, anchoTextura, altoTextura);
   contexto.imageSmoothingEnabled = true;
   contexto.imageSmoothingQuality = 'high';
-  contexto.filter = 'blur(5px)';
+  if (SOPORTA_FILTRO) {
+    contexto.filter = 'blur(5px)';
+  }
   contexto.drawImage(lienzoBase, 0, 0, anchoTextura, altoTextura);
-  contexto.filter = 'none';
+  if (SOPORTA_FILTRO) {
+    contexto.filter = 'none';
+  }
   texturaMalla.needsUpdate = true;
   actualizarLeyenda();
+  actualizarResumen();
+}
+
+function actualizarResumen() {
+  const indice = indiceVariable(estado.variable);
+  const variable = variables[indice];
+  let total = 0;
+  let significativas = 0;
+  let suma = 0;
+  let peso = 0;
+  let norte = 0;
+  let norteTotal = 0;
+  let sur = 0;
+  let surTotal = 0;
+  malla.celdas.forEach((celda, posicion) => {
+    const pendiente = celda[2 + indice * 3];
+    if (pendiente === null || pendiente === undefined) {
+      return;
+    }
+    total += 1;
+    const coseno = Math.cos((celda[0] * Math.PI) / 180);
+    suma += pendiente * coseno;
+    peso += coseno;
+    if (esSignificativa(posicion, indice)) {
+      significativas += 1;
+    }
+    if (celda[0] > 60) {
+      norte += pendiente;
+      norteTotal += 1;
+    }
+    if (celda[0] < -60) {
+      sur += pendiente;
+      surTotal += 1;
+    }
+  });
+  if (!total) {
+    document.getElementById('resumen-global').textContent = '';
+    return;
+  }
+  const porcentaje = Math.round((100 * significativas) / total);
+  const media = suma / peso;
+  const lineaPolar = (norteTotal && surTotal)
+    ? `<br>Ártico ${(norte / norteTotal).toFixed(2)} · Antártida ${(sur / surTotal).toFixed(2)} ${variable.unidad}`
+    : '';
+  document.getElementById('resumen-global').innerHTML =
+    `<b>${porcentaje}%</b> de las celdas con tendencia significativa (FDR)<br>` +
+    `Media global ${media >= 0 ? '+' : ''}${media.toFixed(2)} ${variable.unidad}` +
+    lineaPolar;
 }
 
 function actualizarLeyenda() {
@@ -365,7 +457,12 @@ function actualizarLeyenda() {
     <div class="barra" style="background: linear-gradient(90deg, rgb(${paleta[0]}), rgb(${paleta[1]}), rgb(${paleta[2]}))"></div>
     <div class="extremos"><span>−${dominio}</span><span>0</span><span>+${dominio}</span></div>
     <label id="filtro"><input type="checkbox" id="solo-significativas"> Solo significativas</label>
-    <div class="nota">Más opaco = tendencia fuerte y significativa (p &lt; 0,05).<br>Gris = sin dato para esta variable.</div>`;
+    <div class="nota">Más opaco = tendencia fuerte y significativa.<br>
+    Significativo = p por debajo del umbral FDR (${(variable.fdr || 0).toFixed(4)},
+    corregido por ${malla.celdas.length} pruebas).<br>
+    ${variable.id === 'PRECTOTCORR' || variable.id === 'WS2M'
+      ? 'Confianza baja: variable de reanálisis, tómala como indicio.<br>' : ''}
+    Gris = sin dato para esta variable.</div>`;
   const casilla = document.getElementById('solo-significativas');
   casilla.checked = estado.soloSignificativas;
   casilla.addEventListener('change', (evento) => {
@@ -948,11 +1045,12 @@ function pintarPanel(datos, celda, variable) {
     `${signo}${pendiente.toFixed(2)} ${variable.unidad}`;
 
   const insignia = document.getElementById('panel-insignia');
-  if (p !== null && p < UMBRAL_SIGNIFICANCIA) {
-    insignia.textContent = `Significativo · p = ${p.toFixed(4)}`;
+  const umbralFDR = variables[indiceVariable(variable.id)].fdr || 0;
+  if (p !== null && umbralFDR && p <= umbralFDR) {
+    insignia.textContent = `Significativo tras FDR · p = ${p.toExponential(1)}`;
     insignia.className = 'significativa';
   } else {
-    insignia.textContent = `Sin tendencia clara · p = ${p === null ? '—' : p.toFixed(2)}`;
+    insignia.textContent = `Sin tendencia clara · p = ${p === null ? '—' : p.toExponential(1)}`;
     insignia.className = '';
   }
 
@@ -970,6 +1068,14 @@ function pintarPanel(datos, celda, variable) {
   const decadas = (validos.length - 1) / 10;
   document.getElementById('panel-cambio').textContent =
     `Cambio total: ${signo}${(pendiente * decadas).toFixed(2)} ${variable.unidad.split('/')[0]} en ${validos.length - 1} años`;
+
+  if (variable.id === 'PRECTOTCORR') {
+    const media = celda[2 + indiceVariable(variable.id) * 3 + 2];
+    if (media && Math.abs(pendiente * decadas) > 0.6 * Math.abs(media)) {
+      document.getElementById('panel-aviso').textContent =
+        'Cambio de lluvia muy grande: típico de artefactos de reanálisis. Tómalo como indicio, no como medición.';
+    }
+  }
 
   const posicion = 2 + indiceVariable(variable.id) * 3;
   const horneada = celda[posicion];
@@ -1272,10 +1378,10 @@ function actualizarLeyendaCapas() {
   const caja = document.getElementById('leyenda-capas');
   const lineas = [];
   if (capas.incendios) {
-    lineas.push(`Incendios · ${puntosIncendios()} zonas · tamaño = eventos 2016–2025`);
+    lineas.push(`Incendios · ${puntosIncendios()} zonas · tamaño = eventos 2016–2025<br>Fuente: NASA EONET`);
   }
   if (capas.tormentas) {
-    lineas.push(`Tormentas · ${puntosTormentas()} zonas · tamaño = eventos 2016–2025`);
+    lineas.push(`Tormentas · ${puntosTormentas()} zonas · tamaño = eventos 2016–2025<br>Fuente: NASA EONET`);
   }
   caja.innerHTML = lineas.join('<br>');
   caja.hidden = lineas.length === 0;
