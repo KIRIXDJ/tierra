@@ -85,6 +85,9 @@
   #panel-insignia.significativa { color: var(--verde); border-color: rgba(88, 227, 154, .5); }
   #panel-cambio { font-size: 12px; color: var(--secundario); margin-top: 8px; }
   #panel-decadas { font-size: 11px; color: var(--secundario); margin-top: 4px; }
+  #panel-rigor { font-size: 11px; color: var(--secundario); margin-top: 4px; }
+  #panel-contraste { font-size: 11px; color: var(--secundario); margin-top: 6px; }
+  #panel-contraste b { color: var(--texto); }
   #panel-serie { width: 100%; height: 130px; display: block; margin: 14px 0 6px; }
   #panel-eventos { font-size: 12px; color: var(--secundario); margin-top: 6px; }
   #comparar { margin-top: 10px; width: 100%; background: transparent; color: var(--cian);
@@ -125,6 +128,7 @@
   <button data-lat="14" data-lon="0">Sahel</button>
   <button data-lat="48" data-lon="10">Europa</button>
   <button id="capa-mapa" class="capa activa">Mapa</button>
+  <button id="capa-polos" class="capa">Polos</button>
   <button id="capa-incendios" class="capa">Incendios</button>
   <button id="capa-tormentas" class="capa">Tormentas</button>
   <button id="capa-activos" class="capa">Activos 7 d</button>
@@ -150,6 +154,8 @@
   <div id="panel-insignia"></div>
   <div id="panel-cambio"></div>
   <div id="panel-decadas"></div>
+  <div id="panel-rigor"></div>
+  <div id="panel-contraste"></div>
   <canvas id="panel-serie"></canvas>
   <button id="comparar">Comparar 2000 / 2025</button>
   <div id="comparacion"></div>
@@ -273,6 +279,7 @@ const estado = {
   variable: variables[0].id,
   soloSignificativas: false,
   mapa: true,
+  polos: false,
   celda: null,
 };
 
@@ -375,6 +382,9 @@ capaMalla.renderOrder = 2;
 function pintar() {
   contextoBase.clearRect(0, 0, columnas, filas);
   malla.celdas.forEach((celda, indice) => {
+    if (estado.polos && Math.abs(celda[0]) <= 60) {
+      return;
+    }
     const color = colorCelda(indice);
     if (color[3] === 0) {
       return;
@@ -441,10 +451,16 @@ function actualizarResumen() {
   const lineaPolar = (norteTotal && surTotal)
     ? `<br>Ártico ${(norte / norteTotal).toFixed(2)} · Antártida ${(sur / surTotal).toFixed(2)} ${variable.unidad}`
     : '';
+  const ranking = variables
+    .map((item) => [item.nombre, Math.round((100 * item.significativas.size) / total)])
+    .sort((a, b) => b[1] - a[1])
+    .map((par) => `${par[0]} ${par[1]}%`)
+    .join(' · ');
   document.getElementById('resumen-global').innerHTML =
     `<b>${porcentaje}%</b> de las celdas con tendencia significativa (FDR)<br>` +
     `Media global ${media >= 0 ? '+' : ''}${media.toFixed(2)} ${variable.unidad}` +
-    lineaPolar;
+    lineaPolar +
+    `<br>Señal por variable: ${ranking}`;
 }
 
 function actualizarLeyenda() {
@@ -462,6 +478,7 @@ function actualizarLeyenda() {
     corregido por ${malla.celdas.length} pruebas).<br>
     ${variable.id === 'PRECTOTCORR' || variable.id === 'WS2M'
       ? 'Confianza baja: variable de reanálisis, tómala como indicio.<br>' : ''}
+    El mapa usa p sin ajuste por autocorrelación; el panel lo recalcula.<br>
     Gris = sin dato para esta variable.</div>`;
   const casilla = document.getElementById('solo-significativas');
   casilla.checked = estado.soloSignificativas;
@@ -736,6 +753,145 @@ function mannKendall(valores) {
   return { z, p };
 }
 
+function rangosDe(valores) {
+  const orden = valores.map((valor, indice) => [valor, indice])
+    .sort((a, b) => a[0] - b[0]);
+  const rangos = new Array(valores.length);
+  let i = 0;
+  while (i < orden.length) {
+    let j = i;
+    while (j + 1 < orden.length && orden[j + 1][0] === orden[i][0]) {
+      j += 1;
+    }
+    const promedio = (i + j) / 2 + 1;
+    for (let k = i; k <= j; k++) {
+      rangos[orden[k][1]] = promedio;
+    }
+    i = j + 1;
+  }
+  return rangos;
+}
+
+function pConAutocorrelacion(valores) {
+  const n = valores.length;
+  if (n < 10) {
+    return null;
+  }
+  let s = 0;
+  for (let i = 0; i < n - 1; i++) {
+    for (let j = i + 1; j < n; j++) {
+      s += Math.sign(valores[j] - valores[i]);
+    }
+  }
+  const conteos = new Map();
+  valores.forEach((valor) => conteos.set(valor, (conteos.get(valor) || 0) + 1));
+  let varianza = n * (n - 1) * (2 * n + 5);
+  conteos.forEach((t) => { varianza -= t * (t - 1) * (2 * t + 5); });
+  varianza /= 18;
+
+  const rangos = rangosDe(valores);
+  const media = (n + 1) / 2;
+  let den = 0;
+  let num1 = 0;
+  for (let i = 0; i < n; i++) {
+    den += (rangos[i] - media) ** 2;
+    if (i < n - 1) {
+      num1 += (rangos[i] - media) * (rangos[i + 1] - media);
+    }
+  }
+  const rho1 = den ? num1 / den : 0;
+  let suma = 0;
+  for (let k = 1; k < n; k++) {
+    let num = 0;
+    for (let i = 0; i < n - k; i++) {
+      num += (rangos[i] - media) * (rangos[i + k] - media);
+    }
+    const rho = den ? num / den : 0;
+    suma += (n - k) * (n - k - 1) * (n - k - 2) * rho;
+  }
+  const nEstrella = 1 + (2 / (n * (n - 1) * (n - 2))) * suma;
+  varianza *= Math.max(1, n / Math.max(1, nEstrella));
+  if (varianza <= 0) {
+    return { p: 1, rho: rho1 };
+  }
+  const z = s > 0 ? (s - 1) / Math.sqrt(varianza)
+    : s < 0 ? (s + 1) / Math.sqrt(varianza) : 0;
+  const p = 2 * (1 - 0.5 * (1 + erf(Math.abs(z) / Math.SQRT2)));
+  return { p, rho: rho1 };
+}
+
+function intervaloBootstrap(valores, iteraciones = 400) {
+  const n = valores.length;
+  const picos = [];
+  for (let k = 0; k < iteraciones; k++) {
+    const muestra = [];
+    for (let i = 0; i < n; i++) {
+      muestra.push(valores[Math.floor(Math.random() * n)]);
+    }
+    const pendiente = sen(muestra);
+    if (pendiente !== null) {
+      picos.push(pendiente * 10);
+    }
+  }
+  if (picos.length < 20) {
+    return null;
+  }
+  picos.sort((a, b) => a - b);
+  return [picos[Math.floor(0.025 * picos.length)], picos[Math.floor(0.975 * picos.length)]];
+}
+
+async function contrasteLluvia(celda, variable, pendientePOWER) {
+  const caja = document.getElementById('panel-contraste');
+  caja.textContent = '';
+  if (variable.id !== 'PRECTOTCORR') {
+    return;
+  }
+  try {
+    const url = new URL('https://archive-api.open-meteo.com/v1/archive');
+    url.searchParams.set('latitude', celda[0]);
+    url.searchParams.set('longitude', celda[1]);
+    url.searchParams.set('start_date', '1984-01-01');
+    url.searchParams.set('end_date', '2025-12-31');
+    url.searchParams.set('daily', 'precipitation_sum');
+    url.searchParams.set('timezone', 'America/Santo_Domingo');
+    const respuesta = await fetch(url);
+    if (!respuesta.ok) {
+      throw new Error('http');
+    }
+    const datos = await respuesta.json();
+    const tiempos = (datos.daily && datos.daily.time) || [];
+    const lluvias = (datos.daily && datos.daily.precipitation_sum) || [];
+    const porAnio = new Map();
+    tiempos.forEach((fecha, indice) => {
+      const valor = lluvias[indice];
+      if (valor === null || valor === undefined) {
+        return;
+      }
+      const anio = Number(fecha.slice(0, 4));
+      porAnio.set(anio, (porAnio.get(anio) || 0) + valor);
+    });
+    const anios = [...porAnio.keys()].sort((a, b) => a - b);
+    const serie = anios.map((anio) => porAnio.get(anio));
+    if (serie.length < 20) {
+      caja.textContent = 'Open-Meteo no tiene serie suficiente para contrastar.';
+      return;
+    }
+    const pendienteOM = sen(serie) * 10;
+    const razon = pendientePOWER / pendienteOM;
+    const mismoSigno = Math.sign(pendientePOWER) === Math.sign(pendienteOM);
+    const coinciden = mismoSigno && Math.abs(razon) > 0.5 && Math.abs(razon) < 2;
+    caja.innerHTML =
+      `<b>Contraste con Open-Meteo (ERA5)</b><br>` +
+      `POWER ${pendientePOWER >= 0 ? '+' : ''}${pendientePOWER.toFixed(1)} · ` +
+      `Open-Meteo ${pendienteOM >= 0 ? '+' : ''}${pendienteOM.toFixed(1)} mm/año por década<br>` +
+      (coinciden
+        ? 'Ambas fuentes coinciden en signo y orden de magnitud.'
+        : 'No coinciden: típico de artefactos de reanálisis en la lluvia.');
+  } catch (error) {
+    caja.textContent = 'No se pudo contrastar con Open-Meteo.';
+  }
+}
+
 function serieDe(datos, variableId) {
   const series = (datos.properties && datos.properties.parameter
     && datos.properties.parameter[variableId]) || {};
@@ -988,7 +1144,7 @@ function abrirPanel(celda) {
   if (celda) {
     const kilometros = Math.round(res * 111);
     document.getElementById('panel-coords').textContent =
-      `${celda[0]}°, ${celda[1]}° · celda de ${res}° (~${kilometros} km)`;
+      `${celda[0]}°, ${celda[1]}° · celda de ${res}° (~${kilometros} km) · punto POWER en el centro`;
     const eventos = contarEventos(celda);
     document.getElementById('panel-eventos').textContent =
       `${eventos.incendios} incendios · ${eventos.tormentas} tormentas cerca (2016–2025)`;
@@ -1007,6 +1163,8 @@ function mostrarCargando() {
   document.getElementById('panel-insignia').textContent = 'Consultando NASA POWER';
   document.getElementById('panel-insignia').className = '';
   document.getElementById('panel-cambio').textContent = '';
+  document.getElementById('panel-rigor').textContent = '';
+  document.getElementById('panel-contraste').textContent = '';
   document.getElementById('panel-error').classList.remove('visible');
 }
 
@@ -1046,11 +1204,13 @@ function pintarPanel(datos, celda, variable) {
 
   const insignia = document.getElementById('panel-insignia');
   const umbralFDR = variables[indiceVariable(variable.id)].fdr || 0;
-  if (p !== null && umbralFDR && p <= umbralFDR) {
-    insignia.textContent = `Significativo tras FDR · p = ${p.toExponential(1)}`;
+  const ajustado = pConAutocorrelacion(validos);
+  const pAjustado = ajustado ? ajustado.p : p;
+  if (pAjustado !== null && umbralFDR && pAjustado <= umbralFDR) {
+    insignia.textContent = `Significativo · p ajustado = ${pAjustado.toExponential(1)}`;
     insignia.className = 'significativa';
   } else {
-    insignia.textContent = `Sin tendencia clara · p = ${p === null ? '—' : p.toExponential(1)}`;
+    insignia.textContent = `Sin tendencia clara · p ajustado = ${pAjustado === null ? '—' : pAjustado.toExponential(1)}`;
     insignia.className = '';
   }
 
@@ -1064,6 +1224,15 @@ function pintarPanel(datos, celda, variable) {
   document.getElementById('panel-decadas').textContent =
     `Primeros ${corte} años: ${inicial.toFixed(1)} · últimos ${corte}: ${final.toFixed(1)}` +
     ` (${variacion >= 0 ? '+' : ''}${variacion.toFixed(0)}%)`;
+
+  const intervalo = intervaloBootstrap(validos);
+  document.getElementById('panel-rigor').textContent =
+    (intervalo
+      ? `IC 95 %: [${intervalo[0].toFixed(2)}, ${intervalo[1].toFixed(2)}] ${variable.unidad}`
+      : '') +
+    (ajustado
+      ? ` · p con autocorrelación (ρ₁ ${ajustado.rho.toFixed(2)}): ${ajustado.p.toExponential(1)}`
+      : '');
 
   const decadas = (validos.length - 1) / 10;
   document.getElementById('panel-cambio').textContent =
@@ -1085,6 +1254,7 @@ function pintarPanel(datos, celda, variable) {
   }
 
   dibujarSerie(serie, sen(serie.filter((valor) => valor !== null)) * 10);
+  contrasteLluvia(celda, variable, pendiente);
   datosCelda = datos;
 }
 
@@ -1351,6 +1521,14 @@ function alternarMapa() {
 }
 
 document.getElementById('capa-mapa').addEventListener('click', alternarMapa);
+
+function alternarPolos() {
+  estado.polos = !estado.polos;
+  document.getElementById('capa-polos').classList.toggle('activa', estado.polos);
+  pintar();
+}
+
+document.getElementById('capa-polos').addEventListener('click', alternarPolos);
 
 function alternarCapa(nombre) {
   if (nombre === 'activos') {
