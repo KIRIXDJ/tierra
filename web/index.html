@@ -153,6 +153,7 @@
   <div id="panel-pendiente"></div>
   <div id="panel-insignia"></div>
   <div id="panel-cambio"></div>
+  <div id="panel-aviso"></div>
   <div id="panel-decadas"></div>
   <div id="panel-rigor"></div>
   <div id="panel-contraste"></div>
@@ -160,7 +161,6 @@
   <button id="comparar">Comparar 2000 / 2025</button>
   <div id="comparacion"></div>
   <div id="panel-eventos"></div>
-  <div id="panel-aviso"></div>
   <div id="panel-error">
     <span id="panel-error-texto"></span>
     <button id="panel-reintentar">Reintentar</button>
@@ -1188,6 +1188,7 @@ function mostrarSinDatos(variable) {
 }
 
 function pintarPanel(datos, celda, variable) {
+  const avisos = [];
   const serie = serieDe(datos, variable.id);
   const factor = FACTORES[variable.id] || 1;
   const validos = serie.filter((valor) => valor !== null).map((valor) => valor * factor);
@@ -1241,18 +1242,17 @@ function pintarPanel(datos, celda, variable) {
   if (variable.id === 'PRECTOTCORR') {
     const media = celda[2 + indiceVariable(variable.id) * 3 + 2];
     if (media && Math.abs(pendiente * decadas) > 0.6 * Math.abs(media)) {
-      document.getElementById('panel-aviso').textContent =
-        'Cambio de lluvia muy grande: típico de artefactos de reanálisis. Tómalo como indicio, no como medición.';
+      avisos.push('Cambio de lluvia muy grande: típico de artefactos de reanálisis. Tómalo como indicio, no como medición.');
     }
   }
 
   const posicion = 2 + indiceVariable(variable.id) * 3;
   const horneada = celda[posicion];
   if (horneada !== null && Math.abs(horneada - pendiente) > Math.abs(variable.dominio) * 0.15) {
-    document.getElementById('panel-aviso').textContent =
-      'La serie en vivo difiere de la malla horneada; se muestra el cálculo en vivo.';
+    avisos.push('La serie en vivo difiere de la malla horneada; se muestra el cálculo en vivo.');
   }
 
+  document.getElementById('panel-aviso').innerHTML = avisos.join('<br>');
   dibujarSerie(serie, sen(serie.filter((valor) => valor !== null)) * 10);
   contrasteLluvia(celda, variable, pendiente);
   datosCelda = datos;
