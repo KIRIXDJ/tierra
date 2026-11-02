@@ -18,3 +18,21 @@ Este repo es la copia canónica de TIERRA. Antes de tocar código, respeta:
 8. Cambios mínimos; no reformatear código ajeno. Un commit por tarea.
 9. No presentar esto como monitoreo de parcela: son estimaciones de celda de
    modelos y reanálisis.
+10. **Respaldos temporales fuera del repo.** Los bundles, zips o dumps de
+    migración se guardan fuera del proyecto y se borran en cuanto el cambio
+    queda confirmado. Nunca se commitean ni se dejan crecer en `/tmp`.
+
+## Respaldo pendiente de borrar
+
+- `/tmp/laboratorio-tierra-20261102.bundle` — **127 MB**. Respaldo de la rama
+  privada `feat/tierra-trend-detective`, que se borró el 2026-11-02 al pasar el
+  proyecto al repo público. Ya no hace falta ahora que el repo público está
+  verificado (32 commits, pruebas en verde, CI en verde):
+
+  ```bash
+  rm -f /tmp/laboratorio-tierra-20261102.bundle
+  ```
+
+  Si se vuelve a necesitar un respaldo así, que sea temporal y con fecha de
+  borrado anotada aquí mismo.
+
