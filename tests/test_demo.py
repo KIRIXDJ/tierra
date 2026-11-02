@@ -1,7 +1,11 @@
 import unittest
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+except ImportError:
+    # Sin navegador instalado el resto de la suite sigue corriendo.
+    raise unittest.SkipTest("requiere playwright y Chrome (pip install playwright)")
 
 from tests.apoyo import html_de_prueba
 

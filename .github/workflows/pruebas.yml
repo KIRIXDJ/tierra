@@ -1,0 +1,40 @@
+name: pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pruebas de Python
+        run: python -m unittest discover -s tests -v
+
+      - name: Sintaxis de los scripts
+        run: |
+          python -m py_compile tools/*.py tests/*.py *.py
+
+      - name: Sintaxis del módulo JS del demo
+        run: |
+          python - <<'PY'
+          import pathlib, re
+          html = pathlib.Path("web/index.html").read_text(encoding="utf-8")
+          modulo = re.search(r'<script type="module">(.*?)</script>', html, re.S).group(1)
+          pathlib.Path("/tmp/modulo.mjs").write_text(modulo, encoding="utf-8")
+          PY
+          node --check /tmp/modulo.mjs
+
+      - name: No hay claves en el repo
+        run: |
+          if git grep -nE 'sk-[A-Za-z0-9]{12}|ghp_[A-Za-z0-9]{20}|AIza[0-9A-Za-z_-]{20}'; then
+            echo "Hay algo con pinta de clave en el repo."; exit 1
+          fi
+          echo "Sin claves visibles."

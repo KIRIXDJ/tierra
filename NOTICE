@@ -1,0 +1,24 @@
+TIERRA — atribuciones y créditos
+
+CÓDIGO
+  MIT (ver LICENSE).
+
+DATOS DE LA NASA (dominio público, sin restricciones de uso)
+  - NASA POWER / MERRA-2 — https://power.larc.nasa.gov/
+  - NASA GIBS (MODIS Terra Corrected Reflectance) — https://earthdata.nasa.gov/gibs
+  - NASA EONET — https://eonet.gsfc.nasa.gov/
+
+DATOS DE TERCEROS
+  - Open-Meteo (ERA5 / ECMWF) — https://open-meteo.com/
+    Licencia de datos CC BY 4.0: se debe acreditar a Open-Meteo.
+    El plan gratuito es para uso no comercial; si el producto se comercializa,
+    hay que contratar el plan correspondiente.
+
+LIBRERÍAS
+  - three.js — MIT — https://threejs.org/
+  - MediaPipe Tasks Vision — Apache-2.0 — https://developers.google.com/mediapipe
+  - Texturas del globo: ejemplos de three.js (MIT).
+
+AVISO
+  Este proyecto no está afiliado a la NASA. NASA Space Apps Challenge es un
+  programa de la NASA; los datos son de la NASA, la aplicación es del equipo.
