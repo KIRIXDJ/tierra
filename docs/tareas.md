@@ -32,12 +32,12 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 
 | Rol | Persona | Tarea |
 |---|---|---|
-| A · Datos | (nombre) | 1 |
-| B · Temporada | (nombre) | 2 |
-| C · Interfaz | (nombre) | 3 |
-| D · Agronomía | (nombre) | 4 |
-| E · QA | (nombre) | 5 |
-| F · Demo | (nombre) | 6 |
+| A · Datos | Ruben · `myticalruben` (invitación pendiente) | 1 |
+| B · Temporada | `dnffa151` | 2 |
+| C · Interfaz | Oscar · `lafortuna8501-sudo` | 3 |
+| D · Agronomía | Marlon · `MarlonRD` | 4 |
+| E · QA | Alison · `alisonrodriguez767-maker` | 5 |
+| F · Demo | sin asignar | 6 |
 
 QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 
