@@ -23,6 +23,7 @@ dentro de su alcance.
 | 4 | Rotaciones | [`tareas/04-rotaciones.md`](../tareas/04-rotaciones.md) | `tarea/4-rotaciones` | `tools/rotaciones.py` + fuentes |
 | 5 | QA | [`tareas/05-qa.md`](../tareas/05-qa.md) | `tarea/5-qa` | `tests/test_reciente_casos.py` + revisión de textos |
 | 6 | Demo | [`tareas/06-demo.md`](../tareas/06-demo.md) | `tarea/6-demo` | guion de 3 min, checklist offline, visión |
+| 7 | Rotaciones UI | [`tareas/07-rotaciones-ui.md`](../tareas/07-rotaciones-ui.md) | `tarea/7-rotaciones-ui` | pestaña con 3 estrategias y prioridades |
 
 Los contratos de datos (JSON exactos, reglas y definiciones de anomalía) están
 **solo** en [`tareas/00-contratos.md`](../tareas/00-contratos.md). Si cambian,
@@ -34,10 +35,11 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 |---|---|---|
 | A · Datos | Ruben · `myticalruben` (invitación pendiente) | 1 |
 | B · Temporada | `dnffa151` | 2 |
-| C · Interfaz | Oscar · `lafortuna8501-sudo` | 3 |
+| C · Interfaz | Oscar · `lafortuna8501-sudo` | 3 y 7 (mismo archivo) |
 | D · Agronomía | Marlon · `MarlonRD` | 4 |
 | E · QA | Alison · `alisonrodriguez767-maker` | 5 |
 | F · Demo | sin asignar | 6 |
+| — | pendiente | 8, 9, 10 |
 
 QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 

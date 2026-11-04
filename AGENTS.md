@@ -25,6 +25,7 @@ No necesitas el contexto de la conversación que la originó.
 | 4 · Rotaciones | `tareas/04-rotaciones.md` | `tarea/4-rotaciones` | `web/`, `datos/` |
 | 5 · QA | `tareas/05-qa.md` | `tarea/5-qa` | código de las otras tareas |
 | 6 · Demo | `tareas/06-demo.md` | `tarea/6-demo` | todo lo demás |
+| 7 · Rotaciones UI | `tareas/07-rotaciones-ui.md` | `tarea/7-rotaciones-ui` | `tools/`, `datos/`, `tests/` |
 
 ## Reglas del proyecto
 

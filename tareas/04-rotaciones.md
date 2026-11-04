@@ -1,10 +1,11 @@
-# Tarea 4 · Motor de rotaciones con contexto reciente
+# Tarea 4 · Motor de rotaciones con clima POWER y contexto reciente
 
-**Entrega:** `tools/rotaciones.py` con `evaluar_rotaciones(finca, contexto_reciente=None)`
-y 3 estrategias (incluida la actual). **≈4 h.** No depende del código de la
-tarea 2: solo del contrato `reciente.json`.
+**Entrega:** `tools/rotaciones.py` (motor puro) + `generar_rotaciones.py`
+(escribe `datos/rotaciones.json`) + `docs/rotaciones.md`. **≈5 h.**
+Usa la climatología **POWER** de `datos/fincas.json` (lente NASA) y, si existe,
+el bloque de temporada de `datos/reciente.json`.
 
-**Rama:** `tarea/4-rotaciones` · **Commit:** `feat(rotaciones): motor con contexto de temporada`
+**Rama:** `tarea/4-rotaciones` · **Commit:** `feat(rotaciones): motor con clima POWER y contexto de temporada`
 
 ## Paso 0 · Crea tu rama (obligatorio)
 
@@ -18,7 +19,7 @@ git checkout main && git pull                     # parte de main al día
 git checkout -b tarea/4-rotaciones
 # ... trabajas ...
 git add <los archivos de "Permitido tocar">
-git commit -m "feat(rotaciones): motor con contexto de temporada"
+git commit -m "feat(rotaciones): motor con clima POWER y contexto de temporada"
 git push -u origin tarea/4-rotaciones
 # luego abre el PR en GitHub: base main <- tarea/4-rotaciones
 ```
@@ -27,20 +28,39 @@ Si tu IA te propone trabajar en `main` o empujar a `main`, dile que **no**:
 la rama es `tarea/4-rotaciones`. Si ya empujaste a `main` por error, no fuerces:
 avisa y se revierte.
 
-
 ## Permitido tocar
 
 - `tools/rotaciones.py` (nuevo)
+- `generar_rotaciones.py` (nuevo)
+- `datos/rotaciones.json` y `datos/rotaciones.js` (generados; se commitean)
 - `tests/test_rotaciones.py` (nuevo)
-- `docs/rotaciones.md` (nuevo: fuentes de cada parámetro)
+- `docs/rotaciones.md` (nuevo: fuentes y fórmulas)
 
 ## Prohibido
 
-`web/`, `datos/`, `tools/reciente.py`, `tools/power_cliente.py`, `AGENTS.md`.
+`web/`, `datos/fincas.json`, `datos/reciente.json`, `tools/reciente.py`,
+`tools/power_cliente.py`, `AGENTS.md`.
+
+## Qué debe usar del clima (esto es lo que lo hace NASA)
+
+Del bloque `climatologia.mensual` de **POWER** en `datos/fincas.json`:
+
+1. **Meses secos de la finca**: los 3 meses con menor media de `lluvia_mm_dia`
+   en 1991–2020. Se calcula, no se escribe a mano.
+2. Cada estrategia declara `meses_criticos` (meses en que su cultivo necesita
+   agua). Mientras no haya fuente (tarea 8), van marcados `provisional`.
+3. **Componente `agua`** = `10 − 2.5 × |meses_criticos ∩ meses_secos|`, acotado a
+   0..10. Es una heurística de diseño, no agronomía: dilo en el docstring y en
+   `docs/rotaciones.md`.
+4. **Componente `diversidad`** = `10 × (número de cultivos distintos / 3)`,
+   acotado a 0..10. Es aritmética, no opinión.
+5. Si el bloque de temporada está y `lluvia.estado == "por_debajo"`, se resta
+   **15** al `indice` de las estrategias con `demanda_agua == "alta"` y se añade
+   un motivo. Ese 15 es **peso de diseño, no agronómico**.
+
+Sin `contexto_reciente`, el motor funciona igual: solo no aplica la resta.
 
 ## Contrato de salida
-
-`evaluar_rotaciones` devuelve **siempre** una lista de 3 diccionarios:
 
 ```python
 {
@@ -48,78 +68,84 @@ avisa y se revierte.
   "titulo": "Rotación actual",
   "cultivos": ["..."],
   "demanda_agua": "alta" | "media" | "baja",
-  "indice": 42,                    # 0..100, orientativo
-  "motivos": ["..."],              # por qué se sugiere
-  "datos_faltantes": ["..."],      # qué falta para decidir mejor
-  "riesgos": ["..."],              # qué revisar con un agrónomo
+  "meses_criticos": [3, 4, 5],        # 1..12, provisional
+  "indice": 42,                        # 0..100, orientativo
+  "componentes": {"agua": 6.0, "diversidad": 3.3},
+  "motivos": ["..."],
+  "datos_faltantes": ["..."],
+  "riesgos": ["..."],
   "provisional": True,
-  "fuentes": []                    # [] si no hay fuente citable
+  "fuentes": []
 }
 ```
 
-Reglas:
+`datos/rotaciones.json` (lo escribe `generar_rotaciones.py`):
 
-- Funciona **con y sin** `contexto_reciente`. Sin él, no hay penalización.
-- `contexto_reciente` es el bloque de **una** finca de `datos/reciente.json`
-  (`{"lluvia": {"estado": "por_debajo", ...}, "humedad_raiz": {...}}`), no el
-  archivo completo.
-- Penalización documentada: si `contexto_reciente["lluvia"]["estado"] == "por_debajo"`,
-  a las estrategias con `demanda_agua == "alta"` se les resta **15** puntos y se
-  añade un motivo. Ese 15 es **peso de diseño, no agronómico**: dilo en el
-  código y en `docs/rotaciones.md`.
-- `indice` siempre entre 0 y 100.
-- Si no hay fuente para un parámetro: `"provisional": true`, `"fuentes": []` y
-  un motivo "parámetro provisional, validar con agrónomo".
+```json
+{"version": 1, "generado": "2026-11-06T10:00:00-04:00",
+ "fuente_clima": "NASA POWER (reanálisis MERRA-2)",
+ "fincas": [{"id": "constanza", "meses_secos": [2, 3, 4],
+             "estrategias": [{"id": "actual", "titulo": "...", "cultivos": [],
+                              "indice": 42, "componentes": {"agua": 6.0, "diversidad": 3.3},
+                              "motivos": [], "datos_faltantes": [], "riesgos": [],
+                              "provisional": true, "fuentes": []}]}]}
+```
+
+La interfaz (tarea 7) recalcula el índice con los deslizadores a partir de
+`componentes`; por eso los componentes van en el JSON.
 
 ## Pasos
 
-1. Crea la tabla `CULTIVOS` (lista de dicts con `id`, `nombre`, `demanda_agua`,
-   `estado`, `fuente`). Todo lo que no puedas citar va `estado="provisional"`,
-   `fuente=None`.
-2. Define `ESTRATEGIAS`: `actual` (la del `cultivo_actual` de la finca) y dos
-   alternativas coherentes con clima tropical húmedo/seco. Sin números
-   agronómicos inventados: solo composición, demanda de agua y rotación.
-3. Implementa `indice_base(estrategia)` con una fórmula simple y explícita
-   (por ejemplo 50, +10 si toda la demanda es baja, −10 si alguna es alta).
-   Documéntala en el docstring: es **orientativa**.
-4. Implementa la penalización por déficit y los textos de `motivos`,
-   `datos_faltantes` y `riesgos` (estos dos últimos siempre con al menos una
-   entrada: textura de suelo, precios, rendimiento histórico, etc.).
-5. `docs/rotaciones.md`: tabla de cultivos con `fuente` o "sin fuente", y la
-   explicación del índice y del 15.
-6. `tests/test_rotaciones.py` (unittest):
+1. `CULTIVOS`: dicts con `id`, `nombre`, `demanda_agua`, `meses_criticos`,
+   `estado`, `fuente`. Lo no citable → `estado="provisional"`, `fuente=None`.
+2. `ESTRATEGIAS`: `actual` (usa `finca["cultivo_actual"]`) y dos alternativas
+   coherentes con clima tropical. Sin números de rendimiento, dosis ni fechas.
+3. `meses_secos(climatologia)`: media por mes de `lluvia_mm_dia` sobre los años
+   con dato; devuelve los 3 índices (1..12) con menor media.
+4. `evaluar_rotaciones(finca, contexto_reciente=None, clima=None)`: calcula
+   componentes, índice (`50·agua/10 + 50·diversidad/10`), resta por déficit y
+   arma textos.
+5. `generar_rotaciones.py`: lee `datos/fincas.json` y `datos/reciente.json` (si
+   existe), llama al motor por finca y escribe `datos/rotaciones.json` y
+   `datos/rotaciones.js` (`window.__ROTACIONES__ = {...}`) atómicos, igual que
+   hace la tarea 2 con `reciente.js`. `--verificar` imprime sin escribir.
+6. `docs/rotaciones.md`: tabla cultivo → demanda → meses críticos → fuente (o
+   "sin fuente"), y las fórmulas con su etiqueta de heurística.
+7. Tests (unittest):
    - 3 estrategias, ids únicos, `indice` en 0..100;
-   - sin contexto y con contexto seco: la de demanda alta baja exactamente 15;
+   - `meses_secos` con climatología sintética conocida;
+   - agua baja cuando los meses críticos caen en los secos;
+   - con contexto seco, la de demanda alta baja exactamente 15;
    - la de demanda baja no cambia;
-   - todas traen `riesgos` y `datos_faltantes` no vacíos;
+   - `riesgos` y `datos_faltantes` no vacíos;
    - `provisional` es `True` mientras no haya fuentes.
 
 ## Criterios de aceptación
 
 ```bash
 python3 -m unittest tests.test_rotaciones -v
+python3 generar_rotaciones.py --verificar
 python3 - <<'PY'
-from tools.rotaciones import evaluar_rotaciones
-finca = {"id": "constanza", "cultivo_actual": "provisional"}
-for r in evaluar_rotaciones(finca):
-    print(r["id"], r["indice"], r["demanda_agua"], r["provisional"])
-ctx = {"lluvia": {"estado": "por_debajo"}, "humedad_raiz": {"valor": 0.2}}
-for r in evaluar_rotaciones(finca, ctx):
-    print(r["id"], r["indice"])
+import json
+d = json.load(open("datos/rotaciones.json"))
+assert len(d["fincas"]) == 3
+for f in d["fincas"]:
+    assert 1 <= len(f["meses_secos"]) == 3
+    assert len(f["estrategias"]) == 3
+print("rotaciones.json OK")
 PY
 ```
-
-La segunda salida debe mostrar la resta de 15 solo en las de demanda alta.
 
 ## Trampas
 
 - No metas cifras de rendimiento, dosis ni fechas de siembra: no hay fuente.
-- No importes `requests` ni leas archivos: el motor es puro.
-- No devuelvas `float("nan")` ni `None` en `indice`.
-- `contexto_reciente` puede venir con campos `null`: trátalo como "sin dato",
-  no como "normal".
+- No importes `requests` ni leas archivos en `tools/rotaciones.py`.
+- El clima sale de POWER; el contexto reciente de Open-Meteo. **No compares uno
+  contra el otro**: el contexto solo dice "déficit" y penaliza.
+- `climatologia` puede faltar: en ese caso `agua` y `diversidad` se calculan
+  igual, pero `meses_secos` va vacío y se añade "sin climatología POWER".
 
 ## Si te bloqueas
 
-Issue `Tarea 4 · <duda>`. Si no encuentras fuente citable para una rotación,
-déjala `provisional` y escríbelo en `docs/rotaciones.md`; no la elimines.
+Issue `Tarea 4 · <duda>`. Si no encuentras fuente citable, deja `provisional` y
+anótalo en `docs/rotaciones.md`; no la elimines.

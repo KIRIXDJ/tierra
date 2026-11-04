@@ -43,17 +43,23 @@ Todo lo demás. Si la demo necesita un arreglo, es un issue para la tarea 3.
    - 0:30–1:30 globo: tendencias 1984–2025 con FDR, una celda del Caribe, aviso de reanálisis;
    - 1:30–2:30 pestaña Finca: "Esta temporada" con los 30 días, la banda normal,
      el pronóstico y la fuente fechada;
-   - 2:30–3:00 límites: no es monitoreo de parcela, se valida con agrónomo, Elio no controla nada.
+   - 2:30–3:00 pestaña Rotaciones: las 3 estrategias con motivos, datos faltantes
+     y riesgos, y los deslizadores de prioridades (si la tarea 7 está integrada);
+   - 3:00 cierre: no es monitoreo de parcela, se valida con un agrónomo local.
 2. **Checklist offline** (marcar antes de salir a la feria):
-   - `datos/reciente.js` presente y con fecha reciente;
+   - `datos/reciente.js` y `datos/rotaciones.js` presentes;
+   - **el 13 de noviembre**: correr `python3 actualizar_reciente.py` con internet
+     y confirmar que la fecha del snapshot es de ese día (si no, la app dirá
+     "datos de hace N días" en plena feria);
    - globo y texturas cargan sin red (anotar si siguen en CDN: es deuda conocida);
    - POWER/GIBS/EONET caídos no rompen nada;
    - navegador y pestañas ya abiertas; zoom al 100 %; notificaciones apagadas;
    - ensayo completo una vez sin internet.
 3. **Diapositiva de visión** (texto listo para pegar): sensores ESP32 en la finca,
-   riego y techo automáticos, asistente por Telegram, **hoy es visión, no está
-   construido**; Elio responde solo con los datos de la herramienta y no controla
-   actuadores en esta fase.
+   riego y techo automáticos y asistente por Telegram. **Hoy es visión, no está
+   construido.** Si Elio está integrado, se menciona como asistente que responde
+   solo con los datos de la herramienta; si no está, no se menciona: no se
+   promete lo que la app no hace.
 4. **Reparto del día**: quién habla, quién maneja el ratón, quién responde
    preguntas, quién vigila el reloj.
 5. **Plan B**: video de 2 minutos pregrabado y capturas fijas, por si falla la red
@@ -71,3 +77,5 @@ Todo lo demás. Si la demo necesita un arreglo, es un issue para la tarea 3.
 - No digas "tiempo real" para datos de hace un día o de un modelo.
 - No presentes la diapositiva de visión como si existiera.
 - No metas cifras nuevas que no estén en la app.
+- No prometas una pestaña o un asistente que no esté en `main` el día del evento:
+  comprueba la app antes de escribir el guion.

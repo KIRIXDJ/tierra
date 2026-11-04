@@ -4,9 +4,22 @@ Cambiar cualquiera de estos formatos requiere avisar al grupo y actualizar este
 archivo en el mismo PR. Los consumidores (interfaz, motor, QA) se escriben
 contra esto, no contra el código de quien lo produce.
 
+## Regla de oro: no mezclar fuentes en una anomalía
+
+Una anomalía solo es válida si el **dato reciente** y la **normal** vienen de la
+misma fuente. POWER (MERRA-2) y Open-Meteo (ERA5) discrepan mes a mes (la
+validación del repo vio cocientes de 0.36 a 4.78 en Constanza), así que restar
+una normal de POWER a un dato de ERA5 mide el desajuste entre modelos, no el
+clima.
+
+- **Anomalía de la temporada** → reciente y normal, ambas **Open-Meteo/ERA5**.
+- **Lente NASA de largo plazo** → POWER, para tendencias 1984–2025 y para el
+  motor de rotaciones. Se etiqueta como POWER y no se resta contra ERA5.
+
 ## `datos/fincas.json`
 
-Lo produce la tarea 1. Se commitea (es dato precalculado para la demo offline).
+Lo produce la tarea 1. Se commitea (dato precalculado para la demo offline).
+Es la **lente NASA**: climatología mensual POWER 1991–2020.
 
 ```json
 {
@@ -43,6 +56,29 @@ Lo produce la tarea 1. Se commitea (es dato precalculado para la demo offline).
 - `t2m`: 12 valores, media mensual en °C.
 - `null` cuando POWER no da dato (relleno `-999`). Nunca `NaN` ni `0` para hueco.
 - `mensual` cubre los 30 años de `periodo`, sin huecos de año.
+- **Uso**: motor de rotaciones (meses secos) y contexto de largo plazo. No se
+  usa para calcular la anomalía de la temporada.
+
+## `datos/climatologia_era5.json`
+
+Lo produce la tarea 2. Se commitea. Es la normal de la **misma fuente** que el
+dato reciente (Open-Meteo/ERA5), periodo 1991–2020.
+
+```json
+{
+  "version": 1,
+  "fuente": "Open-Meteo archive (ERA5) · no NASA",
+  "periodo": [1991, 2020],
+  "fincas": [
+    {"id": "constanza", "mensual": {"1991": {"lluvia_mm": [120.4, 96.1, 112.0, 130.2, 141.3, 99.4, 82.1, 91.0, 110.0, 128.1, 139.2, 122.3]}}}
+  ]
+}
+```
+
+- `lluvia_mm`: 12 valores por año, **total del mes en mm** (no tasa diaria).
+- 30 años por finca (`1991`…`2020`), `null` si falta un mes.
+- Agregación: se pide a Open-Meteo el diario 1991–2020 (una petición por finca,
+  ~2 s y ~210 KB) y se suma por mes y año.
 
 ## `datos/reciente.json`
 
@@ -72,9 +108,9 @@ Lo produce la tarea 2. Se commitea (es el snapshot offline).
         "media": 24.1, "normal": 23.5, "delta": 0.6,
         "banda": [22.9, 24.2], "estado": "normal"
       },
-      "humedad_raiz": {
+      "humedad_superficial": {
         "valor": 0.28, "unidad": "m³/m³", "cambio_7d": -0.02,
-        "banda": null, "nota": "sin climatología comparable"
+        "banda": null, "nota": "capa 0–7 cm; sin climatología comparable"
       },
       "serie_30d": [
         {"fecha": "2026-10-05", "lluvia_mm": 0.0, "tmax": 25.1, "tmin": 17.2, "humedad": 0.29}
@@ -91,11 +127,14 @@ Reglas:
 
 - `actualizado`: ISO 8601 **con offset** de la zona de la finca.
 - `ventana`: 30 días completos; `fin` = ayer, `inicio` = `fin − 29`.
+- `normal_mm` y `banda` salen de `climatologia_era5.json`, **no** de POWER.
 - `estado`: `"por_debajo"` (< P25), `"normal"` (P25–P75), `"por_encima"` (> P75).
 - Falta un dato → `null` en el campo, y se añade una frase a `avisos`.
 - `serie_30d`: exactamente 30 entradas, una por día, aunque falte el valor.
 - `pronostico`: 7 entradas; si no hay pronóstico, `[]` + aviso.
-- `humedad_raiz.banda` siempre `null` (no hay climatología homogénea).
+- `humedad_superficial.banda` siempre `null` (no hay climatología comparable).
+  **No la llames "humedad de raíz"**: `soil_moisture_0_to_7cm` es la capa
+  superficial (0–7 cm), no la zona radicular.
 
 ## `datos/reciente.js`
 
@@ -108,12 +147,14 @@ window.__RECIENTE__ = {"version": 1, "actualizado": "..." /* mismo objeto */};
 ## Definiciones de anomalía
 
 - **Ventana**: 30 días completos, `fin = ayer` en la zona de la finca.
-- **Normal de lluvia**: suma de `lluvia_mm_dia` de cada mes, ponderada por los
-  días de ese mes dentro de la ventana (se cruza de mes, no se redondea).
+- **Normal de lluvia (ERA5)**: suma de `lluvia_mm` de cada mes ponderada por la
+  fracción de días de ese mes dentro de la ventana.
+  `shortcut: reparto proporcional a días asume lluvia uniforme en el mes; si se
+  necesita precisión, guardar normales diarias.`
 - **Banda**: P25 y P75 de esa misma suma calculada año por año en `periodo`.
 - **Temperatura**: media ponderada igual; `delta = media − normal`.
-- **Humedad**: media de los últimos 7 días; `cambio_7d` contra los 7 anteriores.
-  Sin banda, a propósito.
+- **Humedad superficial**: media de los últimos 7 días; `cambio_7d` contra los 7
+  anteriores. Sin banda, a propósito.
 
 ## Fixtures
 

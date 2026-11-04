@@ -9,9 +9,10 @@ tarea 2, lee `02-temporada.md` y nada más (además de `AGENTS.md` y
 | 1 · Datos | [01-datos.md](01-datos.md) | `tarea/1-datos` | `generar_fincas.py`, `datos/fincas.json`, `tools/power_cliente.py` (solo añadir), `tests/test_fincas.py`, `tests/fixtures/power_mensual.json` | `web/`, `tools/tendencia.py`, `tools/malla_global.py`, `tests/test_power_cliente.py` |
 | 2 · Temporada | [02-temporada.md](02-temporada.md) | `tarea/2-temporada` | `tools/reciente.py`, `actualizar_reciente.py`, `datos/reciente.json`, `datos/reciente.js`, `tests/test_reciente.py`, `tests/fixtures/openmeteo_*.json` | `web/`, `datos/fincas.json`, `tools/rotaciones.py` |
 | 3 · Interfaz | [03-ui.md](03-ui.md) | `tarea/3-ui` | `web/index.html` | `tools/`, `datos/`, `tests/` |
-| 4 · Rotaciones | [04-rotaciones.md](04-rotaciones.md) | `tarea/4-rotaciones` | `tools/rotaciones.py`, `tests/test_rotaciones.py`, `docs/rotaciones.md` | `web/`, `datos/`, `tools/reciente.py` |
+| 4 · Rotaciones | [04-rotaciones.md](04-rotaciones.md) | `tarea/4-rotaciones` | `tools/rotaciones.py`, `generar_rotaciones.py`, `datos/rotaciones.json`/`.js`, `tests/test_rotaciones.py`, `docs/rotaciones.md` | `web/`, `datos/fincas.json`, `tools/reciente.py` |
 | 5 · QA | [05-qa.md](05-qa.md) | `tarea/5-qa` | `tests/test_reciente_casos.py`, `tests/fixtures/reciente_*.json`, `docs/revision-textos.md` | los archivos de código de las otras tareas |
 | 6 · Demo | [06-demo.md](06-demo.md) | `tarea/6-demo` | `docs/demo.md` | todo lo demás |
+| 7 · Rotaciones UI | [07-rotaciones-ui.md](07-rotaciones-ui.md) | `tarea/7-rotaciones-ui` | `web/index.html` (después de la 3) | `tools/`, `datos/`, `tests/` |
 
 ## Protocolo (obligatorio)
 
@@ -51,3 +52,16 @@ T6 (demo) depende de que T3 esté integrada
 
 T3 puede empezar el día 1 con `tests/fixtures/reciente_ejemplo.json`, que T2
 entrega antes de terminar su pipeline.
+
+**`web/index.html` es un solo archivo**: lo tocan las tareas 3, 7 y 9. Se
+integran en orden 3 → 7 → 9, o los hace la misma persona. Si dos PR abiertos lo
+tocan a la vez, se pisan.
+
+## Pendiente de decidir (no asignado)
+
+- **T8 · Cultivos con fuente**: 6–8 cultivos de la zona con fuente citable y
+  revisión de un agrónomo o profesor. Sin esto, la tarea 4 sigue `provisional`.
+- **T9 · Demo sin internet**: localizar three.js, texturas y MediaPipe. El FDR
+  ya está implementado en la app; no hace falta rehacerlo.
+- **T10 · Elio local**: respuestas deterministas sobre los resultados del motor.
+  Solo entra si las 1–7 están integradas.
