@@ -36,8 +36,8 @@ python3 -m http.server 8000
 ```
 
 Necesita un navegador con WebGL 2 (Chrome, Edge o Firefox recientes).
-**Sin internet** el globo y la malla funcionan; las capas en vivo (POWER, GIBS,
-EONET) y la comparación satelital no.
+Necesita internet: three.js, las texturas y las capas en vivo (POWER, GIBS,
+EONET) se descargan al abrir. Los datos de tendencia van incrustados en el HTML.
 
 ## Datos y fuentes
 
@@ -78,7 +78,7 @@ Reparto de tareas y contratos de datos en [`docs/tareas.md`](docs/tareas.md).
 ## Límites conocidos
 
 - Todavía hay dependencias por CDN (three.js, MediaPipe, texturas): falta
-  localizarlas para que la demo funcione 100 % sin internet.
+  localizarlas para que un fallo de red no impida abrir la app.
 - La capa agrícola y el asistente Elio están en diseño.
 - Los puntajes de rotación serán orientativos y se marcarán como provisionales
   cuando falte una fuente citable.

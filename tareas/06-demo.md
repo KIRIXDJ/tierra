@@ -1,10 +1,10 @@
 # Tarea 6 · Demo, pitch y diapositiva de visión
 
-**Entrega:** `docs/demo.md` con el guion de 3 minutos, el checklist offline y el
+**Entrega:** `docs/demo.md` con el guion de 3 minutos, el checklist de feria y el
 texto de la diapositiva de visión. **≈3 h.** Depende de que la tarea 3 esté
 integrada (o de una captura del estado actual).
 
-**Rama:** `tarea/6-demo` · **Commit:** `docs(demo): guion, checklist offline y visión`
+**Rama:** `tarea/6-demo` · **Commit:** `docs(demo): guion, checklist de feria y visión`
 
 ## Paso 0 · Crea tu rama (obligatorio)
 
@@ -18,7 +18,7 @@ git checkout main && git pull                     # parte de main al día
 git checkout -b tarea/6-demo
 # ... trabajas ...
 git add <los archivos de "Permitido tocar">
-git commit -m "docs(demo): guion, checklist offline y visión"
+git commit -m "docs(demo): guion, checklist de feria y visión"
 git push -u origin tarea/6-demo
 # luego abre el PR en GitHub: base main <- tarea/6-demo
 ```
@@ -46,15 +46,15 @@ Todo lo demás. Si la demo necesita un arreglo, es un issue para la tarea 3.
    - 2:30–3:00 pestaña Rotaciones: las 3 estrategias con motivos, datos faltantes
      y riesgos, y los deslizadores de prioridades (si la tarea 7 está integrada);
    - 3:00 cierre: no es monitoreo de parcela, se valida con un agrónomo local.
-2. **Checklist offline** (marcar antes de salir a la feria):
+2. **Checklist de feria** (marcar antes de salir):
    - `datos/reciente.js` y `datos/rotaciones.js` presentes;
    - **el 13 de noviembre**: correr `python3 actualizar_reciente.py` con internet
      y confirmar que la fecha del snapshot es de ese día (si no, la app dirá
      "datos de hace N días" en plena feria);
-   - globo y texturas cargan sin red (anotar si siguen en CDN: es deuda conocida);
+   - probar la red del lugar con el globo ya cargado; si no hay, video de respaldo;
    - POWER/GIBS/EONET caídos no rompen nada;
    - navegador y pestañas ya abiertas; zoom al 100 %; notificaciones apagadas;
-   - ensayo completo una vez sin internet.
+   - ensayo completo una vez con la red del lugar (o hotspot).
 3. **Diapositiva de visión** (texto listo para pegar): sensores ESP32 en la finca,
    riego y techo automáticos y asistente por Telegram. **Hoy es visión, no está
    construido.** Si Elio está integrado, se menciona como asistente que responde

@@ -18,7 +18,7 @@ clima.
 
 ## `datos/fincas.json`
 
-Lo produce la tarea 1. Se commitea (dato precalculado para la demo offline).
+Lo produce la tarea 1. Se commitea (arranque sin esperar a las APIs).
 Es la **lente NASA**: climatología mensual POWER 1991–2020.
 
 ```json
@@ -82,7 +82,7 @@ dato reciente (Open-Meteo/ERA5), periodo 1991–2020.
 
 ## `datos/reciente.json`
 
-Lo produce la tarea 2. Se commitea (es el snapshot offline).
+Lo produce la tarea 2. Se commitea (snapshot local: arranque y respaldo).
 
 ```json
 {

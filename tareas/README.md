@@ -13,6 +13,8 @@ tarea 2, lee `02-temporada.md` y nada más (además de `AGENTS.md` y
 | 5 · QA | [05-qa.md](05-qa.md) | `tarea/5-qa` | `tests/test_reciente_casos.py`, `tests/fixtures/reciente_*.json`, `docs/revision-textos.md` | los archivos de código de las otras tareas |
 | 6 · Demo | [06-demo.md](06-demo.md) | `tarea/6-demo` | `docs/demo.md` | todo lo demás |
 | 7 · Rotaciones UI | [07-rotaciones-ui.md](07-rotaciones-ui.md) | `tarea/7-rotaciones-ui` | `web/index.html` (después de la 3) | `tools/`, `datos/`, `tests/` |
+| 8 · Cultivos | [08-cultivos.md](08-cultivos.md) | `tarea/8-cultivos` | `datos/cultivos.json`, `docs/cultivos-fuentes.md`, `tests/test_cultivos.py` | `web/`, `tools/`, `datos/fincas.json` |
+| 10 · Elio local | [10-elio.md](10-elio.md) | `tarea/10-elio` | `web/elio.js`, `tests/elio.mjs`, 2 líneas en `web/index.html` | el módulo del globo, `tools/`, `datos/` |
 
 ## Protocolo (obligatorio)
 
@@ -57,11 +59,9 @@ entrega antes de terminar su pipeline.
 integran en orden 3 → 7 → 9, o los hace la misma persona. Si dos PR abiertos lo
 tocan a la vez, se pisan.
 
-## Pendiente de decidir (no asignado)
+## Descartado
 
-- **T8 · Cultivos con fuente**: 6–8 cultivos de la zona con fuente citable y
-  revisión de un agrónomo o profesor. Sin esto, la tarea 4 sigue `provisional`.
-- **T9 · Demo sin internet**: localizar three.js, texturas y MediaPipe. El FDR
-  ya está implementado en la app; no hace falta rehacerlo.
-- **T10 · Elio local**: respuestas deterministas sobre los resultados del motor.
-  Solo entra si las 1–7 están integradas.
+- **T9 · Demo sin internet**: el producto es monitoreo en línea, no un modo
+  offline. Riesgo que queda anotado, sin tarea: three.js y las texturas vienen
+  de un CDN, y si falla la red la app no arranca (no es "offline", es no
+  depender de un CDN para pintar). El FDR ya está implementado: no se rehace.

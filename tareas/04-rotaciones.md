@@ -96,8 +96,9 @@ La interfaz (tarea 7) recalcula el índice con los deslizadores a partir de
 
 ## Pasos
 
-1. `CULTIVOS`: dicts con `id`, `nombre`, `demanda_agua`, `meses_criticos`,
-   `estado`, `fuente`. Lo no citable → `estado="provisional"`, `fuente=None`.
+1. `CULTIVOS`: si existe `datos/cultivos.json` (tarea 8), úsalo; si no, tabla
+   inline provisional. Cada entrada: `id`, `nombre`, `demanda_agua`,
+   `meses_criticos`, `estado`, `fuente`. Lo no citable → `provisional`.
 2. `ESTRATEGIAS`: `actual` (usa `finca["cultivo_actual"]`) y dos alternativas
    coherentes con clima tropical. Sin números de rendimiento, dosis ni fechas.
 3. `meses_secos(climatologia)`: media por mes de `lluvia_mm_dia` sobre los años

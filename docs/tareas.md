@@ -7,9 +7,11 @@ dentro de su alcance.
 
 ## Cambio de regla (base de la demo)
 
-- La demo funciona **sin internet** con datos precalculados en el repo.
-- Encima va una capa **opcional** "Esta temporada" con datos recientes en vivo,
-  con caché y respaldo. Sin red: último dato cacheado + su fecha + "sin conexión".
+- El producto es **monitoreo en línea**: globo, capas y datos recientes usan
+  internet.
+- Los datos de tendencia van precalculados en el repo (arranque rápido y respaldo
+  si una API falla). La capa "Esta temporada" se guarda en caché: si falla la red,
+  se muestra el último dato con su fecha y la etiqueta "sin conexión".
 - Los datos de meses o años **solo** sirven para tendencia y estimación, no para
   la cosecha en curso. Por eso la capa nueva trabaja con 30 días + 7 de pronóstico.
 
@@ -24,6 +26,8 @@ dentro de su alcance.
 | 5 | QA | [`tareas/05-qa.md`](../tareas/05-qa.md) | `tarea/5-qa` | `tests/test_reciente_casos.py` + revisión de textos |
 | 6 | Demo | [`tareas/06-demo.md`](../tareas/06-demo.md) | `tarea/6-demo` | guion de 3 min, checklist offline, visión |
 | 7 | Rotaciones UI | [`tareas/07-rotaciones-ui.md`](../tareas/07-rotaciones-ui.md) | `tarea/7-rotaciones-ui` | pestaña con 3 estrategias y prioridades |
+| 8 | Cultivos | [`tareas/08-cultivos.md`](../tareas/08-cultivos.md) | `tarea/8-cultivos` | `datos/cultivos.json` con fuentes |
+| 10 | Elio local | [`tareas/10-elio.md`](../tareas/10-elio.md) | `tarea/10-elio` | respuestas deterministas, sin IA |
 
 Los contratos de datos (JSON exactos, reglas y definiciones de anomalía) están
 **solo** en [`tareas/00-contratos.md`](../tareas/00-contratos.md). Si cambian,
@@ -39,7 +43,7 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | D · Agronomía | Marlon · `MarlonRD` | 4 |
 | E · QA | Alison · `alisonrodriguez767-maker` | 5 |
 | F · Demo | sin asignar | 6 |
-| — | pendiente | 8, 9, 10 |
+| — | pendiente | 8 y 10 |
 
 QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 
@@ -50,9 +54,9 @@ QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 | 3 nov | Contratos cerrados, fixture de ejemplo, ramas creadas |
 | 4–5 nov | 1 y 2 producen datos; 3 maqueta con el fixture; 4 investiga fuentes |
 | 6–7 nov | Integración 2+3; 4 motor; 5 pruebas |
-| 8–9 nov | Offline (three.js/MediaPipe locales), textos, pulido |
+| 8–9 nov | Textos, pulido y dependencias del CDN si da tiempo |
 | 10–11 nov | Elio si hay tiempo; 6 prepara demo |
-| 12–13 nov | Ensayo offline, capturas, video de respaldo |
+| 12–13 nov | Ensayo con la red del lugar, capturas, video de respaldo |
 | 14–15 nov | Evento y entrega |
 
 ## Reglas de trabajo en grupo
@@ -71,4 +75,5 @@ QA (5) debe hacerlo alguien distinto de quien escribe la 2.
   estructurado que la app le entrega, cita fuente y no controla actuadores.
 - Tarea A completa: catálogo de cultivos con fuente citable y las pantallas de
   comparación de las 3 rotaciones.
-- Localizar three.js y MediaPipe para que la demo sea 100 % offline.
+- Localizar three.js, texturas y MediaPipe: sin red la app no arranca (no es
+  "modo offline", es no depender de un CDN para pintar).
