@@ -6,6 +6,28 @@ tarea 2: solo del contrato `reciente.json`.
 
 **Rama:** `tarea/4-rotaciones` · **Commit:** `feat(rotaciones): motor con contexto de temporada`
 
+## Paso 0 · Crea tu rama (obligatorio)
+
+`main` está protegida: **el push directo se rechaza**. Trabaja en tu rama y
+entrega por PR. Copia y pega:
+
+```bash
+git clone https://github.com/KIRIXDJ/tierra.git   # si aún no lo tienes
+cd tierra
+git checkout main && git pull                     # parte de main al día
+git checkout -b tarea/4-rotaciones
+# ... trabajas ...
+git add <los archivos de "Permitido tocar">
+git commit -m "feat(rotaciones): motor con contexto de temporada"
+git push -u origin tarea/4-rotaciones
+# luego abre el PR en GitHub: base main <- tarea/4-rotaciones
+```
+
+Si tu IA te propone trabajar en `main` o empujar a `main`, dile que **no**:
+la rama es `tarea/4-rotaciones`. Si ya empujaste a `main` por error, no fuerces:
+avisa y se revierte.
+
+
 ## Permitido tocar
 
 - `tools/rotaciones.py` (nuevo)

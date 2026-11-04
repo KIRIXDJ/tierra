@@ -6,6 +6,28 @@
 
 **Rama:** `tarea/2-temporada` · **Commit:** `feat(temporada): últimos 30 días, anomalías y caché`
 
+## Paso 0 · Crea tu rama (obligatorio)
+
+`main` está protegida: **el push directo se rechaza**. Trabaja en tu rama y
+entrega por PR. Copia y pega:
+
+```bash
+git clone https://github.com/KIRIXDJ/tierra.git   # si aún no lo tienes
+cd tierra
+git checkout main && git pull                     # parte de main al día
+git checkout -b tarea/2-temporada
+# ... trabajas ...
+git add <los archivos de "Permitido tocar">
+git commit -m "feat(temporada): últimos 30 días, anomalías y caché"
+git push -u origin tarea/2-temporada
+# luego abre el PR en GitHub: base main <- tarea/2-temporada
+```
+
+Si tu IA te propone trabajar en `main` o empujar a `main`, dile que **no**:
+la rama es `tarea/2-temporada`. Si ya empujaste a `main` por error, no fuerces:
+avisa y se revierte.
+
+
 ## Permitido tocar
 
 - `tools/reciente.py` (nuevo)

@@ -15,8 +15,9 @@ tarea 2, lee `02-temporada.md` y nada más (además de `AGENTS.md` y
 
 ## Protocolo (obligatorio)
 
-1. **Rama**: `git checkout -b tarea/N-slug` desde `main` actualizado.
-   Nunca trabajes en `main`.
+1. **Rama**: cada archivo de tarea empieza con "Paso 0 · Crea tu rama", con el
+   comando exacto. Resumen: `git checkout main && git pull` y
+   `git checkout -b tarea/N-slug`. Nunca trabajes en `main`.
 2. **Alcance**: toca solo la columna "Toca". Si necesitas otro archivo, **para**
    y abre un issue `Tarea N · necesito tocar <archivo>`. No lo toques "de paso".
 3. **Contrato**: los formatos de `00-contratos.md` son fijos. Si algo no encaja,

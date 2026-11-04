@@ -6,6 +6,28 @@ integrada (o de una captura del estado actual).
 
 **Rama:** `tarea/6-demo` · **Commit:** `docs(demo): guion, checklist offline y visión`
 
+## Paso 0 · Crea tu rama (obligatorio)
+
+`main` está protegida: **el push directo se rechaza**. Trabaja en tu rama y
+entrega por PR. Copia y pega:
+
+```bash
+git clone https://github.com/KIRIXDJ/tierra.git   # si aún no lo tienes
+cd tierra
+git checkout main && git pull                     # parte de main al día
+git checkout -b tarea/6-demo
+# ... trabajas ...
+git add <los archivos de "Permitido tocar">
+git commit -m "docs(demo): guion, checklist offline y visión"
+git push -u origin tarea/6-demo
+# luego abre el PR en GitHub: base main <- tarea/6-demo
+```
+
+Si tu IA te propone trabajar en `main` o empujar a `main`, dile que **no**:
+la rama es `tarea/6-demo`. Si ya empujaste a `main` por error, no fuerces:
+avisa y se revierte.
+
+
 ## Permitido tocar
 
 - `docs/demo.md` (nuevo)

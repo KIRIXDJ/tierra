@@ -5,6 +5,28 @@ climatología mensual de NASA POWER (1991–2020). **≈3 h.**
 
 **Rama:** `tarea/1-datos` · **Commit:** `feat(datos): fincas piloto y climatología POWER`
 
+## Paso 0 · Crea tu rama (obligatorio)
+
+`main` está protegida: **el push directo se rechaza**. Trabaja en tu rama y
+entrega por PR. Copia y pega:
+
+```bash
+git clone https://github.com/KIRIXDJ/tierra.git   # si aún no lo tienes
+cd tierra
+git checkout main && git pull                     # parte de main al día
+git checkout -b tarea/1-datos
+# ... trabajas ...
+git add <los archivos de "Permitido tocar">
+git commit -m "feat(datos): fincas piloto y climatología POWER"
+git push -u origin tarea/1-datos
+# luego abre el PR en GitHub: base main <- tarea/1-datos
+```
+
+Si tu IA te propone trabajar en `main` o empujar a `main`, dile que **no**:
+la rama es `tarea/1-datos`. Si ya empujaste a `main` por error, no fuerces:
+avisa y se revierte.
+
+
 ## Permitido tocar
 
 - `generar_fincas.py` (nuevo)
