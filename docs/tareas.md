@@ -56,6 +56,8 @@ QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 ## Reglas de trabajo en grupo
 
 - Una rama por tarea (`tarea/N-slug`), PR a `main`, CI verde, una revisión.
+  `main` está **protegida**: el push directo se rechaza; hacen falta PR y
+  que el check `pruebas` pase. El admin puede saltárselo si urge.
 - Commits en español, un commit por tarea, con el prefijo del archivo de la tarea.
 - No se toca el alcance de otra tarea; si hace falta, issue y aviso.
 - Si alguien se bloquea más de 30 min, lo dice; no se queda callado.
