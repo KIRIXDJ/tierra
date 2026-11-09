@@ -1,0 +1,284 @@
+{
+  ".github/workflows/pruebas.yml": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729259,
+    "ast_hash": "2c87205ec807624f76339aa7b98757d8",
+    "semantic_hash": "2c87205ec807624f76339aa7b98757d8"
+  },
+  "datos/fincas.json": {
+    "mtime": 1794240003.1352916,
+    "seen": 1794243201.2729328,
+    "ast_hash": "2486b78726992a5f2b3f94c94852601e",
+    "semantic_hash": "2486b78726992a5f2b3f94c94852601e"
+  },
+  "generar_fincas.py": {
+    "mtime": 1794239984.4952173,
+    "seen": 1794243201.272936,
+    "ast_hash": "0250dd5bf86034a231710ac2b6435664",
+    "semantic_hash": "0250dd5bf86034a231710ac2b6435664"
+  },
+  "nasa_service.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729383,
+    "ast_hash": "dc1b8d37022f2fe052bdd950d5358394",
+    "semantic_hash": "dc1b8d37022f2fe052bdd950d5358394"
+  },
+  "prueba_power.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729397,
+    "ast_hash": "27849773973d8947a9bc5760e56e86af",
+    "semantic_hash": "27849773973d8947a9bc5760e56e86af"
+  },
+  "tests/__init__.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729414,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "tests/apoyo.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729425,
+    "ast_hash": "5cfa8ec1198aef2c4a5be020f72b6613",
+    "semantic_hash": "5cfa8ec1198aef2c4a5be020f72b6613"
+  },
+  "tests/fixtures/power_mensual.json": {
+    "mtime": 1794239931.3069992,
+    "seen": 1794243201.272944,
+    "ast_hash": "9b38075f3418c9ffb24b2ab5a773f4f0",
+    "semantic_hash": "9b38075f3418c9ffb24b2ab5a773f4f0"
+  },
+  "tests/fixtures/power_serie.json": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729452,
+    "ast_hash": "b08298eaef23917c323c8d5cad06a1f1",
+    "semantic_hash": "b08298eaef23917c323c8d5cad06a1f1"
+  },
+  "tests/test_demo.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729464,
+    "ast_hash": "0201b0cd6b136611e68172c6b3cce7c5",
+    "semantic_hash": "0201b0cd6b136611e68172c6b3cce7c5"
+  },
+  "tests/test_eventos.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729478,
+    "ast_hash": "0cecb275b4a37ec0c5514cc427e6d567",
+    "semantic_hash": "0cecb275b4a37ec0c5514cc427e6d567"
+  },
+  "tests/test_fincas.py": {
+    "mtime": 1794239990.9592433,
+    "seen": 1794243201.2729495,
+    "ast_hash": "03fb78c5f8ab3e9ed7a7926d4995f682",
+    "semantic_hash": "03fb78c5f8ab3e9ed7a7926d4995f682"
+  },
+  "tests/test_html_malla.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.272951,
+    "ast_hash": "62148bda50ae7755e5c5e70847517c79",
+    "semantic_hash": "62148bda50ae7755e5c5e70847517c79"
+  },
+  "tests/test_malla_global.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.272952,
+    "ast_hash": "f3c7e7acfd41c96cc708abbddebad44d",
+    "semantic_hash": "f3c7e7acfd41c96cc708abbddebad44d"
+  },
+  "tests/test_power_cliente.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729533,
+    "ast_hash": "7813adebcdb9a7b25570aa80ed6e99e8",
+    "semantic_hash": "7813adebcdb9a7b25570aa80ed6e99e8"
+  },
+  "tests/test_tendencia.py": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729547,
+    "ast_hash": "afe74d014d6811e3dcf2d9ee9c78b58b",
+    "semantic_hash": "afe74d014d6811e3dcf2d9ee9c78b58b"
+  },
+  "tierra.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.272956,
+    "ast_hash": "c42308660c7dedb0b140ea55443b8fcb",
+    "semantic_hash": "c42308660c7dedb0b140ea55443b8fcb"
+  },
+  "tierra_2.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.272957,
+    "ast_hash": "19576c1365546571a10260f36fe1485d",
+    "semantic_hash": "19576c1365546571a10260f36fe1485d"
+  },
+  "tools/__init__.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729583,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "tools/eventos.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729595,
+    "ast_hash": "eff82d1fe883f93ae0bdafe648605a3a",
+    "semantic_hash": "eff82d1fe883f93ae0bdafe648605a3a"
+  },
+  "tools/html_malla.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729607,
+    "ast_hash": "2c743de8f73d743e88f4e246b092badf",
+    "semantic_hash": "2c743de8f73d743e88f4e246b092badf"
+  },
+  "tools/malla_global.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.272962,
+    "ast_hash": "fb39c2b5238f3d918d21be0c5b1cafa0",
+    "semantic_hash": "fb39c2b5238f3d918d21be0c5b1cafa0"
+  },
+  "tools/power_cliente.py": {
+    "mtime": 1794239972.999171,
+    "seen": 1794243201.2729635,
+    "ast_hash": "4344b8af05093619361c51a5c2c39a40",
+    "semantic_hash": "4344b8af05093619361c51a5c2c39a40"
+  },
+  "tools/tendencia.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.272965,
+    "ast_hash": "357ca8977c3874a33ef36fb8deda3a8e",
+    "semantic_hash": "357ca8977c3874a33ef36fb8deda3a8e"
+  },
+  "validar_power.py": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729661,
+    "ast_hash": "c673c29dd51274f9bb6117906c160125",
+    "semantic_hash": "c673c29dd51274f9bb6117906c160125"
+  },
+  "AGENTS.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.272967,
+    "ast_hash": "c21b303c81c6537aa6724ab03943d4b6",
+    "semantic_hash": "c21b303c81c6537aa6724ab03943d4b6"
+  },
+  "README.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729685,
+    "ast_hash": "27bbe99a48dd6cbce005a4928b17175e",
+    "semantic_hash": "27bbe99a48dd6cbce005a4928b17175e"
+  },
+  "docs/tareas.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729697,
+    "ast_hash": "4ffcb9f9fffdabb8422b39b8569c17bf",
+    "semantic_hash": "4ffcb9f9fffdabb8422b39b8569c17bf"
+  },
+  "requirements.txt": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.272971,
+    "ast_hash": "2c9f4273d8f5b870f2ed87c09de4d01a",
+    "semantic_hash": "2c9f4273d8f5b870f2ed87c09de4d01a"
+  },
+  "tareas/00-contratos.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729723,
+    "ast_hash": "31c63403225945c89b618845f66cffba",
+    "semantic_hash": "31c63403225945c89b618845f66cffba"
+  },
+  "tareas/01-datos.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729735,
+    "ast_hash": "83b156a9f696fdd221f4cb90866e5841",
+    "semantic_hash": "83b156a9f696fdd221f4cb90866e5841"
+  },
+  "tareas/02-temporada.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729747,
+    "ast_hash": "bd4645f93b02f471c2850f3bd0eb723b",
+    "semantic_hash": "bd4645f93b02f471c2850f3bd0eb723b"
+  },
+  "tareas/03-ui.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729762,
+    "ast_hash": "f2124510dd327b5a891308fd3b9fe82f",
+    "semantic_hash": "f2124510dd327b5a891308fd3b9fe82f"
+  },
+  "tareas/04-rotaciones.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729774,
+    "ast_hash": "ce8d72f690d2f5a0c512f8bdd1b50622",
+    "semantic_hash": "ce8d72f690d2f5a0c512f8bdd1b50622"
+  },
+  "tareas/05-qa.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729788,
+    "ast_hash": "01eb13acd02c8d12b295e2380e2c843c",
+    "semantic_hash": "01eb13acd02c8d12b295e2380e2c843c"
+  },
+  "tareas/06-demo.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.27298,
+    "ast_hash": "19b2f220a9282f35aee457b72def4974",
+    "semantic_hash": "19b2f220a9282f35aee457b72def4974"
+  },
+  "tareas/07-rotaciones-ui.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729812,
+    "ast_hash": "5229d0e891dde9f6fd2047f9ff9dc01f",
+    "semantic_hash": "5229d0e891dde9f6fd2047f9ff9dc01f"
+  },
+  "tareas/08-cultivos.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729824,
+    "ast_hash": "e5b626d06939f05339bec4b833fef667",
+    "semantic_hash": "e5b626d06939f05339bec4b833fef667"
+  },
+  "tareas/10-elio.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729836,
+    "ast_hash": "bce502cd563a552dd315556254710e8d",
+    "semantic_hash": "bce502cd563a552dd315556254710e8d"
+  },
+  "tareas/README.md": {
+    "mtime": 1794239504.6407332,
+    "seen": 1794243201.2729847,
+    "ast_hash": "ee1db58162a63f72a2bc44ea4bb6c9d8",
+    "semantic_hash": "ee1db58162a63f72a2bc44ea4bb6c9d8"
+  },
+  "tools/README.md": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729862,
+    "ast_hash": "413105896976b4bfe0e85219a583e2ff",
+    "semantic_hash": "413105896976b4bfe0e85219a583e2ff"
+  },
+  "web/index.html": {
+    "mtime": 1794239504.6527333,
+    "seen": 1794243201.2729871,
+    "ast_hash": "7f99387ad8c177909e651beb2b2c506a",
+    "semantic_hash": "7f99387ad8c177909e651beb2b2c506a"
+  },
+  "web/manos.html": {
+    "mtime": 1794239504.6527333,
+    "seen": 1794243201.2729883,
+    "ast_hash": "40aaf93ffecd6be68ca89a0f16194787",
+    "semantic_hash": "40aaf93ffecd6be68ca89a0f16194787"
+  },
+  "textures/earth_clouds.png": {
+    "mtime": 1794239504.6447334,
+    "seen": 1794243201.2729907,
+    "ast_hash": "9c6ea74e6ca1cdb828d108d342b99482",
+    "semantic_hash": "9c6ea74e6ca1cdb828d108d342b99482"
+  },
+  "textures/earth_day.jpg": {
+    "mtime": 1794239504.6447334,
+    "seen": 1794243201.272992,
+    "ast_hash": "e15eb8d2a32d001aa4e06884f6a566cd",
+    "semantic_hash": "e15eb8d2a32d001aa4e06884f6a566cd"
+  },
+  "textures/earth_night.png": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729933,
+    "ast_hash": "b7aa53cabe1568ca70d0789c0e9eada2",
+    "semantic_hash": "b7aa53cabe1568ca70d0789c0e9eada2"
+  },
+  "textures/earth_specular.jpg": {
+    "mtime": 1794239504.6487334,
+    "seen": 1794243201.2729943,
+    "ast_hash": "7dd1857a60a7a7bee6fb9e4b6c9fc9dd",
+    "semantic_hash": "7dd1857a60a7a7bee6fb9e4b6c9fc9dd"
+  }
+}
