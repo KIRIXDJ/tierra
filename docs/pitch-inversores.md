@@ -1,7 +1,7 @@
 # Pitch para inversores · TIERRA
 
 Guion de 5 minutos, preguntas difíciles y lo que **no** se dice.
-La presentación está en [`deck/index.html`](deck/index.html) (11 diapositivas,
+La presentación está en [`deck/index.html`](deck/index.html) (13 diapositivas,
 teclas ← →, funciona sin internet).
 
 > Contexto: no tenemos acceso a parcelas ni a agrónomos todavía. Por eso el
@@ -109,7 +109,7 @@ falta."
 
 ## Antes de la conferencia (checklist)
 
-- [ ] Completar nombres y roles del equipo (diapositiva 10).
+- [ ] Completar nombres y roles del equipo (diapositiva 12).
 - [ ] Ensayar con cronómetro: no pasar de 5:00.
 - [ ] Probar el deck y la app **sin internet** en el portátil que se va a usar.
 - [ ] Tener la app abierta en **Mi parcela**, con el chat del bot a la vista y la
