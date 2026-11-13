@@ -16,8 +16,8 @@ qué se riega solo, y qué avisa por Telegram."
 
 **0:25–1:40 · Mi parcela: el producto, a pantalla completa**
 - La app ya está abierta en **Mi parcela**: mapa satelital real con las tres
-  parcelas encima (La Esperanza 1,06 ha de yuca, El Hoyo 0,71 ha de frijol,
-  La Loma 1,44 ha de maíz), sus sensores ESP32 y su cámara.
+  parcelas encima (La Esperanza 1,27 ha de yuca, El Hoyo 1,22 ha de frijol,
+  La Loma 1,01 ha de maíz), sus sensores ESP32 y su cámara.
 - Panel derecho: **sensores** (humedad de suelo, temperatura, batería, gráfico de
   24 h) y **clima real** de la finca (lluvia de 30 días contra su normal,
   temperatura, humedad superficial, mañana). Pie de fuente: Open-Meteo/ERA5
@@ -66,7 +66,7 @@ qué se riega solo, y qué avisa por Telegram."
       tiene más de 3 días, la app lo dice).
 - [ ] Servidor local arriba: `python3 -m http.server 8000` → `localhost:8000/web/`.
 - [ ] Bot arriba (si se va a mostrar Telegram de verdad):
-      `python3 tools/bot_elio.py` en otra terminal; probar `/ping` desde el móvil.
+      `python3 tools/bot_elio.py` en otra terminal; probar `/estado` desde el móvil.
 - [ ] Globo cargado: si el wifi del lugar falla, three.js y las texturas no
       llegan. **Tener el video de respaldo listo.**
 - [ ] Zoom del navegador al 100 %, notificaciones silenciadas, pestañas limpias.
