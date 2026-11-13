@@ -10,6 +10,24 @@ Demo en vivo para el jurado: **https://kirixdj.github.io/tierra/web/**
 
 **Presenta: Alison.** Otra persona del equipo lleva el ratón y el cronómetro.
 
+## Ojo: 7 bloques hablados, 13 diapositivas
+
+Los **7** son el guion de voz (los del modelo de la profesora); las **13** son las
+diapositivas del deck. No van 1 a 1: la demo manda, y el deck se proyecta solo en
+un par de momentos (portada, Canvas y cierre). Si no hay proyector, se hace todo
+en la app y este guion no cambia.
+
+| Bloque (tiempo) | Diapositivas | Qué se ve |
+|---|---|---|
+| 1 · Gancho · 0:00–0:15 | 1 → 2 | Portada y las dos lluvias: Azua +103 %, Constanza +3 % |
+| 2 · Problema · 0:15–0:45 | 2 | App · bloque **Riesgos** |
+| 3 · Solución · 0:45–1:25 | 3 y 4 | App · mapa, satélite, terreno, rotación, escenario −40 % |
+| 4 · Propuesta de valor · 1:25–1:55 | 7 | App · **Método y límites** |
+| 5 · Modelo de negocio · 1:55–2:15 | 6 y 8 | Deck · **Canvas** y suscripción por finca |
+| 6 · Impacto · 2:15–2:35 | 9 y 10 (11 si sobra) | App y bot |
+| 7 · Llamado a la acción · 2:35–3:00 | 13 | App en pantalla, bot en la mano |
+| Si preguntan | 5, 11, 12 | Reto punto por punto, hoja de ruta, equipo |
+
 ## Antes de empezar (10 s, sin hablar)
 
 - App abierta en **Mi parcela** (abre sola), zoom del navegador al 100 %.
