@@ -229,6 +229,8 @@ class TestApp(unittest.TestCase):
         pag.evaluate("window.__tierra.seleccionar(18.9, -70.7)")
         pag.wait_for_selector("#panel.visible")
         self.assertTrue(pag.inner_text("#panel-coords").strip())
+        # Del globo a la finca: la celda del Caribe debe ofrecer las piloto.
+        self.assertGreaterEqual(pag.eval_on_selector_all("#panel-finca button", "e => e.length"), 1)
 
         # 2. Finca: Constanza, con fuente y fecha.
         pag.keyboard.press("Escape")

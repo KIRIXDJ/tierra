@@ -13,6 +13,8 @@ rotación conviene y por qué."
 
 **0:30–1:30 · El globo: 42 años de tendencia**
 - Girar el globo, abrir "Caribe", clic en República Dominicana.
+- Señalar que el panel ofrece **las fincas de esa celda**: del dato global a la
+  finca concreta en un clic.
 - Leer: pendiente en °C/década, p-valor y el filtro de significativas.
 - Decir: "esto es NASA POWER, que es **reanálisis**, no una medición en la finca."
 - Señalar el FDR: "con 2.592 celdas, sin corrección, ~130 por variable saldrían

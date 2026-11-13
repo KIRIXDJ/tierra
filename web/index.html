@@ -68,6 +68,9 @@
   #panel.visible { transform: none; opacity: 1; pointer-events: auto; }
   #panel h2 { font-size: 13px; letter-spacing: .18em; color: var(--cian); text-transform: uppercase; }
   #panel-coords { font-size: 11px; color: var(--secundario); margin: 4px 0 12px; }
+  #panel-finca button { width: 100%; margin: 2px 0 3px; background: transparent;
+    color: var(--cian); border: 1px solid var(--borde); border-radius: 7px;
+    padding: 7px 10px; font: inherit; font-size: 12px; cursor: pointer; }
   #panel-pendiente { font-family: ui-monospace, Consolas, monospace; font-size: 34px; line-height: 1.1; }
   #panel-insignia { display: inline-block; margin-top: 6px; font-size: 11px;
     padding: 3px 8px; border-radius: 999px; border: 1px solid var(--borde); color: var(--secundario); }
@@ -242,6 +245,7 @@
   <button id="panel-cerrar" aria-label="Cerrar panel">×</button>
   <h2 id="panel-titulo">Celda</h2>
   <p id="panel-coords"></p>
+  <div id="panel-finca"></div>
   <div id="panel-pendiente"></div>
   <div id="panel-insignia"></div>
   <div id="panel-cambio"></div>
@@ -1364,6 +1368,34 @@ async function compararImagenes() {
 
 document.getElementById('comparar').addEventListener('click', compararImagenes);
 
+/* Una celda de 5° mide ~550 km de lado: la finca está dentro si cae en su
+   recuadro, no si está cerca del centro. */
+function fincasEnCelda(celda) {
+  const medio = (malla.res || 5) / 2;
+  return FINCAS.filter((f) => {
+    const dLat = Math.abs(f.lat - celda[0]);
+    const dLon = Math.abs(((f.lon - celda[1] + 540) % 360) - 180);
+    return dLat <= medio && dLon <= medio;
+  });
+}
+
+/* Si la celda elegida contiene fincas piloto, ofrecer abrirlas: así el globo
+   lleva a la decisión, no solo al color de la malla. */
+function pintarFincaCercana(celda) {
+  const caja = document.getElementById('panel-finca');
+  const dentro = fincasEnCelda(celda);
+  if (!dentro.length) { caja.innerHTML = ''; return; }
+  const titulo = dentro.length === 1 ? 'Finca en esta celda' : 'Fincas en esta celda';
+  caja.innerHTML = `<div style="font-size:10px;color:var(--secundario);margin-bottom:4px">${titulo}</div>`
+    + dentro.map((f) => `<button class="panel-finca-abrir" data-finca="${f.id}">${f.nombre}</button>`).join('');
+  caja.querySelectorAll('.panel-finca-abrir').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      fincaId = boton.dataset.finca;
+      panel('finca');
+    });
+  });
+}
+
 function abrirPanel(celda) {
   document.getElementById('panel').classList.add('visible');
   document.getElementById('panel-titulo').textContent =
@@ -1375,6 +1407,9 @@ function abrirPanel(celda) {
     const eventos = contarEventos(celda);
     document.getElementById('panel-eventos').textContent =
       `${eventos.incendios} incendios · ${eventos.tormentas} tormentas cerca (2016–2025)`;
+    pintarFincaCercana(celda);
+  } else {
+    document.getElementById('panel-finca').innerHTML = '';
   }
   document.getElementById('panel-error').classList.remove('visible');
   document.getElementById('panel-aviso').textContent = '';
