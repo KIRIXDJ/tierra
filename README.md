@@ -22,12 +22,21 @@ Challenge 2026**.
 - Contraste de lluvia con Open-Meteo (ERA5) para detectar discrepancias de
   reanálisis, etiquetado como **no NASA**.
 - Capas de incendios y tormentas activas (EONET) y comparación satelital (GIBS).
-- Pestaña **Mi parcela**: parcelas registradas sobre mapa satelital real, con
-  humedad, temperatura, riego, ventilación de invernadero, techo, lluvia y plantas
-  georreferenciadas. Incluye **control por Telegram** (`/estado`, `/riego off`,
-  `/techo on`), **registro de una parcela nueva dibujándola** sobre el mapa (calcula
-  el área) y **análisis de una foto** del cultivo (mide color: verde, amarillo, marrón).
-  Todo simulado salvo el mapa: no hay hardware instalado.
+- **Mi parcela** (vista a pantalla completa tipo panel de monitoreo): el globo
+  vuela hasta Constanza y entra al mapa satelital real con las tres parcelas
+  encima, sus sensores ESP32, la cámara y el techo. Al lado, el panel con
+  **lecturas de sensores** (humedad de suelo, temperatura, batería), **clima real**
+  de la finca (NASA POWER/ERA5), **fotos** (satélite real recortado + foto de
+  cultivo simulada dibujada en el navegador) y **control de actuadores** (riego,
+  techo y ventilación, en automático o a mano). Incluye **registro de una parcela
+  nueva dibujándola** sobre el mapa (calcula el área) y **análisis de una foto**
+  del cultivo (mide color: verde, amarillo, marrón). Todo simulado salvo el mapa,
+  el clima y el bot: no hay hardware instalado y la app lo dice en pantalla.
+- **Bot de Telegram real** ([@climaxeliobot](https://t.me/climaxeliobot)) con dos
+  modos: **comandos** (`/estado`, `/clima`, `/riego off`, `/techo on`, `/foto`) y
+  **API**, donde Elio responde en lenguaje natural con el contexto de los datos.
+  El bot escribe el estado en `datos/estado_finca.json` y el panel lo refleja en
+  segundos. Ver [`docs/bot-telegram.md`](docs/bot-telegram.md).
 - Pestaña **Finca** · "Esta temporada": últimos 30 días de lluvia, temperatura y
   humedad superficial (0–7 cm) contra la banda normal P25–P75, más pronóstico de
   7 días. Fuente **Open-Meteo (no NASA)**, con fecha visible.
@@ -60,6 +69,10 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 | Finca · esta temporada | Rotaciones | Método y límites |
 |---|---|---|
 | ![Finca](docs/capturas/finca.png) | ![Rotaciones](docs/capturas/rotaciones.png) | ![Método](docs/capturas/metodo.png) |
+
+| Mi parcela · monitor | Fotos de la parcela | En el móvil |
+|---|---|---|
+| ![Monitoreo](docs/capturas/monitor.png) | ![Fotos](docs/capturas/monitor-fotos.png) | ![Móvil](docs/capturas/monitor-movil.png) |
 
 ## Presentaciones
 
@@ -120,12 +133,15 @@ tierra.py       app de escritorio (pygame) — histórico, no es la demo web
 python3 -m unittest discover -s tests -v
 ```
 
-82 pruebas de Python y 6 de navegador. Las de navegador necesitan
-`playwright` y su Chromium (`python3 -m playwright install chromium`); si no están,
-se saltan solas. Ninguna prueba necesita internet.
+Las pruebas de Python incluyen el bot (37, sin red) y la lógica del monitoreo;
+las de navegador necesitan `playwright` y su Chromium
+(`python3 -m playwright install chromium`); si no están, se saltan solas.
+Ninguna prueba necesita internet.
 
 ```bash
-node tests/elio.mjs    # Elio y los textos de la capa agrícola
+node tests/elio.mjs     # Elio y los textos de la capa agrícola
+node tests/vision.mjs   # riego, techo y foto de la granja simulada
+node tests/monitor.mjs  # sensores simulados y estado del bot
 ```
 
 ## Equipo

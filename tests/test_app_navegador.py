@@ -7,10 +7,12 @@ Necesita playwright y un navegador: si no están, se salta.
 
 import functools
 import http.server
+import json
 import pathlib
 import socketserver
 import threading
 import unittest
+from datetime import datetime, timezone
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
 
@@ -55,10 +57,18 @@ class TestApp(unittest.TestCase):
         cls.nav.close()
         cls._pw.stop()
 
-    def abrir(self):
+    def abrir(self, estado_bot=None):
         pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
         errores = []
         pag.on("pageerror", lambda e: errores.append(str(e)))
+        # El estado del bot real es un archivo local. En pruebas se simula:
+        # por defecto sin bot (modo simulación) y con estado inyectado cuando toca.
+        patron = "**/datos/estado_finca.json*"
+        if estado_bot is None:
+            pag.route(patron, lambda ruta: ruta.abort())
+        else:
+            pag.route(patron, lambda ruta: ruta.fulfill(
+                status=200, content_type="application/json", body=json.dumps(estado_bot)))
         pag.goto(f"{self.base}/web/index.html")
         pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
         return pag, errores
@@ -165,6 +175,7 @@ class TestApp(unittest.TestCase):
                 route.abort()
 
         pag.route("**/*", filtrar)
+        pag.route("**/datos/estado_finca.json*", lambda ruta: ruta.abort())
         errores = []
         pag.on("pageerror", lambda e: errores.append(str(e)))
         pag.goto(f"{self.base}/web/index.html")
@@ -200,18 +211,14 @@ class TestApp(unittest.TestCase):
 
     def test_parcela_seleccionable(self):
         """La demo es de UNA parcela: se elige, muestra sus datos y reacciona."""
-        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
-        errores = []
-        pag.on("pageerror", lambda e: errores.append(str(e)))
-        pag.goto(f"{self.base}/web/index.html")
-        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag, errores = self.abrir()
         pag.click("#vision-boton")
         pag.wait_for_selector("#vision.visible")
 
-        aviso = pag.inner_text(".simulacion")
-        self.assertIn("Vista simulada", aviso)
-        self.assertIn("No hay hardware conectado", aviso) if False else None
-        self.assertIn("no hay sensores instalados", aviso)
+        aviso = pag.inner_text("#vision-aviso-campo")
+        self.assertIn("Vista de demostración", aviso)
+        self.assertIn("simulados", aviso)
+        self.assertIn("@climaxeliobot", aviso)
 
         # Hay parcelas registradas y se puede elegir.
         opciones = pag.eval_on_selector_all("#parcela-selector option", "e => e.map(x => x.textContent)")
@@ -300,6 +307,7 @@ class TestApp(unittest.TestCase):
                 route.abort()
 
         pag.route("**/*", filtrar)
+        pag.route("**/datos/estado_finca.json*", lambda ruta: ruta.abort())
         errores = []
         pag.on("pageerror", lambda e: errores.append(str(e)))
         pag.goto(f"{self.base}/web/index.html")
@@ -327,11 +335,7 @@ class TestApp(unittest.TestCase):
     def test_recorrido_del_pitch(self):
         """El guion de la presentación, clic a clic. Si esto pasa, la demo no falla
         en vivo: globo, finca, cambio de finca, rotaciones, granja y método."""
-        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
-        errores = []
-        pag.on("pageerror", lambda e: errores.append(str(e)))
-        pag.goto(f"{self.base}/web/index.html")
-        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag, errores = self.abrir()
 
         # 1. Globo: volar al Caribe y abrir la celda de República Dominicana.
         pag.click("#chips button[data-lat='18'][data-lon='-72']")
@@ -378,7 +382,10 @@ class TestApp(unittest.TestCase):
         pag.wait_for_timeout(300)
         self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
 
-        # 6. Método y Elio.
+        # 6. Volver al globo (el monitoreo tapa las pestañas) y ver Método y Elio.
+        pag.click("#vision-cerrar")
+        pag.wait_for_timeout(400)
+        self.assertFalse(pag.is_visible("#vision"))
         pag.click("#metodo-boton")
         pag.wait_for_selector("#metodo.visible")
         self.assertIn("reanálisis", pag.inner_text("#metodo"))
@@ -389,6 +396,102 @@ class TestApp(unittest.TestCase):
         self.assertTrue(pag.inner_text("#elio-respuesta").strip())
 
         self.assertEqual(errores, [], "el guion dejó errores de JS")
+        pag.close()
+
+
+    def test_monitor_mapa_grande_y_fotos(self):
+        """El mapa manda en la vista (no una esquina) y las dos fotos se dibujan."""
+        pag, errores = self.abrir()
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        ancho, alto = pag.eval_on_selector("#vision-mapa", "c => [c.clientWidth, c.clientHeight]")
+        self.assertGreater(ancho, 600, f"mapa demasiado estrecho: {ancho}")
+        self.assertGreater(alto, 240, f"mapa demasiado bajo: {alto}")
+        self.assertEqual(pag.eval_on_selector_all(".tarjeta-parcela", "e => e.length"), 3)
+        for selector in ("#foto-satelite", "#foto-cultivo"):
+            pixeles = pag.evaluate("""(sel) => {
+                const c = document.querySelector(sel);
+                const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+                let n = 0;
+                for (let i = 0; i < d.length; i += 4000) {
+                    if (d[i] + d[i + 1] + d[i + 2] > 60) { n += 1; }
+                }
+                return n;
+            }""", selector)
+            self.assertGreater(pixeles, 100, f"{selector} salió vacío")
+        # La foto de cultivo es la simulada y lo dice al ampliarla.
+        pag.click(".foto-mini[data-foto='cultivo']")
+        pag.wait_for_selector("#vision-lightbox.visible")
+        pie = pag.inner_text("#vision-lightbox-pie").lower()
+        self.assertIn("simulada", pie)
+        self.assertIn("no es una foto real", pie)
+        pag.click("#vision-lightbox")
+        pag.wait_for_timeout(200)
+        self.assertFalse(pag.is_visible("#vision-lightbox"))
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_techo_se_cierra_y_se_abre(self):
+        """Abrir/cerrar el techo como el invernadero de Hiroki, y se ve en pantalla."""
+        pag, errores = self.abrir()
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        pag.select_option("#parcela-selector", "el-hoyo")
+        pag.wait_for_timeout(200)
+        pag.click("button[data-act='techo'][data-val='on']")
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
+        self.assertTrue(pag.evaluate("window.__tierra.parcelaActual().id") == "el-hoyo")
+        pag.click("button[data-act='techo'][data-val='off']")
+        self.assertIn("abierto", pag.inner_text("#parcela-lecturas"))
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_estado_del_bot_telegram(self):
+        """Si el bot real escribe el estado, la vista lo refleja (sin red)."""
+        ahora = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+        estado = {
+            "version": 1, "origen": "telegram", "actualizado": ahora, "modo": "comandos",
+            "parcelas": {"la-esperanza": {"riego": False, "techo": True, "ventilacion": False}},
+            "ultimo": {"texto": "/techo on", "respuesta": "Techo cerrado en La Esperanza.",
+                       "ts": ahora},
+            "historial": [{"texto": "/techo on", "respuesta": "Techo cerrado en La Esperanza.",
+                           "ts": ahora}],
+        }
+        pag, errores = self.abrir(estado_bot=estado)
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        pag.wait_for_function(
+            "document.getElementById('vision-bot').textContent.includes('conectado')",
+            timeout=15000)
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
+        self.assertIn("Telegram", pag.inner_text("#chat-mensajes"))
+        self.assertIn("conectado", pag.inner_text("#vision-bot"))
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_monitor_en_el_movil(self):
+        """El monitoreo también entra en un teléfono: mapa arriba, panel debajo."""
+        pag = self.nav.new_page(viewport={"width": 390, "height": 844},
+                                is_mobile=True, has_touch=True)
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.route("**/datos/estado_finca.json*", lambda ruta: ruta.abort())
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        medidas = pag.evaluate("""() => {
+            const mapa = document.getElementById('vision-mapa-caja').getBoundingClientRect();
+            const cuerpo = document.getElementById('vision-cuerpo').getBoundingClientRect();
+            return {
+                mapaAlto: Math.round(mapa.height),
+                ancho: Math.round(cuerpo.width),
+                desborda: cuerpo.right > window.innerWidth + 1 || cuerpo.left < -1,
+            };
+        }""")
+        self.assertFalse(medidas["desborda"], f"el monitoreo se sale: {medidas}")
+        self.assertGreater(medidas["mapaAlto"], 150, f"mapa muy bajo: {medidas}")
+        self.assertEqual(errores, [])
         pag.close()
 
     def test_analiza_una_foto_real(self):
@@ -402,9 +505,7 @@ class TestApp(unittest.TestCase):
                 imagen.putpixel((x, y), (220, 210, 60))
         imagen.save(ruta, quality=90)
 
-        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
-        pag.goto(f"{self.base}/web/index.html")
-        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag, _ = self.abrir()
         pag.click("#vision-boton")
         pag.wait_for_selector("#vision.visible")
         pag.set_input_files("#vision-archivo", str(ruta))
@@ -418,11 +519,7 @@ class TestApp(unittest.TestCase):
 
     def test_registrar_parcela_dibujando(self):
         """El agricultor dibuja su parcela sobre el mapa y se calcula el área."""
-        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
-        errores = []
-        pag.on("pageerror", lambda e: errores.append(str(e)))
-        pag.goto(f"{self.base}/web/index.html")
-        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag, errores = self.abrir()
         pag.click("#vision-boton")
         pag.wait_for_selector("#vision.visible")
         antes = pag.eval_on_selector_all("#parcela-selector option", "e => e.length")

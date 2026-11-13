@@ -5,3 +5,5 @@ captura_*.png
 .env
 datos/*.tmp
 graphify-out/
+datos/estado_finca.json
+.offset_bot.json

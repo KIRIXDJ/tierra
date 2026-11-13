@@ -35,14 +35,18 @@ jobs:
           PY
           node --check /tmp/modulo.mjs
 
-      - name: Elio y textos (Node)
+      - name: Lógica del demo (Node)
         run: |
           node --check web/elio.js
+          node --check web/vision.js
+          node --check web/monitor.js
           node tests/elio.mjs
+          node tests/vision.mjs
+          node tests/monitor.mjs
 
       - name: No hay claves en el repo
         run: |
-          if git grep -nE 'sk-[A-Za-z0-9]{12}|ghp_[A-Za-z0-9]{20}|AIza[0-9A-Za-z_-]{20}'; then
+          if git grep -nE 'sk-[A-Za-z0-9]{12}|ghp_[A-Za-z0-9]{20}|AIza[0-9A-Za-z_-]{20}|[0-9]{9,10}:[A-Za-z0-9_-]{35}'; then
             echo "Hay algo con pinta de clave en el repo."; exit 1
           fi
           echo "Sin claves visibles."

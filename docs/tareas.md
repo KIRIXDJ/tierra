@@ -71,7 +71,7 @@ construyó con ChatGPT/Codex su invernadero automatizado sin saber programar
 | 10 · Elio | — | **hecho por el lead** (`web/elio.js` + `tests/elio.mjs`) |
 | 6 · Demo | — | **hecha por el lead** (`docs/demo.md`) |
 | 8 · Cultivos | — | pendiente: necesita agrónomo para quitar `provisional` |
-| 5 · QA | Alison | cubierta en parte: 82 pruebas Python + 6 de navegador + `tests/elio.mjs` |
+| 5 · QA | Alison | cubierta en parte: 127 pruebas Python + 3 comprobaciones Node (`elio`, `vision`, `monitor`) |
 
 Además, fuera de reparto y ya en `main`:
 

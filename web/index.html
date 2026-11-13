@@ -18,7 +18,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; background: var(--fondo); color: var(--texto);
     font-family: "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
-  #lienzo { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  #lienzo { position: fixed; inset: 0; width: 100%; height: 100%; display: block;
+    transition: opacity .5s ease; }
   #marca { position: fixed; top: 22px; left: 26px; pointer-events: none; }
   #marca h1 { font-size: 22px; letter-spacing: 0.32em; font-weight: 600; color: var(--cian); }
   #marca p { font-size: 12px; color: var(--secundario); letter-spacing: 0.08em; margin-top: 4px; }
@@ -105,13 +106,12 @@
   #aviso h2 { font-size: 20px; margin-bottom: 10px; }
   #aviso p { color: var(--secundario); max-width: 460px; line-height: 1.5; }
 
-  #finca, #rotaciones, #elio, #metodo, #vision { position: fixed; top: 140px; right: 22px; width: 398px;
+  #finca, #rotaciones, #elio, #metodo { position: fixed; top: 140px; right: 22px; width: 398px;
     max-height: calc(100vh - 168px); overflow-y: auto; background: var(--panel);
     border: 1px solid var(--borde); border-radius: 14px; padding: 18px;
     backdrop-filter: blur(10px); display: none; }
-  #finca.visible, #rotaciones.visible, #elio.visible, #metodo.visible,
-  #vision.visible { display: block; }
-  #finca h2, #rotaciones h2, #elio h2, #metodo h2, #vision h2 { font-size: 13px; letter-spacing: .18em;
+  #finca.visible, #rotaciones.visible, #elio.visible, #metodo.visible { display: block; }
+  #finca h2, #rotaciones h2, #elio h2, #metodo h2 { font-size: 13px; letter-spacing: .18em;
     color: var(--cian); text-transform: uppercase; }
   #finca select { width: 100%; margin: 10px 0 14px; background: #0a1420;
     color: var(--texto); border: 1px solid var(--borde); border-radius: 7px;
@@ -199,33 +199,139 @@
     border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
     border-radius: 8px; padding: 8px 10px; margin: 10px 0 12px; }
   .simulacion b { color: var(--ambar); }
-  .campo { display: block; font-size: 11px; color: var(--secundario); margin-bottom: 10px; }
+  .campo { display: block; font-size: 11px; color: var(--secundario); margin-bottom: 8px; }
   .campo select { width: 100%; margin-top: 4px; background: #0a1420; color: var(--texto);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px 9px; font: inherit;
     font-size: 12px; }
-  #parcela-lecturas { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto;
-    gap: 5px; margin-bottom: 8px; }
-  #parcela-lecturas div { border: 1px solid var(--borde); border-radius: 9px; padding: 5px 4px;
-    text-align: center; font-size: 9px; color: var(--secundario); letter-spacing: .04em; }
-  #parcela-lecturas b { display: block; color: var(--texto); font-size: 15px; margin: 0;
+  .campo.foto { border: 1px dashed var(--borde); border-radius: 8px; padding: 8px 10px;
+    text-align: center; cursor: pointer; color: var(--cian); font-size: 11px; margin: 6px 0 0; }
+  .campo.foto input { display: none; }
+  #vision-diagnostico { display: none; margin-top: 8px; font-size: 11px; line-height: 1.45;
+    border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
+    border-radius: 8px; padding: 8px 10px; color: var(--texto); }
+  #vision-diagnostico.visible { display: block; }
+  #vision-diagnostico b { color: var(--ambar); }
+
+  /* ---------- Monitoreo de la finca: pantalla completa, mapa grande ---------- */
+  #vision { position: fixed; inset: 0; z-index: 40; display: none;
+    grid-template-rows: auto minmax(0, 1fr);
+    background: radial-gradient(1200px 700px at 18% 0%, #0a1b2a 0%, var(--fondo) 62%);
+    opacity: 0; transform: scale(1.04); transition: opacity .5s ease, transform .5s ease; }
+  #vision.visible { display: grid; opacity: 1; transform: none; }
+  #vision-cabecera { display: flex; align-items: center; gap: 14px;
+    padding: 10px 20px; border-bottom: 1px solid var(--borde);
+    background: rgba(4, 7, 13, .62); backdrop-filter: blur(8px); }
+  #vision-cabecera h2 { font-size: 14px; letter-spacing: .16em; color: var(--cian);
+    text-transform: uppercase; }
+  #vision-cabecera h2 span { color: var(--texto); letter-spacing: .04em;
+    text-transform: none; font-size: 13px; }
+  #vision-cabecera p { font-size: 10px; color: var(--secundario); margin-top: 2px; }
+  #vision-cabecera .crece { flex: 1; }
+  #vision-reloj { font-family: ui-monospace, Consolas, monospace; font-size: 20px;
+    color: var(--texto); text-align: right; }
+  #vision-reloj small { display: block; font-size: 8px; color: var(--secundario);
+    letter-spacing: .16em; }
+  #vision-cerrar { position: static; font-size: 22px; padding: 4px 8px; }
+  #parcela-selector { background: #0a1420; color: var(--texto); border: 1px solid var(--borde);
+    border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 11px; max-width: 250px; }
+  .chip-estado { font-size: 10px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--borde); color: var(--secundario); white-space: nowrap; }
+  .chip-estado.conectado { color: var(--verde); border-color: rgba(88, 227, 154, .55);
+    background: rgba(88, 227, 154, .09); }
+  .chip-estado.simulado { color: var(--ambar); border-color: rgba(255, 180, 84, .5); }
+
+  #vision-cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) 424px;
+    gap: 14px; padding: 14px 18px 18px; min-height: 0; }
+  #vision-izq { display: grid; grid-template-rows: minmax(0, 1fr) auto auto;
+    gap: 10px; min-height: 0; }
+  #vision-pie { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px; }
+  #vision-pie .bloque { display: flex; flex-direction: column; }
+  #vision-mapa-caja { position: relative; flex: 1; min-height: 240px;
+    border: 1px solid var(--borde); border-radius: 14px; overflow: hidden; background: #08111c; }
+  #vision-mapa { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+  #vision-mapa.arrastrando { cursor: grabbing; }
+  #vision-mapa-hud { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; }
+  #vision-mapa-hud button { min-width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--borde); background: rgba(4, 10, 18, .82); color: var(--texto);
+    font: inherit; font-size: 14px; cursor: pointer; }
+  #vision-mapa-hud button.ancho { padding: 0 10px; font-size: 10px; }
+  #vision-mapa-pie { position: absolute; bottom: 8px; left: 12px; right: 12px; display: flex;
+    justify-content: space-between; font-size: 9px; color: rgba(220, 233, 245, .72);
+    pointer-events: none; }
+  #vision-tira { display: flex; gap: 8px; }
+  .tarjeta-parcela { flex: 1; text-align: left; background: rgba(11, 20, 32, .72);
+    border: 1px solid var(--borde); border-radius: 10px; padding: 7px 10px; color: var(--texto);
+    font: inherit; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
+  .tarjeta-parcela:hover { border-color: rgba(53, 214, 255, .55); }
+  .tarjeta-parcela.activa { border-color: var(--cian); background: rgba(53, 214, 255, .10); }
+  .tarjeta-parcela b { display: block; font-size: 12px; }
+  .tarjeta-parcela span { font-size: 9px; color: var(--secundario); display: block; margin-top: 1px; }
+  .tarjeta-parcela i { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    margin-right: 4px; vertical-align: middle; }
+
+  #vision-lado { overflow-y: auto; min-height: 0; padding-right: 4px;
+    display: flex; flex-direction: column; gap: 10px; }
+  .bloque { border: 1px solid var(--borde); border-radius: 12px; padding: 8px 10px;
+    background: rgba(11, 20, 32, .72); }
+  .bloque h3 { font-size: 9px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--secundario); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .bloque h3 span { color: var(--cian); letter-spacing: .02em; text-transform: none; }
+  #parcela-lecturas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+  #parcela-lecturas div { border: 1px solid var(--borde); border-radius: 9px; padding: 4px 2px;
+    text-align: center; font-size: 8px; color: var(--secundario); letter-spacing: .03em; }
+  #parcela-lecturas b { display: block; color: var(--texto); font-size: 15px; margin: 1px 0 0;
     font-family: ui-monospace, Consolas, monospace; }
   #parcela-lecturas .alerta b { color: var(--ambar); }
   #parcela-lecturas .bien b { color: var(--verde); }
-  #vision-clima { font-size: 10px; color: var(--secundario); margin-top: 8px;
-    line-height: 1.45; border-left: 2px solid rgba(53, 214, 255, .45); padding-left: 7px; }
-  #vision-mapa { cursor: crosshair; }
-  #parcela-camara { margin-top: 8px; font-size: 10px; color: var(--secundario);
-    border-left: 2px solid rgba(88, 227, 154, .55); padding-left: 7px; line-height: 1.45; }
-  #vision-mapa { width: 100%; height: 180px; display: block; border-radius: 8px;
-    background: #08111c; border: 1px solid var(--borde); }
-  #vision-chat { margin-top: 10px; border: 1px solid var(--borde); border-radius: 10px;
-    overflow: hidden; background: #071019; }
-  .chat-cabecera { font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+  #vision-historial { width: 100%; height: 54px; display: block; margin-top: 6px; }
+  #vision-sensores { display: flex; flex-direction: column; gap: 6px; }
+  .sensor-fila { display: grid; grid-template-columns: 52px repeat(3, 1fr); gap: 4px;
+    align-items: center; border: 1px solid var(--borde); border-radius: 8px; padding: 5px 7px; }
+  .sensor-fila .id { font-family: ui-monospace, Consolas, monospace; font-size: 11px;
+    color: var(--cian); }
+  .sensor-fila em { display: block; font-style: normal; font-size: 8px; color: var(--secundario);
+    letter-spacing: .06em; text-transform: uppercase; }
+  .sensor-fila b { font-family: ui-monospace, Consolas, monospace; font-size: 13px;
+    color: var(--texto); font-weight: 600; }
+  .sensor-fila small { font-size: 8px; color: var(--secundario); margin-left: 2px; }
+  .sensor-fila .punto { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--verde); margin-right: 3px; box-shadow: 0 0 6px rgba(88, 227, 154, .8); }
+  #vision-clima { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+  #vision-clima div { border: 1px solid var(--borde); border-radius: 8px; padding: 4px 6px;
+    font-size: 8px; color: var(--secundario); }
+  #vision-clima b { display: block; color: var(--texto); font-size: 13px;
+    font-family: ui-monospace, Consolas, monospace; margin-top: 1px; }
+  #vision-clima .fuente { grid-column: 1 / -1; font-size: 8px; color: var(--secundario);
+    border: 0; padding: 0; line-height: 1.4; }
+  #vision-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .foto-mini { padding: 0; border: 1px solid var(--borde); border-radius: 9px;
+    background: #071019; overflow: hidden; cursor: zoom-in; color: var(--secundario);
+    font: inherit; text-align: left; }
+  .foto-mini canvas { width: 100%; height: 98px; display: block; }
+  .foto-mini span { display: block; font-size: 8px; padding: 4px 6px; line-height: 1.35; }
+  .foto-mini b { color: var(--texto); font-size: 9px; display: block; }
+  #vision-actuadores { display: flex; flex-direction: column; gap: 6px; }
+  .actuador { display: flex; align-items: center; gap: 8px; font-size: 10px; color: var(--secundario); }
+  .actuador .nombre { width: 74px; }
+  .actuador .valor { flex: 1; font-family: ui-monospace, Consolas, monospace; color: var(--texto);
+    font-size: 11px; }
+  .actuador button { background: transparent; border: 1px solid var(--borde); color: var(--texto);
+    border-radius: 7px; padding: 4px 8px; font: inherit; font-size: 10px; cursor: pointer; }
+  .actuador button:hover { border-color: var(--cian); color: var(--cian); }
+  .actuador button.activo { border-color: var(--verde); color: var(--verde); }
+  .control { margin: 6px 0 0; font-size: 10px; color: var(--secundario); }
+  .control label { display: flex; justify-content: space-between; }
+  .control b { color: var(--texto); font-family: ui-monospace, Consolas, monospace; }
+  .control input { width: 100%; accent-color: var(--cian); }
+  #vision-chat { border: 1px solid var(--borde); border-radius: 10px; overflow: hidden;
+    background: #071019; display: flex; flex-direction: column; flex: 1; }
+  .chat-cabecera { font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
     color: var(--secundario); padding: 6px 10px; background: rgba(53, 214, 255, .06);
-    border-bottom: 1px solid var(--borde); }
-  #chat-mensajes { max-height: 88px; overflow-y: auto; padding: 8px 10px;
-    display: flex; flex-direction: column; gap: 6px; }
-  .burbuja { max-width: 88%; font-size: 11px; line-height: 1.4; padding: 6px 9px;
+    border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; }
+  #chat-mensajes { flex: 1; min-height: 56px; max-height: 92px; overflow-y: auto;
+    padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .burbuja { max-width: 90%; font-size: 11px; line-height: 1.4; padding: 6px 9px;
     border-radius: 10px; white-space: pre-wrap; }
   .burbuja.yo { align-self: flex-end; background: rgba(53, 214, 255, .16); color: var(--texto);
     border-bottom-right-radius: 3px; }
@@ -236,25 +342,49 @@
     padding: 8px 10px; font: inherit; font-size: 12px; outline: none; }
   #chat-forma button { background: transparent; border: 0; color: var(--cian);
     padding: 0 12px; font-size: 15px; cursor: pointer; }
-  #vision-registrar { width: 100%; margin-top: 8px; background: transparent; color: var(--verde);
+  #vision-registrar { width: 100%; background: transparent; color: var(--verde);
     border: 1px solid rgba(88, 227, 154, .5); border-radius: 7px; padding: 7px; font: inherit;
     font-size: 12px; cursor: pointer; }
   #vision-dibujo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
-    margin-top: 8px; font-size: 10px; color: var(--ambar); }
+    font-size: 10px; color: var(--ambar); }
   #vision-dibujo[hidden] { display: none; }
   #vision-dibujo button { background: transparent; border: 1px solid var(--borde);
     color: var(--texto); border-radius: 6px; padding: 4px 9px; font: inherit;
     font-size: 11px; cursor: pointer; }
   #vision-dibujo span { flex: 1 1 100%; }
-  .campo.foto { border: 1px dashed var(--borde); border-radius: 8px; padding: 8px 10px;
-    text-align: center; cursor: pointer; color: var(--cian); font-size: 11px;
-    margin-top: 8px; }
-  .campo.foto input { display: none; }
-  #vision-diagnostico { display: none; margin-top: 8px; font-size: 11px; line-height: 1.45;
-    border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
-    border-radius: 8px; padding: 8px 10px; color: var(--texto); }
-  #vision-diagnostico.visible { display: block; }
-  #vision-diagnostico b { color: var(--ambar); }
+  #vision-aviso-campo { font-size: 9px; color: var(--secundario); line-height: 1.5;
+    padding: 0 2px; }
+  #vision-aviso-campo b { color: var(--ambar); }
+
+  #vision-lightbox { position: fixed; inset: 0; z-index: 60; display: none;
+    place-items: center; background: rgba(2, 5, 9, .9); padding: 24px; }
+  #vision-lightbox.visible { display: grid; }
+  #vision-lightbox figure { max-width: 900px; width: 100%; }
+  #vision-lightbox canvas { width: 100%; border-radius: 12px; border: 1px solid var(--borde);
+    background: #071019; }
+  #vision-lightbox figcaption { margin-top: 8px; font-size: 11px; color: var(--secundario);
+    line-height: 1.5; }
+  #vision-lightbox figcaption b { color: var(--texto); }
+  /* Monitoreo en el teléfono: mapa arriba y el panel debajo, con scroll normal. */
+  @media (max-width: 900px) {
+    #vision-cabecera { flex-wrap: wrap; gap: 6px; padding: 8px 12px; }
+    #vision-cabecera h2 { font-size: 12px; }
+    #vision-cabecera p { display: none; }
+    #vision-reloj { font-size: 15px; margin-left: auto; }
+    #vision-cuerpo { display: flex; flex-direction: column; gap: 10px;
+      padding: 8px 10px 22px; overflow-y: auto; align-items: stretch; }
+    #vision-izq { display: flex; flex-direction: column; gap: 10px; min-height: auto; }
+    #vision-mapa-caja { flex: none; height: 38vh; min-height: 220px; }
+    #vision-tira { flex-wrap: wrap; }
+    .tarjeta-parcela { flex: 1 1 30%; padding: 6px 7px; }
+    .tarjeta-parcela b { font-size: 11px; }
+    #vision-pie { grid-template-columns: 1fr; }
+    #vision-lado { overflow: visible; padding-right: 0; }
+    #vision-fotos { grid-template-columns: 1fr 1fr; }
+    .foto-mini canvas { height: 84px; }
+    #vision-aviso-campo { display: none; }
+  }
+
 </style>
 </head>
 <body>
@@ -355,45 +485,99 @@
 </aside>
 
 
-<aside id="vision">
-  <button class="cerrar" data-cierra="vision" aria-label="Cerrar">×</button>
-  <h2>Mi parcela</h2>
-  <div class="simulacion">
-    <b>Vista simulada.</b> Mapa satelital real de la zona; las parcelas de encima son
-    de ejemplo. Hoy no hay sensores instalados.
+<section id="vision" aria-label="Monitoreo de la finca">
+  <header id="vision-cabecera">
+    <div>
+      <h2>Mi parcela <span id="vision-finca">Constanza</span></h2>
+      <p id="vision-sub">Mapa satelital real · clima NASA/ERA5 · sensores y techo simulados</p>
+    </div>
+    <select id="parcela-selector" aria-label="Elegir parcela"></select>
+    <span id="vision-bot" class="chip-estado simulado">bot: esperando</span>
+    <div class="crece"></div>
+    <div id="vision-reloj">--:--<small>hora local</small></div>
+    <button id="vision-cerrar" title="Volver al globo" aria-label="Volver al globo">×</button>
+  </header>
+  <div id="vision-cuerpo">
+    <div id="vision-izq">
+      <div id="vision-mapa-caja">
+        <canvas id="vision-mapa"></canvas>
+        <div id="vision-mapa-hud">
+          <button id="vision-zoom-menos" title="Alejar">−</button>
+          <button id="vision-zoom-mas" title="Acercar">+</button>
+          <button id="vision-centrar" class="ancho" title="Ver todas las parcelas">Centrar</button>
+        </div>
+        <div id="vision-mapa-pie">
+          <span id="vision-escala">100 m</span>
+          <span>© Esri World Imagery · satélite real, no NASA</span>
+        </div>
+      </div>
+      <div id="vision-tira"></div>
+      <div id="vision-pie">
+        <div class="bloque">
+          <h3>Fotos <span>satélite real · cámara simulada</span></h3>
+          <div id="vision-fotos"></div>
+        </div>
+        <div class="bloque">
+          <h3>Bot de Telegram <span>@climaxeliobot</span></h3>
+          <div id="vision-chat">
+            <div class="chat-cabecera"><span>Bot de la finca</span><span>/estado · /techo on</span></div>
+            <div id="chat-mensajes" aria-live="polite"></div>
+            <form id="chat-forma">
+              <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
+              <button type="submit" aria-label="Enviar">➤</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div id="vision-aviso-campo">
+        <b>Vista de demostración.</b> Mapa satélite real de la zona y clima de NASA POWER/ERA5;
+        parcelas, sensores ESP32 y techo simulados. El bot de Telegram es real: <b>@climaxeliobot</b>.
+      </div>
+    </div>
+    <aside id="vision-lado">
+      <div class="bloque">
+        <h3>Sensores <span id="vision-sensores-hora"></span></h3>
+        <div id="parcela-lecturas"></div>
+        <div id="vision-sensores"></div>
+        <canvas id="vision-historial"></canvas>
+      </div>
+      <div class="bloque">
+        <h3>Clima real de la finca <span>NASA POWER · ERA5</span></h3>
+        <div id="vision-clima"></div>
+      </div>
+      <div class="bloque">
+        <h3>Actuadores <span>simulados</span></h3>
+        <div id="vision-actuadores"></div>
+        <div class="control"><label for="vision-humedad">Humedad del suelo
+          <b id="vision-humedad-valor">18 %</b></label>
+          <input type="range" id="vision-humedad" min="5" max="50" value="18"></div>
+        <div class="control"><label for="vision-lluvia">Lluvia
+          <b id="vision-lluvia-valor">0 mm/h</b></label>
+          <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
+      </div>
+      <div class="bloque" id="vision-campo">
+        <h3>Registrar otra parcela</h3>
+        <div id="vision-dibujo" hidden>
+          <span id="vision-dibujo-info">Haz clic en el mapa para marcar las esquinas.</span>
+          <button id="vision-terminar">Terminar parcela</button>
+          <button id="vision-cancelar">Cancelar</button>
+        </div>
+        <button id="vision-registrar">Registrar mi parcela</button>
+        <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
+          <input type="file" id="vision-archivo" accept="image/*" capture="environment">
+        </label>
+        <div id="vision-diagnostico"></div>
+      </div>
+      <div id="parcela-camara"></div>
+    </aside>
   </div>
-  <label class="campo">Parcela (clic en el mapa o aquí)
-    <select id="parcela-selector"></select>
-  </label>
-  <div id="parcela-lecturas"></div>
-  <div id="vision-chat">
-    <div class="chat-cabecera">Bot de la finca · Telegram</div>
-    <div id="chat-mensajes" aria-live="polite"></div>
-    <form id="chat-forma">
-      <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
-      <button type="submit" aria-label="Enviar">➤</button>
-    </form>
+  <div id="vision-lightbox">
+    <figure>
+      <canvas id="vision-lightbox-canvas" width="900" height="560"></canvas>
+      <figcaption id="vision-lightbox-pie"></figcaption>
+    </figure>
   </div>
-  <canvas id="vision-mapa"></canvas>
-  <div id="vision-dibujo" hidden>
-    <span id="vision-dibujo-info">Haz clic en el mapa para marcar las esquinas.</span>
-    <button id="vision-terminar">Terminar parcela</button>
-    <button id="vision-cancelar">Cancelar</button>
-  </div>
-  <div id="vision-clima"></div>
-  <div id="parcela-camara"></div>
-  <button id="vision-registrar">Registrar mi parcela</button>
-  <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
-    <input type="file" id="vision-archivo" accept="image/*" capture="environment">
-  </label>
-  <div id="vision-diagnostico"></div>
-  <div class="control"><label for="vision-humedad">Humedad del suelo:
-    <b id="vision-humedad-valor">18 %</b></label>
-    <input type="range" id="vision-humedad" min="5" max="50" value="18"></div>
-  <div class="control"><label for="vision-lluvia">Lluvia:
-    <b id="vision-lluvia-valor">0 mm/h</b></label>
-    <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
-</aside>
+</section>
 <aside id="metodo">
   <button class="cerrar" data-cierra="metodo" aria-label="Cerrar">×</button>
   <h2>Método y límites</h2>
@@ -450,6 +634,7 @@
 
 <script src="elio.js"></script>
 <script src="vision.js"></script>
+<script src="monitor.js"></script>
 <script src="../datos/reciente.js"></script>
 <script src="../datos/rotaciones.js"></script>
 <script src="../datos/fincas.js"></script>
@@ -979,8 +1164,10 @@ function animar() {
       destinoCamara = null;
     }
   }
-  controles.update();
-  renderer.render(escena, camara);
+  if (!monitorAbierto) {
+    controles.update();
+    renderer.render(escena, camara);
+  }
   if (primerFrame && escena.children.length > 0) {
     primerFrame = false;
     window.__tierra.listo = true;
@@ -1916,6 +2103,8 @@ function panel(id) {
     const boton = document.getElementById(`${otro}-boton`);
     if (boton) { boton.classList.toggle('activa', otro === id); }
   });
+  // Abrir otra vista cierra el monitoreo: si no, seguiría el reloj y el sondeo.
+  if (id !== 'vision' && monitorAbierto) { cerrarMonitor(); }
   if (id === 'finca') { pintarFinca(); }
   if (id === 'rotaciones') { pintarRotaciones(); }
 }
@@ -2225,22 +2414,39 @@ document.getElementById('elio-enviar').addEventListener('click', () => {
 refrescarDatos().then(() => { if (document.getElementById('finca').classList.contains('visible')) { pintarFinca(); } });
 
 
-// ---------- Mi parcela: parcelas dibujadas sobre el mapa satelital ----------
+// ---------- Mi parcela: monitoreo de la finca (demo tipo Hiroki Tomiyasu) ----------
+// El mapa y el clima son reales (Esri / NASA POWER / ERA5). Las parcelas, los
+// sensores y el techo son una SIMULACIÓN: enseñan cómo funcionaría el producto.
 const PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.parcelas) || [];
 const MAPA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.mapa) || null;
 const FINCA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.finca) || null;
+// Respaldo inerte: si Monitor faltara, el globo y el resto del app siguen vivos.
+const Monitor = window.Monitor || {
+  lecturas: () => [], historial: () => [], resumen: () => 'No tengo ese dato.',
+  estadoRemoto: () => null, fusionar: (e) => e, formatoHora: () => '--:--',
+};
+
 let parcelaId = PARCELAS.length ? PARCELAS[0].id : null;
 let parcelaEstado = null;
+const overrides = {};           // cambios manuales o del bot: {riego, techo, ventilacion, ts, fuente}
+const avisosVistos = new Set();
 let dibujo = { activo: false, puntos: [] };
-let manual = { riego: null, ventilacion: null, techo: null };
 let imagenMapa = null;
 let imagenLista = false;
-
-// Ventana visible del mapa, en metros, centrada en el conjunto de parcelas.
-const VISTA_M = 470;
+let vista = { escala: 0.7, cx: 0, cy: 0 };
+let arrastre = null;
+let monitorAbierto = false;
+let temporizador = null;
+let estadoBot = null;
+let botVisto = null;
+let botConsultado = false;
 
 function parcelaActual() {
   return PARCELAS.find((p) => p.id === parcelaId) || null;
+}
+
+function fincaDeParcelas() {
+  return FINCAS.find((f) => f.id === FINCA_PARCELAS) || FINCAS[0] || null;
 }
 
 function centroParcelas() {
@@ -2249,25 +2455,6 @@ function centroParcelas() {
   const x = puntos.reduce((a, p) => a + p[0], 0) / puntos.length;
   const y = puntos.reduce((a, p) => a + p[1], 0) / puntos.length;
   return { x, y };
-}
-
-function cargarMapa() {
-  if (!MAPA_PARCELAS) { return; }
-  const img = new Image();
-  img.onload = () => { imagenMapa = img; imagenLista = true; pintarVision(); };
-  img.src = `../datos/${MAPA_PARCELAS.archivo}`;
-}
-
-/* Geometría: metros -> píxeles del canvas. */
-function transformacion(canvas) {
-  const ancho = canvas.clientWidth || 366;
-  const alto = canvas.clientHeight || 250;
-  const escala = ancho / VISTA_M;
-  const centro = centroParcelas();
-  return {
-    ancho, alto, escala,
-    aPantalla: (x, y) => [ancho / 2 + (x - centro.x) * escala, alto / 2 + (y - centro.y) * escala],
-  };
 }
 
 function dentroPoligono(x, y, puntos) {
@@ -2309,92 +2496,245 @@ function plantasDeParcela(parcela, maximo = 140) {
   return salida;
 }
 
-function colorParcela(humedad) {
-  if (humedad === null || humedad === undefined) { return 'rgba(126, 151, 173, 0.20)'; }
-  if (humedad < 25) { return 'rgba(255, 180, 84, 0.30)'; }
-  if (humedad > 40) { return 'rgba(53, 214, 255, 0.22)'; }
-  return 'rgba(88, 227, 154, 0.26)';
+function areaHa(puntos) {
+  let s = 0;
+  for (let i = 0; i < puntos.length; i += 1) {
+    const [x1, y1] = puntos[i];
+    const [x2, y2] = puntos[(i + 1) % puntos.length];
+    s += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(s) / 2 / 10000;
 }
 
-function dibujarParcela(parcela, estado) {
+function cargarMapa() {
+  if (!MAPA_PARCELAS) { return; }
+  const img = new Image();
+  img.onload = () => { imagenMapa = img; imagenLista = true; pintarVision(); };
+  img.src = `../datos/${MAPA_PARCELAS.archivo}`;
+}
+
+/* ---------- Cámara del mapa: metros -> píxeles ---------- */
+function cajaMapa() {
+  const caja = document.getElementById('vision-mapa-caja');
+  return {
+    ancho: (caja && caja.clientWidth) || 640,
+    alto: (caja && caja.clientHeight) || 420,
+  };
+}
+
+function ajustarVista() {
+  const { ancho, alto } = cajaMapa();
+  const puntos = PARCELAS.flatMap((p) => p.poligono_m || []);
+  if (!puntos.length) { vista = { escala: 1, cx: 0, cy: 0 }; return; }
+  const xs = puntos.map((p) => p[0]);
+  const ys = puntos.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const margen = 46;
+  const escala = Math.max(0.2, Math.min(
+    (ancho - 2 * margen) / Math.max(1, x1 - x0),
+    (alto - 2 * margen) / Math.max(1, y1 - y0),
+  ));
+  vista = { escala, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+  limitarVista();
+}
+
+/* La foto satelital solo cubre su propio cuadrado: no dejamos que el mapa
+   muestre vacío negro a los lados al mover o alejar. */
+function limitarVista() {
+  if (!MAPA_PARCELAS) { return; }
+  const { ancho, alto } = cajaMapa();
+  const mitad = (MAPA_PARCELAS.ancho_px * MAPA_PARCELAS.metros_por_pixel) / 2;
+  const mx = Math.max(0, mitad - ancho / (2 * vista.escala));
+  const my = Math.max(0, mitad - alto / (2 * vista.escala));
+  vista.cx = Math.max(-mx, Math.min(mx, vista.cx));
+  vista.cy = Math.max(-my, Math.min(my, vista.cy));
+}
+
+function aPantalla(x, y) {
+  const { ancho, alto } = cajaMapa();
+  return [ancho / 2 + (x - vista.cx) * vista.escala, alto / 2 + (y - vista.cy) * vista.escala];
+}
+
+function pantallaAMetros(clientX, clientY) {
   const canvas = document.getElementById('vision-mapa');
+  const caja = canvas.getBoundingClientRect();
+  const ancho = caja.width || 640;
+  const alto = caja.height || 420;
+  return [
+    (clientX - caja.left - ancho / 2) / vista.escala + vista.cx,
+    (clientY - caja.top - alto / 2) / vista.escala + vista.cy,
+  ];
+}
+
+function zoomEn(factor, clientX, clientY) {
+  const canvas = document.getElementById('vision-mapa');
+  const caja = canvas.getBoundingClientRect();
+  const antes = clientX === undefined
+    ? { x: vista.cx, y: vista.cy }
+    : (() => { const [x, y] = pantallaAMetros(clientX, clientY); return { x, y }; })();
+  const escala = Math.min(14, Math.max(0.25, vista.escala * factor));
+  if (clientX === undefined) {
+    vista.escala = escala;
+    return;
+  }
+  // Mantener el punto bajo el cursor en su sitio.
+  const dx = (clientX - caja.left - (caja.width || 640) / 2);
+  const dy = (clientY - caja.top - (caja.height || 420) / 2);
+  vista.escala = escala;
+  vista.cx = antes.x - dx / escala;
+  vista.cy = antes.y - dy / escala;
+  limitarVista();
+}
+
+function colorParcela(humedad) {
+  if (humedad === null || humedad === undefined) { return 'rgba(126, 151, 173, 0.22)'; }
+  if (humedad < 25) { return 'rgba(255, 180, 84, 0.34)'; }
+  if (humedad > 40) { return 'rgba(53, 214, 255, 0.24)'; }
+  return 'rgba(88, 227, 154, 0.28)';
+}
+
+/* ---------- Dibujo del mapa ---------- */
+function dibujarMapa(estado) {
+  const canvas = document.getElementById('vision-mapa');
+  if (!canvas) { return; }
+  const { ancho, alto } = cajaMapa();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const { ancho, alto, aPantalla } = transformacion(canvas);
   canvas.width = Math.round(ancho * dpr);
   canvas.height = Math.round(alto * dpr);
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, ancho, alto);
 
-  // 1. Imagen satelital de fondo.
+  // 1. Foto satelital real de fondo (Esri).
   ctx.fillStyle = '#0a1410';
   ctx.fillRect(0, 0, ancho, alto);
   if (imagenLista && MAPA_PARCELAS) {
-    const escala = ancho / VISTA_M;
     const mpp = MAPA_PARCELAS.metros_por_pixel;
-    const centro = centroParcelas();
-    const anchoImg = MAPA_PARCELAS.ancho_px * mpp * escala;
-    const altoImg = MAPA_PARCELAS.alto_px * mpp * escala;
-    // El centro del mapa (0,0 m) cae a la izquierda/arriba según el centro de parcelas.
-    const cx = ancho / 2 - centro.x * escala;
-    const cy = alto / 2 - centro.y * escala;
-    ctx.drawImage(imagenMapa, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
-    // Velo suave para que las líneas se lean sin tapar la imagen.
-    ctx.fillStyle = 'rgba(4, 10, 18, 0.22)';
+    const anchoM = MAPA_PARCELAS.ancho_px * mpp;
+    const altoM = MAPA_PARCELAS.alto_px * mpp;
+    const [cx, cy] = aPantalla(0, 0);
+    ctx.drawImage(imagenMapa, cx - (anchoM * vista.escala) / 2, cy - (altoM * vista.escala) / 2,
+      anchoM * vista.escala, altoM * vista.escala);
+    ctx.fillStyle = 'rgba(4, 10, 18, 0.20)';
     ctx.fillRect(0, 0, ancho, alto);
   }
 
-  // 2. Cada parcela dibujada sobre el campo.
+  // 2. Parcelas encima del campo.
   PARCELAS.forEach((p) => {
     const puntos = (p.poligono_m || []).map(([x, y]) => aPantalla(x, y));
     if (puntos.length < 3) { return; }
     const activa = p.id === parcelaId;
-    const humedad = activa && estado ? estado.humedad : p.humedad_inicial;
-
+    const esEstado = activa && estado ? estado : null;
+    const humedad = esEstado ? esEstado.humedad : p.humedad_inicial;
     ctx.beginPath();
     ctx.moveTo(puntos[0][0], puntos[0][1]);
     puntos.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
     ctx.closePath();
     ctx.fillStyle = colorParcela(humedad);
     ctx.fill();
-
     if (activa && estado && estado.riego) {
-      ctx.fillStyle = 'rgba(53, 214, 255, 0.30)';
+      ctx.fillStyle = 'rgba(53, 214, 255, 0.22)';
       ctx.fill();
     }
-    if (activa && estado && estado.ventilacion) {
-      ctx.fillStyle = 'rgba(88, 227, 154, 0.20)';
+    if (activa && estado && estado.techo) {
+      // Techo (plástico) cerrado: rayas suaves sobre la parcela.
+      ctx.save();
+      ctx.clip();
+      ctx.strokeStyle = 'rgba(220, 233, 245, 0.16)';
+      ctx.lineWidth = 1;
+      for (let i = -alto; i < ancho + alto; i += 9) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0); ctx.lineTo(i + alto, alto);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(200, 220, 235, 0.16)';
       ctx.fill();
+      ctx.restore();
     }
-    ctx.lineWidth = activa ? 2.4 : 1.2;
+    ctx.lineWidth = activa ? 2.6 : 1.2;
     ctx.strokeStyle = activa ? '#dce9f5' : 'rgba(220, 233, 245, 0.55)';
     ctx.setLineDash(activa ? [] : [4, 4]);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Etiqueta con fondo para que se lea sobre la foto.
+    // Etiqueta legible sobre la foto.
     const [ex, ey] = puntos[0];
-    const texto = p.nombre;
-    ctx.font = '600 10px "Segoe UI", system-ui, sans-serif';
+    const texto = `${p.nombre} · ${p.cultivo}`;
+    ctx.font = '600 11px "Segoe UI", system-ui, sans-serif';
     const anchoTexto = ctx.measureText(texto).width;
-    ctx.fillStyle = activa ? 'rgba(4, 7, 13, 0.85)' : 'rgba(4, 7, 13, 0.62)';
-    ctx.fillRect(ex - 2, ey - 15, anchoTexto + 8, 13);
-    ctx.fillStyle = activa ? '#35d6ff' : 'rgba(220, 233, 245, 0.85)';
+    ctx.fillStyle = activa ? 'rgba(4, 7, 13, 0.88)' : 'rgba(4, 7, 13, 0.66)';
+    ctx.fillRect(ex - 2, ey - 17, anchoTexto + 9, 15);
+    ctx.fillStyle = activa ? '#35d6ff' : 'rgba(220, 233, 245, 0.88)';
     ctx.fillText(texto, ex + 2, ey - 5);
+
+    // Techo cerrado: rótulo en el centro.
+    if (esEstado && esEstado.techo) {
+      const [mx, my] = aPantalla(
+        (Math.min(...(p.poligono_m || [[0, 0]]).map((q) => q[0])) + Math.max(...(p.poligono_m || [[0, 0]]).map((q) => q[0]))) / 2,
+        (Math.min(...(p.poligono_m || [[0, 0]]).map((q) => q[1])) + Math.max(...(p.poligono_m || [[0, 0]]).map((q) => q[1]))) / 2,
+      );
+      ctx.font = '700 9px "Segoe UI", system-ui, sans-serif';
+      const t = 'TECHO CERRADO';
+      const anchoT = ctx.measureText(t).width;
+      ctx.fillStyle = 'rgba(4, 7, 13, 0.8)';
+      ctx.fillRect(mx - anchoT / 2 - 3, my - 7, anchoT + 6, 13);
+      ctx.fillStyle = '#dce9f5';
+      ctx.fillText(t, mx - anchoT / 2, my + 3);
+    }
   });
 
-  // 2b. Plantas georreferenciadas de la parcela activa (muestra).
+  // 3. Plantas georreferenciadas de la parcela activa (muestra).
   const activaP = parcelaActual();
   if (activaP) {
-    const plantas = plantasDeParcela(activaP);
-    ctx.fillStyle = 'rgba(88, 227, 154, 0.6)';
-    plantas.forEach(([x, y]) => {
+    ctx.fillStyle = 'rgba(120, 240, 170, 0.85)';
+    plantasDeParcela(activaP, 120).forEach(([x, y]) => {
       const [px, py] = aPantalla(x, y);
-      ctx.fillRect(px - 0.8, py - 0.8, 1.7, 1.7);
+      ctx.fillRect(px - 0.9, py - 0.9, 1.9, 1.9);
     });
   }
 
-  // 2c. Polígono que se está registrando.
+  // 4. Sensores y cámara de cada parcela.
+  PARCELAS.forEach((p) => {
+    const activa = p.id === parcelaId;
+    (p.sensores || []).forEach((sensor) => {
+      const [sx, sy] = aPantalla(sensor.x_m, sensor.y_m);
+      const humedad = activa && estado ? estado.humedad : p.humedad_inicial;
+      const color = activa && estado && estado.riego ? '#35d6ff'
+        : ((humedad ?? 30) < 25 ? '#ffb454' : '#58e39a');
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(53, 214, 255, 0.16)';
+      ctx.arc(sx, sy, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.arc(sx, sy, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(4, 7, 13, 0.9)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.font = '9px ui-monospace, Consolas, monospace';
+      ctx.fillStyle = 'rgba(230, 240, 250, 0.95)';
+      ctx.fillText(sensor.id, sx + 9, sy + 3);
+    });
+    // Cámara: pequeño icono en la esquina superior del polígono.
+    const punto = (p.poligono_m || [])[0];
+    if (punto) {
+      const [cx, cy] = aPantalla(punto[0] + 8, punto[1] - 8);
+      ctx.fillStyle = 'rgba(4, 7, 13, 0.75)';
+      ctx.strokeStyle = activa ? '#35d6ff' : 'rgba(220, 233, 245, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(cx - 5, cy - 3.5, 8, 7);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 3, cy - 2); ctx.lineTo(cx + 6, cy - 4);
+      ctx.lineTo(cx + 6, cy + 4); ctx.lineTo(cx + 3, cy + 2);
+      ctx.closePath(); ctx.fillStyle = ctx.strokeStyle; ctx.fill();
+    }
+  });
+
+  // 5. Polígono que se está registrando.
   if (dibujo.activo && dibujo.puntos.length) {
     ctx.beginPath();
     dibujo.puntos.forEach(([x, y], i) => {
@@ -2415,67 +2755,49 @@ function dibujarParcela(parcela, estado) {
     });
   }
 
-  // 3. Sensores de la parcela activa.
-  const activa = parcelaActual();
-  if (activa) {
-    (activa.sensores || []).forEach((sensor) => {
-      const [sx, sy] = aPantalla(sensor.x_m, sensor.y_m);
-      const color = estado && estado.riego ? '#35d6ff'
-        : ((estado ? estado.humedad : activa.humedad_inicial) < 25 ? '#ffb454' : '#58e39a');
-      // halo
-      ctx.beginPath();
-      ctx.fillStyle = 'rgba(53, 214, 255, 0.18)';
-      ctx.arc(sx, sy, 9, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.arc(sx, sy, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(4, 7, 13, 0.9)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.font = '9px ui-monospace, Consolas, monospace';
-      ctx.fillStyle = 'rgba(220, 233, 245, 0.92)';
-      ctx.fillText(sensor.id, sx + 8, sy + 3);
-    });
-  }
-
-  // 4. Escala y atribución.
-  const escala = ancho / VISTA_M;
-  const metros = 100;
-  const largo = metros * escala;
-  ctx.strokeStyle = 'rgba(220, 233, 245, 0.8)';
+  // 6. Escala.
+  const candidatos = [25, 50, 100, 200, 250, 500, 1000];
+  const metros = candidatos.find((m) => m * vista.escala >= 70) || 100;
+  const largo = metros * vista.escala;
+  ctx.strokeStyle = 'rgba(220, 233, 245, 0.85)';
   ctx.lineWidth = 1.5;
   ctx.beginPath();
-  ctx.moveTo(10, alto - 14); ctx.lineTo(10 + largo, alto - 14);
-  ctx.moveTo(10, alto - 18); ctx.lineTo(10, alto - 10);
-  ctx.moveTo(10 + largo, alto - 18); ctx.lineTo(10 + largo, alto - 10);
+  ctx.moveTo(12, alto - 26); ctx.lineTo(12 + largo, alto - 26);
+  ctx.moveTo(12, alto - 30); ctx.lineTo(12, alto - 22);
+  ctx.moveTo(12 + largo, alto - 30); ctx.lineTo(12 + largo, alto - 22);
   ctx.stroke();
   ctx.font = '9px ui-monospace, Consolas, monospace';
-  ctx.fillStyle = 'rgba(220, 233, 245, 0.85)';
-  ctx.fillText(`${metros} m`, 14, alto - 18);
-  if (MAPA_PARCELAS) {
-    ctx.fillStyle = 'rgba(220, 233, 245, 0.65)';
-    ctx.textAlign = 'right';
-    ctx.fillText('© Esri World Imagery', ancho - 6, alto - 5);
-    ctx.textAlign = 'left';
-  }
+  ctx.fillStyle = 'rgba(220, 233, 245, 0.9)';
+  ctx.fillText(`${metros} m`, 16, alto - 30);
 }
 
-function pintarVision() {
+/* ---------- Estado y lecturas de la parcela activa ---------- */
+function humedadSlider() {
+  const campo = document.getElementById('vision-humedad');
   const parcela = parcelaActual();
-  const lecturas = document.getElementById('parcela-lecturas');
-  const camara = document.getElementById('parcela-camara');
-  const clima = document.getElementById('vision-clima');
-  if (!parcela) {
-    lecturas.innerHTML = '<div>Sin parcelas</div>';
-    camara.textContent = '';
-    clima.textContent = '';
-    return;
-  }
-  const humedad = Number(document.getElementById('vision-humedad').value);
-  const lluvia = Number(document.getElementById('vision-lluvia').value);
+  const valor = campo ? Number(campo.value) : (parcela && parcela.humedad_inicial) || 25;
+  return valor;
+}
 
+function lluviaSlider() {
+  const campo = document.getElementById('vision-lluvia');
+  return campo ? Number(campo.value) : 0;
+}
+
+function lecturasActuales(parcela, estado, ahora) {
+  return Monitor.lecturas(parcela, ahora || Date.now(), {
+    humedad: humedadSlider(),
+    lluvia_mm_h: lluviaSlider(),
+    riego: Boolean(estado && estado.riego),
+    techo: Boolean(estado && estado.techo),
+  });
+}
+
+/* Estado automático (riego/techo/ventilación) + lo que hayan pedido a mano o
+   por Telegram. El override más reciente gana. */
+function calcularEstado(parcela) {
+  const humedad = humedadSlider();
+  const lluvia = lluviaSlider();
   const entrada = {
     id: parcela.id, nombre: parcela.nombre, cultivo: parcela.cultivo,
     humedad, area_ha: parcela.area_ha, sensores: (parcela.sensores || []).length,
@@ -2485,113 +2807,704 @@ function pintarVision() {
     ventilacion: parcelaEstado ? parcelaEstado.ventilacion : false,
   };
   const salida = Vision.evaluar([entrada], { lluvia_mm_h: lluvia });
-  parcelaEstado = { ...salida.parcelas[0] };
-  ['riego', 'ventilacion', 'techo'].forEach((clave) => {
-    if (manual[clave] !== null) { parcelaEstado[clave] = manual[clave]; }
-  });
-
-
-  document.getElementById('vision-humedad-valor').textContent = `${humedad} %`;
-  document.getElementById('vision-lluvia-valor').textContent = `${lluvia} mm/h`;
-  dibujarParcela(parcela, parcelaEstado);
-
-  const seco = humedad < Vision.UMBRAL_RIEGO;
-  lecturas.innerHTML = `
-    <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${humedad}%</b></div>
-    <div>TEMPERATURA<b>${parcela.temperatura}°</b></div>
-    <div class="${parcelaEstado.riego ? 'bien' : ''}">RIEGO<b>${parcelaEstado.riego ? 'ON' : 'off'}</b></div>
-    <div class="${parcelaEstado.ventilacion ? 'bien' : ''}">VENTILA<b>${parcelaEstado.ventilacion ? 'ON' : 'off'}</b></div>
-    <div class="${parcelaEstado.techo ? 'bien' : ''}">TECHO<b>${parcelaEstado.techo ? 'cerr.' : 'abierto'}</b></div>
-    <div>LLUVIA<b>${lluvia}</b><span style="font-size:8px">mm/h</span></div>
-    <div>PLANTAS<b>${parcela.plantas_georreferenciadas ?? '—'}</b></div>
-    <div>ÁREA<b>${parcela.area_ha}</b><span style="font-size:8px">ha</span></div>`;
-
-  // Clima de la finca desde el snapshot (Open-Meteo). Honesto: es previsión, no sensor.
-  const bloque = (RECIENTE && (RECIENTE.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
-  const manana = bloque && (bloque.pronostico || [])[0];
-  if (manana) {
-    clima.innerHTML = `<b>Previsión</b> ${manana.fecha.slice(8)}/${manana.fecha.slice(5, 7)}: `
-      + `lluvia ${manana.lluvia_mm ?? '–'} mm · ${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C`
-      + ` · Fuente: Open-Meteo (no NASA)`;
-  } else {
-    clima.textContent = 'Previsión: sin dato.';
+  const estado = { ...salida.parcelas[0], humedad };
+  const ov = overrides[parcela.id];
+  if (ov) {
+    ['riego', 'techo', 'ventilacion'].forEach((clave) => {
+      if (typeof ov[clave] === 'boolean') { estado[clave] = ov[clave]; }
+    });
   }
+  return { estado, avisos: salida.avisos };
+}
 
-  camara.innerHTML = `<b>Cámara</b> · última captura: ${parcela.camara}`;
+function ponerOverride(parcela, clave, valor) {
+  if (!parcela) { return; }
+  overrides[parcela.id] = {
+    ...(overrides[parcela.id] || {}),
+    [clave]: valor,
+    ts: Date.now(),
+    fuente: 'panel',
+  };
+}
 
-  // Los cambios de los actuadores se avisan por el chat, como haría el bot.
-  salida.avisos.forEach((aviso) => {
-    if (typeof burbuja === 'function' && document.getElementById('chat-mensajes')) {
-      burbuja(aviso, 'bot');
-    }
+/* ---------- Panel de monitoreo ---------- */
+function pintarHistorial(parcela, sensor) {
+  const canvas = document.getElementById('vision-historial');
+  if (!canvas) { return; }
+  const ancho = canvas.clientWidth || 380;
+  const alto = 54;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(ancho * dpr);
+  canvas.height = Math.round(alto * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, ancho, alto);
+  const serie = Monitor.historial(parcela, Date.now(), {
+    humedad: humedadSlider(), riego: Boolean(parcelaEstado && parcelaEstado.riego),
+  });
+  if (!serie.length) { return; }
+  const valores = serie.map((p) => p.valor);
+  const minimo = Math.min(...valores) - 1;
+  const maximo = Math.max(...valores) + 1;
+  const x = (i) => 4 + (i / (serie.length - 1)) * (ancho - 8);
+  const y = (v) => alto - 8 - ((v - minimo) / (maximo - minimo)) * (alto - 16);
+  ctx.beginPath();
+  serie.forEach((p, i) => {
+    if (i === 0) { ctx.moveTo(x(i), y(p.valor)); } else { ctx.lineTo(x(i), y(p.valor)); }
+  });
+  ctx.strokeStyle = '#35d6ff';
+  ctx.lineWidth = 1.6;
+  ctx.stroke();
+  ctx.lineTo(x(serie.length - 1), alto);
+  ctx.lineTo(x(0), alto);
+  ctx.closePath();
+  const degradado = ctx.createLinearGradient(0, 0, 0, alto);
+  degradado.addColorStop(0, 'rgba(53, 214, 255, 0.30)');
+  degradado.addColorStop(1, 'rgba(53, 214, 255, 0)');
+  ctx.fillStyle = degradado;
+  ctx.fill();
+  ctx.font = '8px ui-monospace, Consolas, monospace';
+  ctx.fillStyle = 'rgba(126, 151, 173, 0.9)';
+  ctx.fillText('24 h', 4, 10);
+  ctx.textAlign = 'right';
+  ctx.fillText(`${sensor ? sensor.humedad : valores[valores.length - 1]} %`, ancho - 4, 10);
+  ctx.textAlign = 'left';
+}
+
+function pintarSensores(parcela, lecturas) {
+  const caja = document.getElementById('vision-sensores');
+  if (!caja) { return; }
+  caja.innerHTML = lecturas.map((s) => `
+    <div class="sensor-fila">
+      <span class="id"><span class="punto"></span>${s.id}</span>
+      <span><em>suelo</em><b>${s.humedad}<small>%</small></b></span>
+      <span><em>aire</em><b>${s.temperatura}<small>°C</small></b></span>
+      <span><em>batería</em><b>${s.bateria}<small>V</small></b></span>
+    </div>`).join('');
+}
+
+function pintarClima() {
+  const caja = document.getElementById('vision-clima');
+  if (!caja) { return; }
+  const bloque = (RECIENTE && (RECIENTE.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
+  if (!bloque) {
+    caja.innerHTML = '<div class="fuente">Clima: sin dato cargado.</div>';
+    return;
+  }
+  const lluvia = bloque.lluvia || {};
+  const temp = bloque.temperatura || {};
+  const humedad = bloque.humedad_superficial || {};
+  const manana = (bloque.pronostico || [])[0] || {};
+  const pct = lluvia.pct;
+  const delta = temp.delta;
+  caja.innerHTML = `
+    <div>LLUVIA 30 D<b>${lluvia['30d_mm'] ?? '–'} mm</b>
+      <span>${pct === null || pct === undefined ? 'sin normal' : `${pct > 0 ? '+' : ''}${Math.round(pct)} % vs normal`}</span></div>
+    <div>TEMPERATURA MEDIA<b>${temp.media ?? '–'} °C</b>
+      <span>${delta === null || delta === undefined ? 'sin normal' : `${delta > 0 ? '+' : ''}${delta} °C vs normal`}</span></div>
+    <div>HUMEDAD SUPERFICIAL<b>${humedad.valor ?? '–'} m³/m³</b>
+      <span>capa 0–7 cm</span></div>
+    <div>MAÑANA<b>${manana.lluvia_mm ?? '–'} mm</b>
+      <span>${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C</span></div>
+    <div class="fuente">Fuente: Open-Meteo / ERA5-Land (no NASA), ventana
+      ${(RECIENTE.ventana || {}).inicio || '–'} a ${(RECIENTE.ventana || {}).fin || '–'}.
+      La humedad del suelo de los sensores es simulada; esta de arriba es de modelo.</div>`;
+}
+
+function pintarActuadores(parcela, estado) {
+  const caja = document.getElementById('vision-actuadores');
+  if (!caja) { return; }
+  if (caja.dataset.parcela !== parcela.id) {
+    caja.dataset.parcela = parcela.id;
+    const filas = [
+      { clave: 'riego', nombre: 'Riego', on: 'ON', off: 'OFF' },
+      { clave: 'techo', nombre: 'Techo', on: 'cerrar', off: 'abrir' },
+      { clave: 'ventilacion', nombre: 'Ventila', on: 'ON', off: 'OFF' },
+    ];
+    caja.innerHTML = filas.map((fila) => `
+      <div class="actuador" data-fila="${fila.clave}">
+        <span class="nombre">${fila.nombre}</span>
+        <span class="valor"></span>
+        <button data-act="${fila.clave}" data-val="on">${fila.on}</button>
+        <button data-act="${fila.clave}" data-val="off">${fila.off}</button>
+        <button data-act="${fila.clave}" data-val="auto" title="Volver al automático">auto</button>
+      </div>`).join('');
+    caja.querySelectorAll('.actuador').forEach((fila) => {
+      fila.querySelectorAll('button').forEach((boton) => {
+        boton.addEventListener('click', () => {
+          const clave = fila.dataset.fila;
+          const pedido = boton.dataset.val;
+          if (pedido === 'auto') {
+            if (overrides[parcela.id]) { delete overrides[parcela.id][clave]; }
+          } else {
+            ponerOverride(parcela, clave, pedido === 'on');
+          }
+          const nombre = { riego: 'Riego', techo: 'Techo', ventilacion: 'Ventilación' }[clave] || clave;
+          burbuja(pedido === 'auto' ? `${nombre}: vuelve a automático.`
+            : `${nombre}: ${pedido === 'on' ? 'encendido' : 'apagado'}.`, 'bot');
+          pintarVision();
+        });
+      });
+    });
+  }
+  const ov = overrides[parcela.id] || {};
+  caja.querySelectorAll('.actuador').forEach((fila) => {
+    const clave = fila.dataset.fila;
+    const activo = Boolean(estado[clave]);
+    const manualActivo = typeof ov[clave] === 'boolean';
+    const origen = !manualActivo ? 'auto' : (ov.fuente === 'telegram' ? 'telegram' : 'manual');
+    fila.querySelector('.valor').textContent = (clave === 'techo'
+      ? (activo ? 'cerrado' : 'abierto') : (activo ? 'ON' : 'off'))
+      + ' · ' + origen;
+    fila.querySelectorAll('button').forEach((boton) => {
+      const pedido = boton.dataset.val;
+      const esActivo = pedido === 'auto' ? !manualActivo : (pedido === 'on') === activo;
+      boton.classList.toggle('activo', esActivo);
+    });
   });
 }
 
-function elegirParcela(id) {
+function pintarLecturas(parcela, sensor, estado, lecturas) {
+  const caja = document.getElementById('parcela-lecturas');
+  if (!caja) { return; }
+  const lluvia = lluviaSlider();
+  const seco = sensor.humedad < Vision.UMBRAL_RIEGO;
+  caja.innerHTML = `
+    <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${sensor.humedad}<small style="font-size:9px"> %</small></b></div>
+    <div>TEMPERATURA<b>${sensor.temperatura}<small style="font-size:9px"> °C</small></b></div>
+    <div class="${estado.riego ? 'bien' : ''}">RIEGO<b>${estado.riego ? 'ON' : 'off'}</b></div>
+    <div class="${estado.ventilacion ? 'bien' : ''}">VENTILA<b>${estado.ventilacion ? 'ON' : 'off'}</b></div>
+    <div class="${estado.techo ? 'bien' : ''}">TECHO<b>${estado.techo ? 'cerr.' : 'abierto'}</b></div>
+    <div>LLUVIA<b>${lluvia}<small style="font-size:8px"> mm/h</small></b></div>
+    <div>PLANTAS<b>${parcela.plantas_georreferenciadas ?? '—'}</b></div>
+    <div>ÁREA<b>${parcela.area_ha}<small style="font-size:8px"> ha</small></b></div>`;
+}
+
+/* ---------- Fotos: satélite real recortado + cámara simulada ---------- */
+function dibujarSatelite(ctx, ancho, alto, parcela) {
+  ctx.clearRect(0, 0, ancho, alto);
+  ctx.fillStyle = '#0a1410';
+  ctx.fillRect(0, 0, ancho, alto);
+  const puntos = parcela.poligono_m || [];
+  if (!imagenLista || !MAPA_PARCELAS || !puntos.length) {
+    ctx.fillStyle = '#7e97ad';
+    ctx.font = '13px "Segoe UI", system-ui, sans-serif';
+    ctx.fillText('Mapa satelital no disponible', 14, alto / 2);
+    return;
+  }
+  const xs = puntos.map((p) => p[0]);
+  const ys = puntos.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const margen = Math.max(14, (x1 - x0) * 0.35, (y1 - y0) * 0.35);
+  let anchoM = (x1 - x0) + 2 * margen;
+  let altoM = (y1 - y0) + 2 * margen;
+  const proporcion = ancho / alto;
+  if (anchoM / altoM > proporcion) { altoM = anchoM / proporcion; } else { anchoM = altoM * proporcion; }
+  const centroX = (x0 + x1) / 2;
+  const centroY = (y0 + y1) / 2;
+  const mpp = MAPA_PARCELAS.metros_por_pixel;
+  const escala = ancho / anchoM;
+  const sx = (centroX - anchoM / 2) / mpp + MAPA_PARCELAS.ancho_px / 2;
+  const sy = (centroY - altoM / 2) / mpp + MAPA_PARCELAS.alto_px / 2;
+  const sw = anchoM / mpp;
+  const sh = altoM / mpp;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, ancho, alto);
+  ctx.clip();
+  ctx.drawImage(imagenMapa, sx, sy, sw, sh, 0, 0, ancho, alto);
+  ctx.restore();
+  // Contorno real de la parcela sobre la foto.
+  ctx.beginPath();
+  puntos.forEach(([x, y], i) => {
+    const px = (x - (centroX - anchoM / 2)) * escala;
+    const py = (y - (centroY - altoM / 2)) * escala;
+    if (i === 0) { ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+  });
+  ctx.closePath();
+  ctx.strokeStyle = 'rgba(53, 214, 255, 0.95)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(4, 10, 18, 0.55)';
+  ctx.fillRect(0, alto - 20, ancho, 20);
+  ctx.fillStyle = 'rgba(220, 233, 245, 0.9)';
+  ctx.font = '10px ui-monospace, Consolas, monospace';
+  ctx.fillText('© Esri World Imagery · no NASA', 8, alto - 6);
+}
+
+/* Foto de cultivo simulada: se dibuja, no se descarga. La app lo dice. */
+function dibujarCultivo(ctx, ancho, alto, parcela, ahora) {
+  const cultivar = String(parcela.cultivo || '').toLowerCase();
+  const azarBase = Monitor.semilla(parcela.id);
+  let semilla = azarBase;
+  const azar = () => {
+    semilla = (semilla * 1103515245 + 12345) % 2147483648;
+    return semilla / 2147483648;
+  };
+  // Suelo.
+  const suelo = ctx.createLinearGradient(0, 0, 0, alto);
+  suelo.addColorStop(0, '#4a3620');
+  suelo.addColorStop(0.55, '#3a2a16');
+  suelo.addColorStop(1, '#241a0e');
+  ctx.fillStyle = suelo;
+  ctx.fillRect(0, 0, ancho, alto);
+  // Textura: terrones y paja.
+  for (let i = 0; i < 900; i += 1) {
+    const x = azar() * ancho;
+    const y = azar() * alto;
+    const tam = 0.6 + azar() * 2.4;
+    ctx.fillStyle = azar() > 0.5 ? 'rgba(20, 12, 5, 0.45)' : 'rgba(150, 120, 80, 0.28)';
+    ctx.fillRect(x, y, tam, tam);
+  }
+  // Surcos en perspectiva.
+  const surcos = 5;
+  for (let s = 0; s < surcos; s += 1) {
+    const y = alto * (0.18 + (s / surcos) * 0.78);
+    ctx.beginPath();
+    ctx.moveTo(-10, y + alto * 0.05);
+    ctx.quadraticCurveTo(ancho * 0.5, y - alto * 0.02, ancho + 10, y + alto * 0.05);
+    ctx.strokeStyle = 'rgba(16, 10, 4, 0.35)';
+    ctx.lineWidth = alto * 0.035;
+    ctx.stroke();
+  }
+  const paleta = {
+    yuca: ['#1e5a24', '#2f7a34', '#4c9a44'],
+    frijol: ['#2c5e1e', '#3f7d29', '#5fa53a'],
+    maíz: ['#33591c', '#517d2a', '#7fa63f'],
+  }[cultivar] || ['#2f5d2a', '#3f7a36', '#5b8f45'];
+
+  function hojaYuca(x, y, tam, giro, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(giro);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(tam * 0.35, -tam * 0.16, tam, 0);
+    ctx.quadraticCurveTo(tam * 0.35, tam * 0.16, 0, 0);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(12, 35, 12, 0.5)';
+    ctx.lineWidth = Math.max(0.5, tam * 0.02);
+    ctx.beginPath();
+    ctx.moveTo(0, 0); ctx.lineTo(tam, 0);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function hojaMaiz(x, y, altoHoja, giro, color) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(giro);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(-altoHoja * 0.25, -altoHoja * 0.6, 0, -altoHoja);
+    ctx.quadraticCurveTo(altoHoja * 0.14, -altoHoja * 0.55, 0, 0);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function mata(x, y, tam) {
+    const color = paleta[Math.floor(azar() * paleta.length)];
+    // Sombra en el suelo: da volumen sin fingir una foto.
+    ctx.beginPath();
+    ctx.ellipse(x + tam * 0.12, y + tam * 0.05, tam * 0.42, tam * 0.12, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(8, 5, 2, 0.35)';
+    ctx.fill();
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate((azar() - 0.5) * 0.35);
+    ctx.translate(-x, -y);
+    if (cultivar === 'maíz' || cultivar === 'maiz') {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y - tam * 0.7);
+      ctx.strokeStyle = paleta[0];
+      ctx.lineWidth = Math.max(1, tam * 0.05);
+      ctx.stroke();
+      for (let i = 0; i < 5; i += 1) {
+        const giro = (i - 2) * 0.42 + (azar() - 0.5) * 0.15;
+        hojaMaiz(x, y - tam * (0.18 + i * 0.1), tam * (0.75 + azar() * 0.4), giro, color);
+      }
+    } else if (cultivar === 'frijol') {
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + (azar() - 0.5) * tam * 0.1, y - tam * 0.45);
+      ctx.strokeStyle = paleta[0];
+      ctx.lineWidth = Math.max(0.8, tam * 0.035);
+      ctx.stroke();
+      for (let i = 0; i < 3; i += 1) {
+        const bx = x + (azar() - 0.5) * tam * 0.35;
+        const by = y - tam * (0.2 + azar() * 0.35);
+        ctx.beginPath();
+        ctx.ellipse(bx, by, tam * 0.22, tam * 0.12, (azar() - 0.5) * 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = paleta[1 + (i % 2)];
+        ctx.fill();
+      }
+    } else {
+      // Yuca y demás: hojas palmeadas.
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x, y - tam * 0.28);
+      ctx.strokeStyle = '#5a4426';
+      ctx.lineWidth = Math.max(1, tam * 0.045);
+      ctx.stroke();
+      const hojas = 5 + Math.floor(azar() * 3);
+      for (let i = 0; i < hojas; i += 1) {
+        const giro = -Math.PI / 2 + (i - (hojas - 1) / 2) * 0.55 + (azar() - 0.5) * 0.16;
+        hojaYuca(x, y - tam * 0.28, tam * (0.55 + azar() * 0.3), giro, color);
+      }
+    }
+    // Hoja amarillenta ocasional (la foto no diagnostica: solo se ve).
+    if (azar() > 0.86) {
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(214, 190, 70, 0.75)';
+      ctx.ellipse(x + tam * 0.12, y - tam * 0.34, tam * 0.1, tam * 0.05, azar(), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  for (let s = 0; s < surcos; s += 1) {
+    const filaY = alto * (0.20 + (s / surcos) * 0.74);
+    const tam = alto * (0.10 + (s / surcos) * 0.06);
+    const cantidad = 6 + s;
+    for (let k = 0; k < cantidad; k += 1) {
+      const x = (k + 0.5 + (azar() - 0.5) * 0.4) * (ancho / cantidad);
+      const y = filaY + (azar() - 0.5) * alto * 0.04;
+      mata(x, y, tam * (0.8 + azar() * 0.4));
+    }
+  }
+  // Sol de la tarde y viñeta: le da aspecto de captura de cámara.
+  const sol = ctx.createRadialGradient(ancho * 0.82, alto * 0.12, 10, ancho * 0.82, alto * 0.12, ancho * 0.7);
+  sol.addColorStop(0, 'rgba(255, 238, 190, 0.34)');
+  sol.addColorStop(0.5, 'rgba(255, 210, 130, 0.08)');
+  sol.addColorStop(1, 'rgba(255, 210, 130, 0)');
+  ctx.fillStyle = sol;
+  ctx.fillRect(0, 0, ancho, alto);
+  const vinate = ctx.createRadialGradient(ancho / 2, alto / 2, alto * 0.2, ancho / 2, alto / 2, ancho * 0.75);
+  vinate.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vinate.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+  ctx.fillStyle = vinate;
+  ctx.fillRect(0, 0, ancho, alto);
+  // Marca de agua: es una foto generada, no una cámara real.
+  ctx.fillStyle = 'rgba(4, 10, 18, 0.6)';
+  ctx.fillRect(0, alto - 20, ancho, 20);
+  ctx.fillStyle = 'rgba(255, 180, 84, 0.95)';
+  ctx.font = '10px ui-monospace, Consolas, monospace';
+  ctx.fillText(`SIMULADA · ${parcela.nombre} · ${parcela.cultivo}`, 8, alto - 6);
+  ctx.textAlign = 'right';
+  ctx.fillStyle = 'rgba(220, 233, 245, 0.8)';
+  ctx.fillText(Monitor.formatoHora(ahora), ancho - 8, alto - 6);
+  ctx.textAlign = 'left';
+}
+
+function pintarFoto(canvas, tipo, parcela) {
+  if (!canvas || !parcela) { return; }
+  const ancho = canvas.width || 480;
+  const alto = canvas.height || 300;
+  const ctx = canvas.getContext('2d');
+  if (tipo === 'satelite') { dibujarSatelite(ctx, ancho, alto, parcela); } else { dibujarCultivo(ctx, ancho, alto, parcela, Date.now()); }
+}
+
+let fotosPintadas = 0;
+let fotosConMapa = false;
+function pintarFotos(parcela) {
+  const caja = document.getElementById('vision-fotos');
+  if (!caja || !parcela) { return; }
+  if (caja.dataset.parcela !== parcela.id) {
+    caja.dataset.parcela = parcela.id;
+    fotosPintadas = 0;
+    caja.innerHTML = `
+      <button class="foto-mini" data-foto="satelite" title="Ampliar foto satelital">
+        <canvas id="foto-satelite" width="480" height="300"></canvas>
+        <span><b>Satélite</b>Esri World Imagery (real, no NASA)</span>
+      </button>
+      <button class="foto-mini" data-foto="cultivo" title="Ampliar foto de la cámara">
+        <canvas id="foto-cultivo" width="480" height="300"></canvas>
+        <span><b>Cámara</b>imagen simulada por la demo</span>
+      </button>`;
+    caja.querySelectorAll('button[data-foto]').forEach((boton) => {
+      boton.addEventListener('click', () => abrirFoto(boton.dataset.foto));
+    });
+  }
+  // La cámara simulada se "actualiza" cada 30 s; el satélite no cambia. Si la
+  // foto se pintó antes de que cargara el mapa, se repinta en cuanto llega.
+  if (Date.now() - fotosPintadas > 30000 || (imagenLista && !fotosConMapa)) {
+    pintarFoto(document.getElementById('foto-satelite'), 'satelite', parcela);
+    pintarFoto(document.getElementById('foto-cultivo'), 'cultivo', parcela);
+    fotosPintadas = Date.now();
+    fotosConMapa = imagenLista;
+  }
+}
+
+function abrirFoto(tipo) {
+  const parcela = parcelaActual();
+  const caja = document.getElementById('vision-lightbox');
+  const canvas = document.getElementById('vision-lightbox-canvas');
+  const pie = document.getElementById('vision-lightbox-pie');
+  if (!parcela || !caja || !canvas) { return; }
+  const ctx = canvas.getContext('2d');
+  if (tipo === 'satelite') {
+    dibujarSatelite(ctx, canvas.width, canvas.height, parcela);
+    pie.innerHTML = `<b>${parcela.nombre} desde el satélite.</b> Imagen real de Esri World Imagery`
+      + ' (no NASA) recortada sobre el contorno de la parcela. El contorno y la forma son'
+      + ' simulados; el suelo que se ve debajo es real.';
+  } else {
+    dibujarCultivo(ctx, canvas.width, canvas.height, parcela, Date.now());
+    pie.innerHTML = `<b>Foto de la cámara de campo.</b> Imagen simulada, dibujada por la demo:`
+      + ' no es una foto real ni un diagnóstico. Cuando haya cámara, la app analizará color y'
+      + ' pedirá confirmación a un agrónomo.';
+  }
+  caja.classList.add('visible');
+}
+
+function cerrarFoto() {
+  const caja = document.getElementById('vision-lightbox');
+  if (caja) { caja.classList.remove('visible'); }
+}
+
+/* ---------- Render general ---------- */
+function pintarVision() {
+  const parcela = parcelaActual();
+  if (!parcela) { return; }
+  const { estado, avisos } = calcularEstado(parcela);
+  parcelaEstado = estado;
+  const lecturas = lecturasActuales(parcela, estado);
+  const sensor = lecturas[0] || { humedad: humedadSlider(), temperatura: parcela.temperatura, humedad_aire: 80, bateria: 4 };
+
+  document.getElementById('vision-humedad-valor').textContent = `${humedadSlider()} %`;
+  document.getElementById('vision-lluvia-valor').textContent = `${lluviaSlider()} mm/h`;
+
+  dibujarMapa(estado);
+  pintarLecturas(parcela, sensor, estado, lecturas);
+  pintarSensores(parcela, lecturas);
+  pintarHistorial(parcela, sensor);
+  pintarClima();
+  pintarActuadores(parcela, estado);
+  const hora = Monitor.formatoHora(Date.now());
+  const cajaHora = document.getElementById('vision-sensores-hora');
+  if (cajaHora) { cajaHora.textContent = `lectura ${hora} · simulado`; }
+  document.getElementById('parcela-camara').innerHTML =
+    `<b>Cámara</b> · última captura: ${parcela.camara || 'sin capturas'}`;
+  pintarFotos(parcela);
+  document.getElementById('vision-reloj').innerHTML =
+    `${hora}<small>hora local</small>`;
+
+  // Avisos del piloto automático, una sola vez cada uno. Si el agricultor (o el
+  // bot) tomó el control de algún actuador, no se narra el automático: se
+  // contradirían en pantalla.
+  if (botConsultado && !overrides[parcela.id]) {
+    avisos.forEach((aviso) => {
+      if (avisosVistos.has(aviso)) { return; }
+      avisosVistos.add(aviso);
+      burbuja(aviso, 'bot');
+    });
+  }
+}
+
+/* ---------- Selección y montaje ---------- */
+function elegirParcela(id, sinRepintar) {
   parcelaId = id;
   parcelaEstado = null;
   const parcela = parcelaActual();
   if (!parcela) { return; }
-  document.getElementById('vision-humedad').value = String(parcela.humedad_inicial ?? 26);
-  document.getElementById('parcela-selector').value = id;
+  const slider = document.getElementById('vision-humedad');
+  if (slider) { slider.value = String(parcela.humedad_inicial ?? 26); }
+  const selector = document.getElementById('parcela-selector');
+  if (selector) { selector.value = id; }
   if (FINCAS.some((f) => f.id === FINCA_PARCELAS)) { fincaId = FINCA_PARCELAS; }
-  pintarVision();
+  const tira = document.getElementById('vision-tira');
+  if (tira) {
+    tira.querySelectorAll('.tarjeta-parcela').forEach((boton) => {
+      boton.classList.toggle('activa', boton.dataset.id === id);
+    });
+  }
+  if (!sinRepintar) { pintarVision(); }
+}
+
+/* Tarjetas y selector: se repintan al registrar una parcela, sin duplicar
+   los escuchadores del mapa. */
+function pintarTira() {
+  const tira = document.getElementById('vision-tira');
+  const selector = document.getElementById('parcela-selector');
+  if (!PARCELAS.length) {
+    if (selector) { selector.innerHTML = '<option>Sin parcelas registradas</option>'; }
+    return;
+  }
+  if (tira) {
+    tira.innerHTML = PARCELAS.map((p) => {
+      const humedad = p.humedad_inicial ?? 30;
+      const color = humedad < 25 ? '#ffb454' : '#58e39a';
+      return `<button class="tarjeta-parcela${p.id === parcelaId ? ' activa' : ''}" data-id="${p.id}">
+        <b><i style="background:${color}"></i>${p.nombre}</b>
+        <span>${p.cultivo} · ${p.area_ha} ha · ${(p.sensores || []).length} sensor(es)</span>
+      </button>`;
+    }).join('');
+    tira.querySelectorAll('.tarjeta-parcela').forEach((boton) => {
+      boton.addEventListener('click', () => elegirParcela(boton.dataset.id));
+    });
+  }
+  if (selector) {
+    selector.innerHTML = PARCELAS.map((p) =>
+      `<option value="${p.id}"${p.id === parcelaId ? ' selected' : ''}>`
+      + `${p.nombre} · ${p.area_ha} ha · ${p.cultivo}</option>`).join('');
+  }
 }
 
 function montarParcelas() {
   const selector = document.getElementById('parcela-selector');
-  if (!PARCELAS.length) {
-    selector.innerHTML = '<option>Sin parcelas registradas</option>';
-    return;
+  pintarTira();
+  if (selector) {
+    selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
   }
-  selector.innerHTML = PARCELAS.map((p) =>
-    `<option value="${p.id}"${p.id === parcelaId ? ' selected' : ''}>`
-    + `${p.nombre} · ${p.area_ha} ha · ${p.cultivo}</option>`).join('');
-  selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
 
-  // Clic en el mapa: seleccionar parcela, o añadir una esquina si se está dibujando.
+  // Mapa: arrastrar para mover, rueda para acercar, clic para elegir parcela.
   const canvas = document.getElementById('vision-mapa');
-  canvas.addEventListener('click', (evento) => {
-    const [mx, my] = pantallaAMetros(evento, canvas);
-    if (dibujo.activo) {
-      dibujo.puntos.push([Math.round(mx), Math.round(my)]);
-      const n = dibujo.puntos.length;
-      document.getElementById('vision-dibujo-info').textContent = n < 3
-        ? `${n} esquina(s). Marca al menos 3.`
-        : `${n} esquinas · ${areaHa(dibujo.puntos).toFixed(2)} ha. Pulsa Terminar.`;
-      dibujarParcela(parcelaActual(), parcelaEstado);
-      return;
-    }
-    const tocada = PARCELAS.find((p) => dentroPoligono(mx, my, p.poligono_m || []));
-    if (tocada) { elegirParcela(tocada.id); }
-  });
+  if (canvas) {
+    canvas.addEventListener('pointerdown', (evento) => {
+      arrastre = { x: evento.clientX, y: evento.clientY, cx: vista.cx, cy: vista.cy, movido: false };
+      canvas.classList.add('arrastrando');
+      canvas.setPointerCapture(evento.pointerId);
+    });
+    canvas.addEventListener('pointermove', (evento) => {
+      if (!arrastre) { return; }
+      const dx = evento.clientX - arrastre.x;
+      const dy = evento.clientY - arrastre.y;
+      if (Math.abs(dx) + Math.abs(dy) > 4) { arrastre.movido = true; }
+      vista.cx = arrastre.cx - dx / vista.escala;
+      vista.cy = arrastre.cy - dy / vista.escala;
+      limitarVista();
+      dibujarMapa(parcelaEstado);
+    });
+    canvas.addEventListener('pointerup', (evento) => {
+      if (!arrastre) { return; }
+      const movido = arrastre.movido;
+      arrastre = null;
+      canvas.classList.remove('arrastrando');
+      if (movido) { return; }
+      const [mx, my] = pantallaAMetros(evento.clientX, evento.clientY);
+      if (dibujo.activo) {
+        dibujo.puntos.push([Math.round(mx), Math.round(my)]);
+        const n = dibujo.puntos.length;
+        document.getElementById('vision-dibujo-info').textContent = n < 3
+          ? `${n} esquina(s). Marca al menos 3.`
+          : `${n} esquinas · ${areaHa(dibujo.puntos).toFixed(2)} ha. Pulsa Terminar.`;
+        dibujarMapa(parcelaEstado);
+        return;
+      }
+      const tocada = PARCELAS.find((p) => dentroPoligono(mx, my, p.poligono_m || []));
+      if (tocada) { elegirParcela(tocada.id); }
+    });
+    canvas.addEventListener('pointercancel', () => { arrastre = null; canvas.classList.remove('arrastrando'); });
+    canvas.addEventListener('wheel', (evento) => {
+      evento.preventDefault();
+      zoomEn(evento.deltaY < 0 ? 1.18 : 1 / 1.18, evento.clientX, evento.clientY);
+      dibujarMapa(parcelaEstado);
+    }, { passive: false });
+  }
+  const zoomMas = document.getElementById('vision-zoom-mas');
+  const zoomMenos = document.getElementById('vision-zoom-menos');
+  const centrar = document.getElementById('vision-centrar');
+  if (zoomMas) { zoomMas.addEventListener('click', () => { zoomEn(1.35); dibujarMapa(parcelaEstado); }); }
+  if (zoomMenos) { zoomMenos.addEventListener('click', () => { zoomEn(1 / 1.35); dibujarMapa(parcelaEstado); }); }
+  if (centrar) { centrar.addEventListener('click', () => { ajustarVista(); dibujarMapa(parcelaEstado); }); }
 
   cargarMapa();
-  elegirParcela(parcelaId);
+  ajustarVista();
+  elegirParcela(parcelaId, true);
 }
 
-function pantallaAMetros(evento, canvas) {
-  const caja = canvas.getBoundingClientRect();
-  const ancho = canvas.clientWidth || 366;
-  const alto = canvas.clientHeight || 210;
-  const escala = ancho / VISTA_M;
-  const centro = centroParcelas();
-  return [
-    (evento.clientX - caja.left - ancho / 2) / escala + centro.x,
-    (evento.clientY - caja.top - alto / 2) / escala + centro.y,
-  ];
+/* ---------- Abrir/cerrar el monitoreo y el viaje desde el globo ---------- */
+function abrirMonitor(sinVuelo) {
+  if (monitorAbierto) { return; }
+  monitorAbierto = true;
+  panel('vision');
+  document.getElementById('vision').classList.add('visible');
+  document.getElementById('lienzo').style.opacity = '0';
+  ajustarVista();
+  elegirParcela(parcelaId, true);
+  pintarVision();
+  refrescarBot();
+  temporizador = setInterval(() => { if (monitorAbierto) { pintarVision(); } }, 2000);
+  setTimeout(() => refrescarBot(), 1500);
 }
 
-function areaHa(puntos) {
-  let s = 0;
-  for (let i = 0; i < puntos.length; i += 1) {
-    const [x1, y1] = puntos[i];
-    const [x2, y2] = puntos[(i + 1) % puntos.length];
-    s += x1 * y2 - x2 * y1;
+function cerrarMonitor() {
+  if (!monitorAbierto) { return; }
+  monitorAbierto = false;
+  if (temporizador) { clearInterval(temporizador); temporizador = null; }
+  document.getElementById('vision').classList.remove('visible');
+  document.getElementById('lienzo').style.opacity = '1';
+  cerrarFoto();
+}
+
+/* El globo se acerca a Constanza y de ahí sale el monitoreo: el "zoom" de la demo. */
+function volarAlaParcela() {
+  if (monitorAbierto) { cerrarMonitor(); return; }
+  const finca = fincaDeParcelas();
+  if (!finca) { abrirMonitor(); return; }
+  volarA(finca.lat, finca.lon);
+  const la = (finca.lat * Math.PI) / 180;
+  const lo = (finca.lon * Math.PI) / 180;
+  destinoCamara = new THREE.Vector3(
+    Math.cos(la) * Math.cos(lo),
+    Math.sin(la),
+    -Math.cos(la) * Math.sin(lo),
+  ).multiplyScalar(1.42);
+  setTimeout(() => abrirMonitor(), 1600);
+}
+
+/* ---------- El bot real de Telegram escribe datos/estado_finca.json ---------- */
+function pintarChipBot() {
+  const chip = document.getElementById('vision-bot');
+  if (!chip) { return; }
+  if (estadoBot && estadoBot.conectado) {
+    chip.className = 'chip-estado conectado';
+    chip.textContent = `Telegram conectado · ${Monitor.formatoHora(estadoBot.cuando)}`;
+    chip.title = 'El bot real está escribiendo el estado de la finca.';
+  } else {
+    chip.className = 'chip-estado simulado';
+    chip.textContent = 'bot sin conexión · simulación';
+    chip.title = 'Arranca tools/bot_elio.py para controlar la finca desde Telegram.';
   }
-  return Math.abs(s) / 2 / 10000;
 }
 
+async function refrescarBot() {
+  try {
+    const respuesta = await fetch(`../datos/estado_finca.json?t=${Date.now()}`, { cache: 'no-store' });
+    if (!respuesta.ok) { throw new Error('sin archivo'); }
+    const datos = await respuesta.json();
+    estadoBot = Monitor.estadoRemoto(datos, Date.now());
+  } catch (error) {
+    estadoBot = null;
+  }
+  botConsultado = true;
+  if (estadoBot && estadoBot.conectado) {
+    // Solo los actuadores que el agricultor mandó por Telegram cuentan como
+    // «manual»; los demás los decide el piloto automático de la app.
+    const mandos = Monitor.mandosDelHistorial(estadoBot.historial) || {};
+    Object.entries(estadoBot.parcelas || {}).forEach(([id]) => {
+      const actual = overrides[id];
+      if (actual && actual.ts && actual.ts > estadoBot.cuando) { return; }
+      overrides[id] = { ...mandos, ts: estadoBot.cuando, fuente: 'telegram' };
+    });
+    if (estadoBot.ultimo && estadoBot.ultimo.ts !== botVisto) {
+      botVisto = estadoBot.ultimo.ts;
+      burbuja(`Telegram · ${estadoBot.ultimo.texto} → ${estadoBot.ultimo.respuesta}`, 'bot');
+      pintarVision();
+    }
+  }
+  pintarChipBot();
+}
+
+/* ---------- Eventos de la vista ---------- */
+document.getElementById('vision-cerrar').addEventListener('click', () => cerrarMonitor());
+document.getElementById('vision-lightbox').addEventListener('click', () => cerrarFoto());
+['vision-humedad', 'vision-lluvia'].forEach((id) => {
+  document.getElementById(id).addEventListener('input', () => { pintarVision(); });
+});
 document.getElementById('vision-registrar').addEventListener('click', () => {
   dibujo = { activo: true, puntos: [] };
   document.getElementById('vision-dibujo').hidden = false;
@@ -2599,13 +3512,11 @@ document.getElementById('vision-registrar').addEventListener('click', () => {
     'Haz clic en el mapa para marcar las esquinas de tu parcela.';
   pintarVision();
 });
-
 document.getElementById('vision-cancelar').addEventListener('click', () => {
   dibujo = { activo: false, puntos: [] };
   document.getElementById('vision-dibujo').hidden = true;
   pintarVision();
 });
-
 document.getElementById('vision-terminar').addEventListener('click', () => {
   if (dibujo.puntos.length < 3) {
     document.getElementById('vision-dibujo-info').textContent =
@@ -2632,20 +3543,17 @@ document.getElementById('vision-terminar').addEventListener('click', () => {
   dibujo = { activo: false, puntos: [] };
   document.getElementById('vision-dibujo').hidden = true;
   const selector = document.getElementById('parcela-selector');
-  const op = document.createElement('option');
-  op.value = nueva.id;
-  op.textContent = `${nueva.nombre} · ${nueva.area_ha} ha · ${nueva.cultivo}`;
-  selector.appendChild(op);
+  if (selector) {
+    const op = document.createElement('option');
+    op.value = nueva.id;
+    op.textContent = `${nueva.nombre} · ${nueva.area_ha} ha · ${nueva.cultivo}`;
+    selector.appendChild(op);
+  }
+  pintarTira();
   elegirParcela(nueva.id);
+  burbuja(`Parcela registrada: ${nueva.nombre} · ${nueva.area_ha} ha.`, 'bot');
 });
 
-document.getElementById('vision-boton').addEventListener('click', () => {
-  panel('vision');
-  pintarVision();
-});
-['vision-humedad', 'vision-lluvia'].forEach((id) => {
-  document.getElementById(id).addEventListener('input', () => pintarVision());
-});
 /* Diagnóstico por foto: procesa la imagen que elija el agricultor y mide color
    real (verde/amarillo/marrón). No es un modelo de visión validado y se dice. */
 document.getElementById('vision-archivo').addEventListener('change', (evento) => {
@@ -2688,6 +3596,7 @@ document.getElementById('vision-archivo').addEventListener('change', (evento) =>
 
 function burbuja(texto, quien) {
   const caja = document.getElementById('chat-mensajes');
+  if (!caja) { return; }
   const div = document.createElement('div');
   div.className = `burbuja ${quien}`;
   div.textContent = texto;
@@ -2701,9 +3610,14 @@ function enviarAlBot(texto) {
   const parcela = parcelaActual();
   burbuja(limpio, 'yo');
   const salida = Vision.interpretarComando(limpio, { parcela, estado: parcelaEstado || {} });
-  // Aplicar los cambios que pida el bot: null vuelve a automático.
   Object.entries(salida.cambios || {}).forEach(([clave, valor]) => {
-    if (clave in manual) { manual[clave] = valor; }
+    if (parcela) {
+      if (valor === null) {
+        if (overrides[parcela.id]) { delete overrides[parcela.id][clave]; }
+      } else {
+        ponerOverride(parcela, clave, valor);
+      }
+    }
   });
   pintarVision();
   burbuja(salida.respuesta, 'bot');
@@ -2715,9 +3629,16 @@ document.getElementById('chat-forma').addEventListener('submit', (evento) => {
   enviarAlBot(campo.value);
   campo.value = '';
 });
+document.getElementById('vision-boton').addEventListener('click', () => volarAlaParcela());
 
 montarParcelas();
+pintarChipBot();
 enviarAlBot('/estado');
+window.addEventListener('resize', () => {
+  if (!monitorAbierto) { return; }
+  ajustarVista();
+  dibujarMapa(parcelaEstado);
+});
 
 window.__tierra = {
   listo: false,

@@ -29,13 +29,18 @@ comparadas con los meses secos de esa finca.
 "Cómo se ve cuando está instalado: sensores ESP32 por parcela, riego que se
 dispara solo, ventilación de invernadero, techo que se cierra con lluvia y
 control por Telegram desde el móvil."
-Mostrar **Mi parcela**: elegir una parcela sobre el mapa satelital, ver sus
-sensores y su cámara, y **escribirle al bot** `/estado`, `/riego off`,
-`/techo on`, viendo cómo cambian los actuadores.
+Pulsar **Mi parcela**: el globo vuela a Constanza y abre el **panel de monitoreo**
+a pantalla completa, con el mapa satelital real y las tres parcelas encima.
+Mostrar en 40 segundos: lecturas de los sensores, clima real NASA/ERA5, las dos
+fotos (satélite real y cámara simulada) y **cerrar el techo** con un clic.
+Cerrar con el móvil en la mano: escribir a **@climaxeliobot** `/estado` y
+`/techo on` — el panel cambia solo. El bot es real y tiene **dos modos**:
+comandos y preguntas libres (Elio responde con los datos y sus fuentes).
 Cerrar con la referencia: *"es el mismo camino que el caso de Hiroki Tomiyasu,
 el agricultor de brócoli que montó su invernadero automatizado sin saber
 programar; nosotros añadimos los datos de la NASA."*
-Decir en la misma frase: *"esto es una simulación, hoy no hay hardware instalado"*.
+Decir en la misma frase: *"la app, los datos y el bot son reales; los sensores y
+el techo son simulados, hoy no hay hardware instalado"*.
 
 **5. Por qué nosotros (45 s)**
 "Lo que casi nadie hace: decir qué no sabe. No mezclamos fuentes, corregimos por
@@ -43,7 +48,7 @@ pruebas múltiples y el asistente responde «no tengo ese dato» cuando falta.
 Eso es lo que un agrónomo puede auditar."
 
 **6. Estado y huecos (30 s)**
-"Hecho: app funcionando, 82 pruebas automáticas, repositorio público.
+"Hecho: app funcionando, 127 pruebas automáticas, repositorio público.
 No hecho: validación agronómica, hardware en campo y precio."
 
 **7. El ask (30 s)**
@@ -52,6 +57,12 @@ validar. Con eso medimos ahorro de agua y mejora de decisión, y entonces sí
 podemos hablar de inversión con números propios."
 
 ## Preguntas difíciles (y respuestas honestas)
+
+**«¿El bot de Telegram ya funciona?»**
+"Sí: es un bot real con token propio, corre en el portátil y responde por long
+polling. Los actuadores que mueve son simulados: no hay relé ni válvula todavía.
+El modo API llama a un modelo con el contexto de los datos y la misma regla que
+Elio: si no está en los datos, «no tengo ese dato»."
 
 **«¿De dónde salen los parámetros de los cultivos?»**
 "De una tabla interna marcada como provisional. No tenemos agrónomo todavía y no

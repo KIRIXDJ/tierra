@@ -138,19 +138,20 @@
       <div class="caja"><span class="titulo">Automático</span>
         <p>Si la humedad baja del umbral, riega. Si llueve, cierra el techo y suspende el riego.
            Sin que el agricultor mire el móvil.</p></div>
-      <div class="caja"><span class="titulo">Control por Telegram</span>
-        <p>El agricultor escribe <b>/estado</b>, <b>/riego off</b> o <b>/techo on</b> al bot y
-           los actuadores cambian. El bot avisa solo cuando algo pasa.</p></div>
-      <div class="caja"><span class="titulo">Foto y GPS</span>
-        <p>Una foto de la hoja: mide color y avisa de clorosis. Cada planta queda
-           georreferenciada sobre el mapa satelital.</p></div>
+      <div class="caja"><span class="titulo">Bot real de Telegram</span>
+        <p>El agricultor escribe <b>/estado</b>, <b>/riego off</b> o <b>/techo on</b> a
+           <b>@climaxeliobot</b> y el panel cambia en segundos. También admite preguntas
+           libres en modo API; Elio responde solo con los datos de la finca.</p></div>
+      <div class="caja"><span class="titulo">Fotos y GPS</span>
+        <p>Satélite real recortado sobre cada polígono, cámara de campo simulada y una
+           foto de hoja que mide color. Cada planta, georreferenciada sobre el mapa.</p></div>
     </div>
     <div class="capturas una">
-      <img src="../capturas/parcela.png" alt="Vista simulada de una parcela con sus sensores">
+      <img src="../capturas/monitor.png" alt="Panel de monitoreo con el mapa satelital y las parcelas">
     </div>
-    <div class="aviso" style="margin-top:1.6vh">La vista «Mi parcela» es una <b>simulación</b>: parcelas de ejemplo, sin hardware instalado.
-      Es el plano de lo que se vende, no una promesa de lo que ya está.</div>
-    <div class="pie"><span>Visión de producto · no construido</span><span id="p4">4 / 11</span></div>
+    <div class="aviso" style="margin-top:1.6vh">La app, el mapa, el clima (NASA/ERA5) y el bot son <b>reales</b>.
+      Los sensores, el techo y la cámara son <b>simulados</b>: hoy no hay hardware instalado.</div>
+    <div class="pie"><span>Funciona hoy · hardware pendiente</span><span id="p4">4 / 11</span></div>
   </section>
 
   <section class="slide">
@@ -164,7 +165,7 @@
       <li><b>Funciona sin internet:</b> 0 librerías externas, 3 MB, 0,6 s de carga.</li>
     </ul>
     <div class="aviso">Esto es lo que un agrónomo o un inversor puede auditar. La confianza se gana así.</div>
-    <div class="pie"><span>82 pruebas automáticas + 7 de navegador</span><span id="p5">5 / 11</span></div>
+    <div class="pie"><span>127 pruebas automáticas · bot real incluido</span><span id="p5">5 / 11</span></div>
   </section>
 
   <section class="slide">

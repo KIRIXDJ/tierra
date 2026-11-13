@@ -45,24 +45,29 @@ rotación conviene y por qué."
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
   preguntas mejores para llevar al agrónomo."
 
-**Cierre opcional · Mi parcela (60 s)**
-- Abrir **Mi parcela** y **elegir una parcela** del selector: La Esperanza (1,2 ha,
-  yuca), El Hoyo (0,8 ha, frijol) o La Loma (1,5 ha, maíz). Es una parcela
-  registrada con imagen aérea, no un punto en un mapa del mundo.
-- Bajar la humedad y ver el riego activarse; subir la lluvia y ver el techo
-  cerrarse y el riego suspenderse. La ficha y la cámara cambian con la parcela.
-- **Escribirle al bot** en el chat: `/estado`, `/riego off`, `/techo on`. El bot
-  responde con los datos reales de la parcela y mueve los actuadores.
-- **Registrar mi parcela**: pulsar el botón y marcar 4 esquinas sobre el mapa;
-  la app calcula el área (p. ej. 1,35 ha) y la añade como parcela nueva.
-- **Analizar una foto**: subir una imagen de hoja; mide el color (verde,
-  amarillo, marrón) y avisa de que no diagnostica enfermedades.
-- Volver a **Rotaciones**: arriba dice «Pensado para La Loma · 1,5 ha · hoy con
-  maíz», y la tarjeta «Actual» muestra ese cultivo. Las rotaciones son de esa
-  parcela, no de un promedio.
-- Botón "Enviar aviso al móvil": sale el mensaje con hora, como llegaría por Telegram.
-- Decirlo en la misma frase: **"esto es una simulación, hoy no hay hardware instalado"**.
-  Es el plano del servicio que se vendería, no algo que ya esté en el campo.
+**Cierre opcional · Mi parcela, el panel de monitoreo (90 s)**
+- Pulsar **Mi parcela**: el globo **vuela hasta Constanza** y entra al mapa
+  satelital real. No es un panel en una esquina: el mapa ocupa la pantalla y las
+  tres parcelas (La Esperanza 1,06 ha de yuca, El Hoyo 0,71 ha de frijol, La Loma
+  1,44 ha de maíz) están dibujadas encima, con sus sensores ESP32 y su cámara.
+- Señalar el **panel de la derecha**: humedad de suelo, temperatura del aire y del
+  suelo, batería por sensor, minigráfico de 24 h, y el **clima real** de la finca
+  (lluvia de 30 días contra su normal, temperatura media, humedad superficial,
+  mañana). Pie de fuente: Open-Meteo/ERA5 (no NASA) + NASA POWER histórico.
+- **Fotos**: la miniatura de la izquierda es **satélite real** (Esri) recortada
+  sobre el polígono; la de la derecha es la **cámara de la finca, simulada** y lo
+  dice al ampliarla. Clic para verlas grandes.
+- **Techo**: pulsar `cerrar`. La parcela se cubre con el plástico en el mapa y la
+  fila pasa a «cerrado · manual». Probar también con el deslizador de **lluvia**:
+  con lluvia el automático cierra el techo y suspende el riego.
+- **Registrar otra parcela**: botón, cuatro esquinas sobre el mapa, área calculada.
+- **El bot es real**: abrir Telegram en el móvil y escribir a **@climaxeliobot**
+  `/estado`, `/techo on`, `/clima`, o una pregunta libre en modo API. El panel
+  cambia el chip a «Telegram conectado» y refleja el actuador en segundos.
+  (Si no hay red en la feria: el chat simulado de la app hace los mismos comandos.)
+- Decirlo en la misma frase: **«la app es real, los datos NASA son reales y el bot
+  es real; los sensores y el techo son simulados porque hoy no hay hardware
+  instalado»**. Es el plano del servicio, no algo que ya esté en el campo.
 
 **Si sobra tiempo o el jurado pide más:**
 - **Abrir la app en el móvil** (misma wifi): los paneles se adaptan. El agricultor
@@ -79,6 +84,8 @@ responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
       tiene más de 3 días, la app avisa "datos de hace N días").
 - [ ] `python3 generar_rotaciones.py` corrido después.
 - [ ] Servidor local arriba: `python3 -m http.server 8000` → `localhost:8000/web/`.
+- [ ] Bot arriba (si se va a mostrar Telegram de verdad):
+      `python3 tools/bot_elio.py` en otra terminal, y probar `/ping` con el móvil.
 - [ ] Globo cargado: si el wifi del lugar falla, three.js y las texturas no
       llegan y no hay globo. **Tener el video de respaldo listo.**
 - [ ] Pestañas Finca y Rotaciones abiertas una vez (calienta la caché).
