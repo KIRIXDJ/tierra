@@ -214,6 +214,67 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [])
         pag.close()
 
+    def test_recorrido_del_pitch(self):
+        """El guion de la presentación, clic a clic. Si esto pasa, la demo no falla
+        en vivo: globo, finca, cambio de finca, rotaciones, granja y método."""
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+
+        # 1. Globo: volar al Caribe y abrir la celda de República Dominicana.
+        pag.click("#chips button[data-lat='18'][data-lon='-72']")
+        pag.wait_for_timeout(300)
+        pag.evaluate("window.__tierra.seleccionar(18.9, -70.7)")
+        pag.wait_for_selector("#panel.visible")
+        self.assertTrue(pag.inner_text("#panel-coords").strip())
+
+        # 2. Finca: Constanza, con fuente y fecha.
+        pag.keyboard.press("Escape")
+        pag.click("#finca-boton")
+        pag.wait_for_selector("#finca.visible")
+        self.assertIn("Lluvia 30 d", pag.inner_text("#finca-filas"))
+        self.assertIn("no NASA", pag.inner_text("#finca-pie"))
+
+        # 3. Cambiar de finca: Azua debe actualizar los números.
+        primera = pag.inner_text("#finca-filas")
+        pag.select_option("#finca-selector", "azua")
+        pag.wait_for_timeout(400)
+        self.assertNotEqual(primera, pag.inner_text("#finca-filas"))
+
+        # 4. Rotaciones: tabla + escenario.
+        pag.click("#rotaciones-boton")
+        pag.wait_for_selector("#rotaciones.visible")
+        self.assertEqual(pag.eval_on_selector_all("#rotaciones-tabla tbody tr", "e => e.length"), 3)
+        pag.fill("#escenario-lluvia", "-40")
+        pag.dispatch_event("#escenario-lluvia", "input")
+        self.assertIn("%", pag.inner_text("#escenario-valor"))
+
+        # 5. Granja conectada: riego, techo y aviso.
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        pag.fill("#vision-humedad", "5")
+        pag.dispatch_event("#vision-humedad", "input")
+        pag.fill("#vision-lluvia", "6")
+        pag.dispatch_event("#vision-lluvia", "input")
+        self.assertIn("techos cerrados", pag.inner_text("#vision-resumen"))
+        pag.click("#vision-telegram")
+        self.assertIn("[", pag.inner_text("#vision-log"))
+
+        # 6. Método y Elio.
+        pag.click("#metodo-boton")
+        pag.wait_for_selector("#metodo.visible")
+        self.assertIn("reanálisis", pag.inner_text("#metodo"))
+        pag.click("#elio-boton")
+        pag.wait_for_selector("#elio.visible")
+        pag.fill("#elio-pregunta", "¿qué rotación me conviene?")
+        pag.click("#elio-enviar")
+        self.assertTrue(pag.inner_text("#elio-respuesta").strip())
+
+        self.assertEqual(errores, [], "el guion dejó errores de JS")
+        pag.close()
+
 
 if __name__ == "__main__":
     unittest.main()
