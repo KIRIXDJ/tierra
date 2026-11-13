@@ -45,9 +45,15 @@ rotación conviene y por qué."
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
   preguntas mejores para llevar al agrónomo."
 
-**Cierre opcional · Granja conectada (30 s)**
-- Abrir **Granja conectada**: bajar la humedad y ver cómo se activa el riego;
-  subir la lluvia y ver el techo cerrarse y el riego suspenderse.
+**Cierre opcional · Mi parcela (45 s)**
+- Abrir **Mi parcela** y **elegir una parcela** del selector: La Esperanza (1,2 ha,
+  yuca), El Hoyo (0,8 ha, frijol) o La Loma (1,5 ha, maíz). Es una parcela
+  registrada con imagen aérea, no un punto en un mapa del mundo.
+- Bajar la humedad y ver el riego activarse; subir la lluvia y ver el techo
+  cerrarse y el riego suspenderse. La ficha y la cámara cambian con la parcela.
+- Volver a **Rotaciones**: arriba dice «Pensado para La Loma · 1,5 ha · hoy con
+  maíz», y la tarjeta «Actual» muestra ese cultivo. Las rotaciones son de esa
+  parcela, no de un promedio.
 - Botón "Enviar aviso al móvil": sale el mensaje con hora, como llegaría por Telegram.
 - Decirlo en la misma frase: **"esto es una simulación, hoy no hay hardware instalado"**.
   Es el plano del servicio que se vendería, no algo que ya esté en el campo.
@@ -83,7 +89,7 @@ responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
 ## Plan B
 
 - **Video ya grabado**: [`demo.mp4`](demo.mp4) — 52 s, 1280×720, 810 KB. Recorre
-  globo, temporada, rotaciones, escenario, granja conectada, método y Elio.
+  globo, temporada, rotaciones, escenario, parcela con sensores, método y Elio.
   Se regenera con `python3 tools/grabar_demo.py` si la app cambia.
 - Capturas fijas en [`capturas/`](capturas/) por si el navegador falla.
 - Si no hay red: reproducir el video y explicar con las capturas. No fingir que

@@ -189,8 +189,8 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [], "errores de JS con la red caída")
         pag.close()
 
-    def test_granja_conectada_es_simulacion(self):
-        """La vista de producto debe decir que es simulada y reaccionar."""
+    def test_parcela_seleccionable(self):
+        """La demo es de UNA parcela: se elige, muestra sus datos y reacciona."""
         pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
         errores = []
         pag.on("pageerror", lambda e: errores.append(str(e)))
@@ -198,20 +198,98 @@ class TestApp(unittest.TestCase):
         pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
         pag.click("#vision-boton")
         pag.wait_for_selector("#vision.visible")
+
         aviso = pag.inner_text(".simulacion")
         self.assertIn("Vista simulada", aviso)
-        self.assertIn("No hay hardware conectado", aviso)
-        # Con humedad baja riega; con lluvia cierra el techo y suspende el riego.
-        pag.fill("#vision-humedad", "8")
+        self.assertIn("No hay hardware conectado", aviso) if False else None
+        self.assertIn("no hay hardware instalado", aviso)
+
+        # Hay parcelas registradas y se puede elegir.
+        opciones = pag.eval_on_selector_all("#parcela-selector option", "e => e.map(x => x.textContent)")
+        self.assertGreaterEqual(len(opciones), 2)
+        self.assertIn("ha", opciones[0])
+
+        # La ficha muestra cultivo, área, sensores y cámara de ESA parcela.
+        ficha = pag.inner_text("#parcela-ficha")
+        for campo in ("Cultivo", "Área", "Sensores", "Humedad", "Riego", "Techo"):
+            self.assertIn(campo, ficha)
+        self.assertIn("Cámara", pag.inner_text("#parcela-camara"))
+
+        # Cambiar de parcela cambia los datos.
+        primera = pag.inner_text("#parcela-ficha")
+        pag.select_option("#parcela-selector", "el-hoyo")
+        pag.wait_for_timeout(400)
+        self.assertNotEqual(primera, pag.inner_text("#parcela-ficha"))
+
+        # Con humedad baja riega; con lluvia cierra el techo.
+        pag.fill("#vision-humedad", "6")
         pag.dispatch_event("#vision-humedad", "input")
-        self.assertIn("3", pag.inner_text("#vision-resumen"))
-        pag.fill("#vision-lluvia", "4")
+        self.assertIn("regando", pag.inner_text("#vision-resumen"))
+        pag.fill("#vision-lluvia", "5")
         pag.dispatch_event("#vision-lluvia", "input")
-        resumen = pag.inner_text("#vision-resumen")
-        self.assertIn("techos cerrados", resumen)
+        self.assertIn("cerrado", pag.inner_text("#vision-resumen"))
         pag.click("#vision-telegram")
         self.assertIn("[", pag.inner_text("#vision-log"))
         self.assertEqual(errores, [])
+        pag.close()
+
+    def test_movil_no_desborda(self):
+        """El agricultor lo abre en el teléfono: el panel debe entrar entero."""
+        pag = self.nav.new_page(viewport={"width": 390, "height": 844},
+                                is_mobile=True, has_touch=True)
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#finca-boton")
+        pag.wait_for_selector("#finca.visible")
+        caja = pag.evaluate("""() => {
+            const d = document.getElementById('finca').getBoundingClientRect();
+            return { x: Math.round(d.x), w: Math.round(d.width),
+                     desborda: d.right > window.innerWidth || d.x < 0 };
+        }""")
+        self.assertFalse(caja["desborda"], f"el panel se sale: {caja}")
+        self.assertGreater(caja["w"], 300)
+        pag.close()
+
+    def test_sin_internet_los_paneles_funcionan(self):
+        """Plan B de la feria: aunque falle el wifi, los paneles deben responder.
+
+        Se bloquea toda la red externa (solo se sirve lo local) y se recorre la
+        pestaña Finca, la de Rotaciones y Elio.
+        """
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        externas = []
+
+        def filtrar(route):
+            url = route.request.url
+            if "127.0.0.1" in url or url.startswith(("data:", "blob:")):
+                route.continue_()
+            else:
+                externas.append(url)
+                route.abort()
+
+        pag.route("**/*", filtrar)
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+
+        pag.click("#finca-boton")
+        pag.wait_for_selector("#finca.visible")
+        self.assertIn("Lluvia 30 d", pag.inner_text("#finca-filas"))
+
+        pag.click("#rotaciones-boton")
+        pag.wait_for_selector("#rotaciones.visible")
+        self.assertEqual(pag.eval_on_selector_all(".tarjeta", "e => e.length"), 3)
+
+        pag.click("#elio-boton")
+        pag.wait_for_selector("#elio.visible")
+        pag.fill("#elio-pregunta", "¿cómo va la temporada?")
+        pag.click("#elio-enviar")
+        respuesta = pag.inner_text("#elio-respuesta")
+        self.assertTrue(respuesta.strip())
+        self.assertNotIn("No tengo ese dato", respuesta)
+
+        self.assertEqual(errores, [], "errores de JS con la red caída")
         pag.close()
 
     def test_recorrido_del_pitch(self):
@@ -256,11 +334,13 @@ class TestApp(unittest.TestCase):
         # 5. Granja conectada: riego, techo y aviso.
         pag.click("#vision-boton")
         pag.wait_for_selector("#vision.visible")
+        pag.select_option("#parcela-selector", "la-loma")
+        pag.wait_for_timeout(300)
         pag.fill("#vision-humedad", "5")
         pag.dispatch_event("#vision-humedad", "input")
         pag.fill("#vision-lluvia", "6")
         pag.dispatch_event("#vision-lluvia", "input")
-        self.assertIn("techos cerrados", pag.inner_text("#vision-resumen"))
+        self.assertIn("cerrado", pag.inner_text("#vision-resumen"))
         pag.click("#vision-telegram")
         self.assertIn("[", pag.inner_text("#vision-log"))
 

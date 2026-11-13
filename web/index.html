@@ -130,6 +130,9 @@
   #finca-pronostico b { display: block; color: var(--texto); font-size: 11px; }
   #finca-pie, #rotaciones-pie { font-size: 10px; color: var(--secundario); margin-top: 10px; line-height: 1.5; }
   #finca-avisos { font-size: 11px; color: var(--ambar); margin-top: 6px; line-height: 1.4; }
+  #rotaciones-parcela { font-size: 11px; color: var(--secundario); line-height: 1.45;
+    border-left: 2px solid rgba(53, 214, 255, .55); padding-left: 8px; margin-bottom: 10px; }
+  #rotaciones-parcela b { color: var(--texto); }
   #rotaciones-tabla table { width: 100%; border-collapse: collapse; font-size: 11px;
     margin-bottom: 12px; }
   #rotaciones-tabla th { text-align: left; color: var(--secundario); font-weight: 600;
@@ -196,6 +199,17 @@
     border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
     border-radius: 8px; padding: 8px 10px; margin: 10px 0 12px; }
   .simulacion b { color: var(--ambar); }
+  .campo { display: block; font-size: 11px; color: var(--secundario); margin-bottom: 10px; }
+  .campo select { width: 100%; margin-top: 4px; background: #0a1420; color: var(--texto);
+    border: 1px solid var(--borde); border-radius: 7px; padding: 7px 9px; font: inherit;
+    font-size: 12px; }
+  #parcela-ficha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
+  #parcela-ficha div { border: 1px solid var(--borde); border-radius: 8px; padding: 6px 8px;
+    font-size: 10px; color: var(--secundario); }
+  #parcela-ficha b { display: block; color: var(--texto); font-size: 14px;
+    font-family: ui-monospace, Consolas, monospace; }
+  #parcela-camara { margin-top: 8px; font-size: 10px; color: var(--secundario);
+    border-left: 2px solid rgba(88, 227, 154, .55); padding-left: 7px; line-height: 1.45; }
   #vision-mapa { width: 100%; height: 190px; display: block; border-radius: 8px;
     background: #08111c; border: 1px solid var(--borde); }
   #vision-resumen { display: flex; gap: 8px; margin: 10px 0 4px; }
@@ -235,7 +249,7 @@
   <button id="finca-boton">Finca</button>
   <button id="rotaciones-boton">Rotaciones</button>
   <button id="elio-boton">Elio</button>
-  <button id="vision-boton">Granja conectada</button>
+  <button id="vision-boton">Mi parcela</button>
   <button id="metodo-boton">Método</button>
 </div>
 <div id="resumen-global"></div>
@@ -304,6 +318,7 @@
     <input type="range" id="escenario-lluvia" min="-40" max="40" value="0" step="5">
     <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.
       Comprueba cómo cambiaría el orden si la temporada fuera más seca o más húmeda.</span></div>
+  <div id="rotaciones-parcela"></div>
   <div id="rotaciones-tabla"></div>
   <div id="rotaciones-tarjetas"></div>
   <div id="rotaciones-pie"></div>
@@ -312,26 +327,26 @@
 
 <aside id="vision">
   <button class="cerrar" data-cierra="vision" aria-label="Cerrar">×</button>
-  <h2>Granja conectada</h2>
+  <h2>Mi parcela</h2>
   <div class="simulacion">
-    <b>Vista simulada.</b> Así funcionaría el servicio instalado en la finca.
-    No hay hardware conectado: los sensores y el techo son una demostración.
+    <b>Vista simulada.</b> Estas parcelas están registradas con imagen aérea (dron).
+    Los sensores y la cámara son una demostración: hoy no hay hardware instalado.
   </div>
+  <label class="campo">Parcela
+    <select id="parcela-selector"></select>
+  </label>
+  <div id="parcela-ficha"></div>
   <canvas id="vision-mapa"></canvas>
+  <div id="parcela-camara"></div>
   <div id="vision-resumen"></div>
   <div class="control"><label for="vision-humedad">Humedad del suelo:
-    <b id="vision-humedad-valor">26 %</b></label>
-    <input type="range" id="vision-humedad" min="5" max="50" value="26"></div>
+    <b id="vision-humedad-valor">18 %</b></label>
+    <input type="range" id="vision-humedad" min="5" max="50" value="18"></div>
   <div class="control"><label for="vision-lluvia">Lluvia:
     <b id="vision-lluvia-valor">0 mm/h</b></label>
     <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
   <button id="vision-telegram">Enviar aviso al móvil</button>
   <div id="vision-log" aria-live="polite"></div>
-  <div class="fila" style="font-size:10px">
-    <b>Parcelas registradas</b> con imagen aérea (dron). Cada una lleva sus sensores
-    ESP32 de humedad, una electroválvula de riego y un techo motorizado que se cierra
-    con lluvia. Los avisos llegarían por Telegram al teléfono del agricultor.
-  </div>
 </aside>
 <aside id="metodo">
   <button class="cerrar" data-cierra="metodo" aria-label="Cerrar">×</button>
@@ -393,6 +408,7 @@
 <script src="../datos/rotaciones.js"></script>
 <script src="../datos/fincas.js"></script>
 <script src="../datos/suelo.js"></script>
+<script src="../datos/parcelas.js"></script>
 <script>
   // Con file:// el navegador bloquea los módulos locales (CORS): avisar en claro.
   if (location.protocol === 'file:') {
@@ -2006,6 +2022,10 @@ function textoSuelo() {
 function textoCultivos(estrategia) {
   if ((estrategia.cultivos || []).length) { return estrategia.cultivos.join(', '); }
   if (estrategia.id === 'actual') {
+    const parcela = typeof parcelaActual === 'function' ? parcelaActual() : null;
+    if (parcela && parcela.cultivo) {
+      return `${parcela.cultivo} (lo que hay hoy en ${parcela.nombre})`;
+    }
     return 'La rotación que ya usa el agricultor: hay que levantarla en campo con el agrónomo.';
   }
   return 'sin definir (validar con el agricultor)';
@@ -2059,6 +2079,13 @@ function pintarRotaciones() {
   const lista = (finca.estrategias || [])
     .map((e) => ({ ...e, calculado: indicesRotaciones(e) }))
     .sort((a, b) => (b.calculado ?? -1) - (a.calculado ?? -1));
+  const parcela = typeof parcelaActual === 'function' ? parcelaActual() : null;
+  document.getElementById('rotaciones-parcela').innerHTML = parcela
+    ? `Pensado para <b>${parcela.nombre}</b> · ${parcela.area_ha} ha · `
+      + `hoy con <b>${parcela.cultivo}</b>. El clima es el de la finca `
+      + `${(ROTACIONES && ROTACIONES.fincas || []).find((f) => f.id === finca.id)
+          ? (FINCAS.find((f) => f.id === finca.id) || {}).nombre || finca.id : finca.id}.`
+    : '';
   document.getElementById('rotaciones-tabla').innerHTML = tablaComparativa(lista, finca);
   caja.innerHTML = lista.map((e) => {
     const puntos = e.calculado === null ? 'sin dato' : e.calculado;
@@ -2152,13 +2179,18 @@ document.getElementById('elio-enviar').addEventListener('click', () => {
 refrescarDatos().then(() => { if (document.getElementById('finca').classList.contains('visible')) { pintarFinca(); } });
 
 
-// ---------- Granja conectada: vista simulada del servicio completo ----------
-const Vision = window.Vision || { parcelasIniciales: () => [], evaluar: () => ({ parcelas: [], avisos: [] }),
-  mensajeTelegram: () => '', resumen: () => ({ regando: 0, techos_cerrados: 0, parcelas_secas: 0, total: 0 }) };
-let visionParcelas = Vision.parcelasIniciales();
-let visionBase = 26;
+// ---------- Mi parcela: una parcela registrada, con sus sensores ----------
+const PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.parcelas) || [];
+const FINCA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.finca) || null;
+let parcelaId = PARCELAS.length ? PARCELAS[0].id : null;
+let parcelaEstado = null;
 
-function dibujarGranja(parcelas) {
+function parcelaActual() {
+  return PARCELAS.find((p) => p.id === parcelaId) || null;
+}
+
+/* Dibuja ESA parcela vista desde arriba: su forma real, surcos, sensores. */
+function dibujarParcela(parcela, estado) {
   const canvas = document.getElementById('vision-mapa');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
   const ancho = canvas.clientWidth || 344;
@@ -2168,94 +2200,147 @@ function dibujarGranja(parcelas) {
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, ancho, alto);
+  if (!parcela) { return; }
 
-  // Cuadrícula fina: imagen aérea / dron.
-  ctx.strokeStyle = 'rgba(120, 200, 255, 0.07)';
-  ctx.lineWidth = 1;
-  for (let x = 0; x < ancho; x += 22) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, alto); ctx.stroke(); }
-  for (let y = 0; y < alto; y += 22) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ancho, y); ctx.stroke(); }
+  // Fondo: suelo de alrededor.
+  ctx.fillStyle = 'rgba(28, 40, 34, 0.55)';
+  ctx.fillRect(0, 0, ancho, alto);
 
-  const caja = (ancho - 28) / 3;
-  parcelas.forEach((p, i) => {
-    const x = 10 + i * (caja + 4);
-    const y = 26;
-    const w = caja;
-    const h = alto - 52;
+  const puntos = (parcela.poligono || []).map(([x, y]) => [x * ancho, y * alto]);
+  if (puntos.length < 3) { return; }
 
-    // Suelo: más oscuro cuanto más seco.
-    const humedad = p.humedad === null ? 0.5 : Math.max(0, Math.min(1, p.humedad / 50));
-    ctx.fillStyle = `rgba(${Math.round(120 - 40 * humedad)}, ${Math.round(90 - 20 * humedad)}, 55, 0.75)`;
-    ctx.fillRect(x, y, w, h);
+  ctx.beginPath();
+  ctx.moveTo(puntos[0][0], puntos[0][1]);
+  puntos.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+  ctx.closePath();
 
-    // Surcos.
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
-    for (let s = y + 6; s < y + h; s += 7) {
-      ctx.beginPath(); ctx.moveTo(x + 3, s); ctx.lineTo(x + w - 3, s); ctx.stroke();
-    }
+  // Color del suelo según humedad.
+  const humedad = estado && estado.humedad !== null && estado.humedad !== undefined
+    ? estado.humedad : (parcela.humedad_inicial ?? 0);
+  const h = Math.max(0, Math.min(1, humedad / 50));
+  ctx.fillStyle = `rgb(${Math.round(122 - 46 * h)}, ${Math.round(92 - 26 * h)}, 56)`;
+  ctx.fill();
 
-    // Riego: franja azul si la electroválvula está abierta.
-    if (p.riego) {
-      ctx.fillStyle = 'rgba(53, 214, 255, 0.28)';
-      ctx.fillRect(x, y, w, h);
-    }
+  // Surcos dentro de la parcela.
+  ctx.save();
+  ctx.clip();
+  ctx.strokeStyle = 'rgba(0,0,0,0.20)';
+  for (let y = 0; y < alto; y += 7) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ancho, y); ctx.stroke();
+  }
+  // Riego: franja azul sobre el suelo.
+  if (estado && estado.riego) {
+    ctx.fillStyle = 'rgba(53, 214, 255, 0.30)';
+    ctx.fillRect(0, 0, ancho, alto);
+  }
+  ctx.restore();
 
-    // Techo motorizado.
-    ctx.strokeStyle = p.techo ? 'rgba(53, 214, 255, 0.9)' : 'rgba(126, 151, 173, 0.45)';
-    ctx.lineWidth = p.techo ? 2 : 1;
-    ctx.setLineDash(p.techo ? [] : [4, 4]);
-    ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
-    ctx.setLineDash([]);
+  // Borde: sólido si el techo está cerrado.
+  ctx.lineWidth = estado && estado.techo ? 2.5 : 1.4;
+  ctx.strokeStyle = estado && estado.techo ? 'rgba(53, 214, 255, 0.95)' : 'rgba(220, 233, 245, 0.55)';
+  ctx.setLineDash(estado && estado.techo ? [] : [5, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
 
-    // Sensores ESP32.
-    for (let k = 0; k < p.sensores; k += 1) {
-      const sx = x + (w * (k + 1)) / (p.sensores + 1);
-      const sy = y + h - 12;
-      ctx.beginPath();
-      ctx.fillStyle = p.riego ? '#35d6ff' : (p.humedad !== null && p.humedad < 25 ? '#ffb454' : '#58e39a');
-      ctx.arc(sx, sy, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Etiqueta.
-    ctx.fillStyle = 'rgba(220, 233, 245, 0.95)';
-    ctx.font = '10px ui-monospace, Consolas, monospace';
-    ctx.fillText(p.id, x + 4, y - 8);
-    ctx.fillStyle = 'rgba(126, 151, 173, 0.95)';
-    ctx.fillText(p.humedad === null ? 'sin dato' : `${p.humedad} %`, x + 4, y + h + 13);
+  // Sensores.
+  (parcela.sensores || []).forEach((sensor) => {
+    const sx = sensor.x * ancho;
+    const sy = sensor.y * alto;
+    ctx.beginPath();
+    ctx.fillStyle = estado && estado.riego ? '#35d6ff'
+      : (humedad < 25 ? '#ffb454' : '#58e39a');
+    ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(6, 12, 20, 0.85)';
+    ctx.font = '8px ui-monospace, Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(sensor.id, sx, sy - 7);
+    ctx.textAlign = 'left';
   });
 
-  ctx.fillStyle = 'rgba(126, 151, 173, 0.8)';
+  // Etiquetas.
+  ctx.fillStyle = 'rgba(220, 233, 245, 0.95)';
+  ctx.font = '10px ui-monospace, Consolas, monospace';
+  ctx.fillText(`${parcela.nombre} · ${parcela.area_ha} ha`, 8, 14);
+  ctx.fillStyle = 'rgba(126, 151, 173, 0.9)';
   ctx.font = '9px ui-monospace, Consolas, monospace';
-  ctx.fillText('vista aérea · parcelas registradas · sensores ESP32', 10, 14);
+  ctx.fillText('vista aérea · registro con dron', 8, alto - 6);
 }
 
-function pintarVision(avisos) {
+function pintarVision() {
+  const parcela = parcelaActual();
+  const caja = document.getElementById('parcela-ficha');
+  const camara = document.getElementById('parcela-camara');
+  if (!parcela) {
+    caja.innerHTML = '<div>Sin parcelas registradas.</div>';
+    camara.textContent = '';
+    return;
+  }
   const humedad = Number(document.getElementById('vision-humedad').value);
   const lluvia = Number(document.getElementById('vision-lluvia').value);
-  visionBase = humedad;
-  const offsets = [-8, 7, 0];
-  visionParcelas = visionParcelas.map((p, i) => ({ ...p, humedad: Math.max(0, Math.min(60, humedad + offsets[i])) }));
-  const salida = Vision.evaluar(visionParcelas, { lluvia_mm_h: lluvia });
-  visionParcelas = salida.parcelas;
+
+  const entrada = {
+    id: parcela.id, nombre: parcela.nombre, cultivo: parcela.cultivo,
+    humedad, area_ha: parcela.area_ha, sensores: (parcela.sensores || []).length,
+    riego: parcelaEstado ? parcelaEstado.riego : false,
+    techo: parcelaEstado ? parcelaEstado.techo : false,
+  };
+  const salida = Vision.evaluar([entrada], { lluvia_mm_h: lluvia });
+  parcelaEstado = salida.parcelas[0];
 
   document.getElementById('vision-humedad-valor').textContent = `${humedad} %`;
   document.getElementById('vision-lluvia-valor').textContent = `${lluvia} mm/h`;
-  dibujarGranja(visionParcelas);
+  dibujarParcela(parcela, parcelaEstado);
 
-  const r = Vision.resumen(visionParcelas);
+  const sensorTxt = (parcela.sensores || []).map((s) => s.id).join(' · ');
+  caja.innerHTML = `
+    <div>Cultivo<b>${parcela.cultivo}</b></div>
+    <div>Área<b>${parcela.area_ha} ha</b></div>
+    <div>Siembra<b>${parcela.siembra || 'sin dato'}</b></div>
+    <div>Sensores<b>${sensorTxt || 'ninguno'}</b></div>
+    <div>Humedad<b>${humedad} %</b></div>
+    <div>Temperatura<b>${parcela.temperatura} °C</b></div>
+    <div>Riego<b>${parcelaEstado.riego ? 'activo' : 'apagado'}</b></div>
+    <div>Techo<b>${parcelaEstado.techo ? 'cerrado' : 'abierto'}</b></div>`;
+  camara.innerHTML = `<b>Cámara</b> · última captura: ${parcela.camara}`;
+
   document.getElementById('vision-resumen').innerHTML = `
-    <div><b>${r.regando}</b>regando</div>
-    <div><b>${r.techos_cerrados}</b>techos cerrados</div>
-    <div><b>${r.parcelas_secas}</b>parcelas secas</div>`;
+    <div><b>${parcelaEstado.riego ? 'regando' : 'sin riego'}</b>riego</div>
+    <div><b>${parcelaEstado.techo ? 'cerrado' : 'abierto'}</b>techo</div>
+    <div><b>${humedad < Vision.UMBRAL_RIEGO ? 'sí' : 'no'}</b>falta agua</div>`;
 
   const log = document.getElementById('vision-log');
-  const nuevo = avisos && avisos.length ? avisos : salida.avisos;
-  if (nuevo.length) {
-    log.innerHTML = nuevo.map((a) => `<div>${a}</div>`).join('') + log.innerHTML;
+  if (salida.avisos.length) {
+    log.innerHTML = salida.avisos.map((a) => `<div>${a}</div>`).join('') + log.innerHTML;
   }
   if (!log.innerHTML.trim()) {
     log.innerHTML = '<div>Sin cambios: todo dentro de lo previsto.</div>';
   }
+}
+
+function elegirParcela(id) {
+  parcelaId = id;
+  parcelaEstado = null;
+  const parcela = parcelaActual();
+  if (!parcela) { return; }
+  document.getElementById('vision-humedad').value = String(parcela.humedad_inicial ?? 26);
+  // La parcela vive en una finca: las rotaciones deben hablar de esa finca.
+  if (FINCAS.some((f) => f.id === FINCA_PARCELAS)) { fincaId = FINCA_PARCELAS; }
+  document.getElementById('vision-log').innerHTML = '';
+  pintarVision();
+}
+
+function montarParcelas() {
+  const selector = document.getElementById('parcela-selector');
+  if (!PARCELAS.length) {
+    selector.innerHTML = '<option>Sin parcelas registradas</option>';
+    return;
+  }
+  selector.innerHTML = PARCELAS.map((p) =>
+    `<option value="${p.id}"${p.id === parcelaId ? ' selected' : ''}>`
+    + `${p.nombre} · ${p.area_ha} ha · ${p.cultivo}</option>`).join('');
+  selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
+  elegirParcela(parcelaId);
 }
 
 document.getElementById('vision-boton').addEventListener('click', () => {
@@ -2266,16 +2351,19 @@ document.getElementById('vision-boton').addEventListener('click', () => {
   document.getElementById(id).addEventListener('input', () => pintarVision());
 });
 document.getElementById('vision-telegram').addEventListener('click', () => {
+  const parcela = parcelaActual();
   const humedad = Number(document.getElementById('vision-humedad').value);
   const lluvia = Number(document.getElementById('vision-lluvia').value);
-  const salida = Vision.evaluar(visionParcelas, { lluvia_mm_h: lluvia });
+  const salida = Vision.evaluar([{ ...parcela, humedad, riego: false, techo: false }],
+                                { lluvia_mm_h: lluvia });
   const hora = new Date().toTimeString().slice(0, 5);
   const mensaje = Vision.mensajeTelegram(
     salida.avisos.length ? salida.avisos
-      : [`Humedad ${humedad} %, lluvia ${lluvia} mm/h. Sin cambios en riego ni techo.`], hora);
+      : [`${parcela.nombre}: humedad ${humedad} %, lluvia ${lluvia} mm/h. Sin cambios.`], hora);
   const log = document.getElementById('vision-log');
-  log.innerHTML = mensaje.split('\n').map((linea) => `<div>${linea}</div>`).join('') + log.innerHTML;
+  log.innerHTML = mensaje.split('\n').map((l) => `<div>${l}</div>`).join('') + log.innerHTML;
 });
+montarParcelas();
 
 window.__tierra = {
   listo: false,
@@ -2302,7 +2390,9 @@ window.__tierra = {
   pintarFinca,
   pintarRotaciones,
   responderElio,
-  vision: () => visionParcelas,
+  parcelas: PARCELAS,
+  parcelaActual,
+  elegirParcela,
   pintarVision,
   contextoElio,
   indicesRotaciones,
