@@ -27,10 +27,15 @@ comparadas con los meses secos de esa finca.
 
 **4. Producto completo (60 s)**
 "Cómo se ve cuando está instalado: sensores ESP32 por parcela, riego que se
-dispara solo, techo que se cierra con lluvia y aviso al móvil por Telegram."
-Mostrar **Mi parcela**: elegir una parcela registrada y ver su humedad, sus
-sensores, su cámara y el riego/techo reaccionando. Decir en la misma frase:
-*"esto es una simulación, hoy no hay hardware instalado"*.
+dispara solo, ventilación de invernadero, techo que se cierra con lluvia y
+control por Telegram desde el móvil."
+Mostrar **Mi parcela**: elegir una parcela sobre el mapa satelital, ver sus
+sensores y su cámara, y **escribirle al bot** `/estado`, `/riego off`,
+`/techo on`, viendo cómo cambian los actuadores.
+Cerrar con la referencia: *"es el mismo camino que el caso de Hiroki Tomiyasu,
+el agricultor de brócoli que montó su invernadero automatizado sin saber
+programar; nosotros añadimos los datos de la NASA."*
+Decir en la misma frase: *"esto es una simulación, hoy no hay hardware instalado"*.
 
 **5. Por qué nosotros (45 s)**
 "Lo que casi nadie hace: decir qué no sabe. No mezclamos fuentes, corregimos por
@@ -88,6 +93,6 @@ falta."
 - [ ] Completar nombres y roles del equipo (diapositiva 10).
 - [ ] Ensayar con cronómetro: no pasar de 5:00.
 - [ ] Probar el deck y la app **sin internet** en el portátil que se va a usar.
-- [ ] Tener la app abierta en **Mi parcela** y en **Rotaciones**.
+- [ ] Tener la app abierta en **Mi parcela** (con el chat del bot a la vista) y en **Rotaciones**.
 - [ ] Decidir quién responde cada bloque de preguntas.
 - [ ] Video de respaldo de 2 minutos.

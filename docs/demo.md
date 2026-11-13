@@ -45,12 +45,18 @@ rotación conviene y por qué."
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
   preguntas mejores para llevar al agrónomo."
 
-**Cierre opcional · Mi parcela (45 s)**
+**Cierre opcional · Mi parcela (60 s)**
 - Abrir **Mi parcela** y **elegir una parcela** del selector: La Esperanza (1,2 ha,
   yuca), El Hoyo (0,8 ha, frijol) o La Loma (1,5 ha, maíz). Es una parcela
   registrada con imagen aérea, no un punto en un mapa del mundo.
 - Bajar la humedad y ver el riego activarse; subir la lluvia y ver el techo
   cerrarse y el riego suspenderse. La ficha y la cámara cambian con la parcela.
+- **Escribirle al bot** en el chat: `/estado`, `/riego off`, `/techo on`. El bot
+  responde con los datos reales de la parcela y mueve los actuadores.
+- **Registrar mi parcela**: pulsar el botón y marcar 4 esquinas sobre el mapa;
+  la app calcula el área (p. ej. 1,35 ha) y la añade como parcela nueva.
+- **Analizar una foto**: subir una imagen de hoja; mide el color (verde,
+  amarillo, marrón) y avisa de que no diagnostica enfermedades.
 - Volver a **Rotaciones**: arriba dice «Pensado para La Loma · 1,5 ha · hoy con
   maíz», y la tarjeta «Actual» muestra ese cultivo. Las rotaciones son de esa
   parcela, no de un promedio.
