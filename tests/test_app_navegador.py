@@ -125,6 +125,24 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [])
         pag.close()
 
+    def test_movil_no_desborda(self):
+        """El agricultor lo abre en el teléfono: el panel debe entrar entero."""
+        pag = self.nav.new_page(viewport={"width": 390, "height": 844},
+                                is_mobile=True, has_touch=True)
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#finca-boton")
+        pag.wait_for_selector("#finca.visible")
+        caja = pag.evaluate("""() => {
+            const d = document.getElementById('finca').getBoundingClientRect();
+            return { x: Math.round(d.x), w: Math.round(d.width),
+                     desborda: d.right > window.innerWidth || d.x < 0 };
+        }""")
+        self.assertFalse(caja["desborda"], f"el panel se sale: {caja}")
+        self.assertGreater(caja["w"], 300)
+        pag.close()
+
 
 if __name__ == "__main__":
     unittest.main()
+

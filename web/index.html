@@ -157,6 +157,25 @@
   #glosario dt { color: var(--texto); font-size: 11px; margin-top: 5px; }
   #glosario dd { margin: 0; }
   #elio-nota { font-size: 10px; color: var(--secundario); margin-top: 10px; line-height: 1.5; }
+
+  /* Móvil: el agricultor lo va a abrir en el teléfono, no en un portátil. */
+  @media (max-width: 720px) {
+    #marca { top: 12px; left: 14px; }
+    #marca h1 { font-size: 17px; letter-spacing: .22em; }
+    #marca p { font-size: 10px; letter-spacing: .02em; max-width: 60vw; }
+    #desafio { display: none; }
+    #chips { top: 62px; right: 10px; left: 10px; max-width: none; gap: 4px; }
+    #chips button { font-size: 10px; padding: 5px 8px; }
+    #resumen-global, #leyenda, #leyenda-capas { display: none; }
+    #finca, #rotaciones, #elio, #metodo {
+      top: 118px; left: 8px; right: 8px; width: auto;
+      max-height: calc(100vh - 130px); padding: 14px;
+    }
+    #finca-serie { height: 76px; }
+    #panel { top: 118px; left: 8px; right: 8px; width: auto;
+      max-height: calc(100vh - 130px); transform: none; }
+    #panel.visible { transform: none; }
+  }
 </style>
 </head>
 <body>
