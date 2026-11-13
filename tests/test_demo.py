@@ -14,11 +14,16 @@ class TestGlobo(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._pw = sync_playwright().start()
-        cls.nav = cls._pw.chromium.launch(
-            channel="chrome", headless=True,
-            args=["--use-fake-device-for-media-stream",
-                  "--use-fake-ui-for-media-stream"],
-        )
+        try:
+            cls.nav = cls._pw.chromium.launch(
+                channel="chrome", headless=True,
+                args=["--use-fake-device-for-media-stream",
+                      "--use-fake-ui-for-media-stream"],
+            )
+        except Exception:
+            # playwright instalado pero sin Chrome: el resto de la suite sigue.
+            cls._pw.stop()
+            raise unittest.SkipTest("requiere Chrome instalado")
 
     @classmethod
     def tearDownClass(cls):
