@@ -142,6 +142,48 @@ class TestApp(unittest.TestCase):
         self.assertGreater(caja["w"], 300)
         pag.close()
 
+    def test_sin_internet_los_paneles_funcionan(self):
+        """Plan B de la feria: aunque falle el wifi, los paneles deben responder.
+
+        Se bloquea toda la red externa (solo se sirve lo local) y se recorre la
+        pestaña Finca, la de Rotaciones y Elio.
+        """
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        externas = []
+
+        def filtrar(route):
+            url = route.request.url
+            if "127.0.0.1" in url or url.startswith(("data:", "blob:")):
+                route.continue_()
+            else:
+                externas.append(url)
+                route.abort()
+
+        pag.route("**/*", filtrar)
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+
+        pag.click("#finca-boton")
+        pag.wait_for_selector("#finca.visible")
+        self.assertIn("Lluvia 30 d", pag.inner_text("#finca-filas"))
+
+        pag.click("#rotaciones-boton")
+        pag.wait_for_selector("#rotaciones.visible")
+        self.assertEqual(pag.eval_on_selector_all(".tarjeta", "e => e.length"), 3)
+
+        pag.click("#elio-boton")
+        pag.wait_for_selector("#elio.visible")
+        pag.fill("#elio-pregunta", "¿cómo va la temporada?")
+        pag.click("#elio-enviar")
+        respuesta = pag.inner_text("#elio-respuesta")
+        self.assertTrue(respuesta.strip())
+        self.assertNotIn("No tengo ese dato", respuesta)
+
+        self.assertEqual(errores, [], "errores de JS con la red caída")
+        pag.close()
+
 
 if __name__ == "__main__":
     unittest.main()
