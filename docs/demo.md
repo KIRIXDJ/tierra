@@ -3,7 +3,8 @@
 Guion de 3 minutos, checklist de feria y diapositiva de visión.
 **Antes de ensayar**, confirma que la app en `main` hace todo lo que dice aquí.
 La app abre directamente en **Mi parcela**; el globo queda detrás y se vuelve con
-la **×**.
+la **×**. Para el pitch con la estructura de elevator pitch que enseñó la
+profesora, usar [`pitch-3min.md`](pitch-3min.md) (mismo tiempo, otra narrativa).
 
 ## Guion (3 minutos)
 

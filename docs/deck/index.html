@@ -84,6 +84,11 @@
     .capturas.una img { max-height: 20vh; }
     .aviso { font-size: 11px; padding: 1vh 1vw; margin-top: 1.2vh; }
   }
+  .canvas { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7vw; }
+  .canvas .caja { padding: 1vh 1vw; }
+  .canvas .caja .titulo { font-size: clamp(11px, 1.05vw, 15px); margin-bottom: .3vh; }
+  .canvas .caja p { font-size: clamp(9px, .85vw, 13px); line-height: 1.35; }
+  .canvas .caja b { color: var(--cian); }
   @media (max-aspect-ratio: 8/5) {
     .slide { padding: 2.6vh 4.5vw; }
     h2 { font-size: clamp(18px, 2.8vw, 34px); margin-bottom: 1.2vh; }
@@ -196,6 +201,41 @@
     </div>
     <div class="aviso" style="margin-top:1.6vh">Checklist completo, requisito por requisito, en <b>docs/recursos-nasa.md</b>.</div>
     <div class="pie"><span>Field Shift: Adapting Farms with NASA Data · 2026</span><span id="p5">5 / 12</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Modelo de negocio</h3>
+    <h2>Modelo Canvas de TIERRA</h2>
+    <div class="canvas">
+      <div class="caja"><span class="titulo">Segmentos</span>
+        <p>Cooperativas y productores de hortalizas, tubérculos y granos.
+           Agrónomos y técnicos. Agroindustria <b>por validar</b>.</p></div>
+      <div class="caja"><span class="titulo">Propuesta de valor</span>
+        <p>42 años de NASA + tu finca en una decisión. Tres rotaciones con
+           evidencia, huecos y riesgos. Incertidumbre a la vista.</p></div>
+      <div class="caja"><span class="titulo">Canales</span>
+        <p>Web y móvil, bot de Telegram, talleres con cooperativas y
+           agrónomos de confianza.</p></div>
+      <div class="caja"><span class="titulo">Relación</span>
+        <p>Acompañamiento en la primera temporada; soporte humano y bot;
+           la app no sustituye al agrónomo.</p></div>
+      <div class="caja"><span class="titulo">Ingresos</span>
+        <p>Suscripción por finca, licencia a cooperativas y kit de sensores.
+           Precio y mercado <b>por validar</b> con 3–5 pilotos.</p></div>
+      <div class="caja"><span class="titulo">Recursos</span>
+        <p>POWER, ERA5, GIBS e ISRIC; motor Sen + FDR; app sin librerías;
+           bot real; equipo y red de agrónomos.</p></div>
+      <div class="caja"><span class="titulo">Actividades</span>
+        <p>Mantener y validar datos, recomendaciones con evidencia, instalar
+           sensores y formar técnicos.</p></div>
+      <div class="caja"><span class="titulo">Asociaciones</span>
+        <p>UNIROMANA, cooperativas, agrónomos locales y proveedores ESP32.</p></div>
+      <div class="caja"><span class="titulo">Costes</span>
+        <p>Desarrollo, hosting bajo, hardware piloto, validación agronómica
+           y visitas de campo.</p></div>
+    </div>
+    <div class="aviso" style="margin-top:1.2vh">Detalle en <b>docs/canvas.md</b>. Sin clientes todavía: precios y mercado por validar.</div>
+    <div class="pie"><span>El reto pide un producto; el Canvas ordena el negocio</span><span id="p6">6 / 13</span></div>
   </section>
 
   <section class="slide">
@@ -315,7 +355,7 @@
 
 <div class="nav">
   <button id="atras" aria-label="Anterior">←</button>
-  <span id="contador">1 / 12</span>
+  <span id="contador">1 / 13</span>
   <button id="siguiente" aria-label="Siguiente">→</button>
 </div>
 

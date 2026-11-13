@@ -91,9 +91,14 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 ## Presentaciones
 
 - **Para el jurado / técnico**, una página: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
+- **Para la expo de 3 minutos**, guion con la estructura de elevator pitch de la
+  profesora Liddy Kiaty (gancho → problema → solución → valor → modelo → impacto →
+  cierre): [`docs/pitch-3min.md`](docs/pitch-3min.md).
+- **Modelo Canvas del negocio** (9 bloques, precios y mercado por validar):
+  [`docs/canvas.md`](docs/canvas.md).
 - **Para inversores**, guion de 5 minutos y preguntas difíciles:
   [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
-- **Diapositivas** (11, sin dependencias, teclas ← →):
+- **Diapositivas** (13, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
 - **Video de respaldo** de 46 s con la vista actual (monitor, riesgos, satélite,
   rotaciones, techo, fotos y vuelo del globo):

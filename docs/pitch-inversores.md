@@ -7,6 +7,11 @@ teclas ← →, funciona sin internet).
 > Contexto: no tenemos acceso a parcelas ni a agrónomos todavía. Por eso el
 > discurso separa **lo que ya funciona** de **cómo sería el servicio**. Nunca se
 > mezclan: un inversor detecta una promesa disfrazada en 30 segundos.
+>
+> Para la expo de 3 minutos con la estructura de elevator pitch (gancho,
+> problema, solución, propuesta de valor, modelo, impacto y cierre) usar
+> [`pitch-3min.md`](pitch-3min.md); el Canvas del negocio está en
+> [`canvas.md`](canvas.md).
 
 ## Guion (5 minutos)
 

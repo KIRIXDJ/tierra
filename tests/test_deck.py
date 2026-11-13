@@ -65,7 +65,7 @@ class TestDeck(unittest.TestCase):
             pag, errores = self.abrir(ancho, alto)
             self.assertEqual(errores, [])
             total = pag.eval_on_selector_all(".slide", "e => e.length")
-            self.assertEqual(total, 12)
+            self.assertEqual(total, 13)
             self.assertIn(f"1 / {total}", pag.inner_text("#contador"))
             for numero in range(total):
                 activa = pag.eval_on_selector(
@@ -94,10 +94,10 @@ class TestDeck(unittest.TestCase):
             self.assertGreater(ancho, 0, f"imagen sin cargar: {origen}")
         pag.keyboard.press("End")
         pag.wait_for_timeout(200)
-        self.assertEqual(pag.inner_text("#contador"), "12 / 12")
+        self.assertEqual(pag.inner_text("#contador"), "13 / 13")
         pag.keyboard.press("Home")
         pag.wait_for_timeout(200)
-        self.assertEqual(pag.inner_text("#contador"), "1 / 12")
+        self.assertEqual(pag.inner_text("#contador"), "1 / 13")
         self.assertEqual(errores, [])
         pag.close()
 
