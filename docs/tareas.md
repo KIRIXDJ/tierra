@@ -71,14 +71,15 @@ construyó con ChatGPT/Codex su invernadero automatizado sin saber programar
 | 10 · Elio | — | **hecho por el lead** (`web/elio.js` + `tests/elio.mjs`) |
 | 6 · Demo | — | **hecha por el lead** (`docs/demo.md`) |
 | 8 · Cultivos | — | pendiente: necesita agrónomo para quitar `provisional` |
-| 5 · QA | Alison | cubierta en parte: 127 pruebas Python + 3 comprobaciones Node (`elio`, `vision`, `monitor`) |
+| 5 · QA | Alison | cubierta en parte: 125 pruebas Python + 3 comprobaciones Node (`elio`, `vision`, `monitor`) |
 
 Además, fuera de reparto y ya en `main`:
 
 - **Suelo** (`generar_suelo.py`, ISRIC SoilGrids): Constanza con dato real
   (arcilla 45,7 %, arena 28,8 %, carbono 40,8 g/kg, pH 6,4, textura arcillosa);
   Azua y San Francisco quedaron `null` porque el servidor de ISRIC no respondió.
-- **Escenario de sequía** en Rotaciones y **panel Método y límites**.
+- **Comparación de rotaciones** con evidencia, huecos y riesgos, prioridades y
+  escenario de lluvia dentro del monitor; **Método y límites** plegado ahí mismo.
 - **Globo sin CDN**: three.js en `web/vendor/` y texturas locales. Se eliminó el
   modo manos y con él MediaPipe: la app no carga ninguna librería externa.
 

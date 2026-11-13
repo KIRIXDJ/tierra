@@ -1,9 +1,9 @@
 # TIERRA · Detective de Tendencias
 
 Herramienta de apoyo a la decisión para adaptar cultivos con datos de la NASA.
-Globo 3D interactivo con tendencias climáticas 1984–2025 y, en desarrollo, una
-capa de seguimiento de la temporada actual. Proyecto para **NASA Space Apps
-Challenge 2026**.
+Abre en el **panel de monitoreo de la finca** (parcelas sobre mapa satelital,
+sensores, clima real y control por Telegram) y deja el **globo 3D** con 42 años
+de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
 
 > Es una herramienta de apoyo: no reemplaza el juicio del agricultor ni de un
 > agrónomo local.
@@ -22,36 +22,37 @@ Challenge 2026**.
 - Contraste de lluvia con Open-Meteo (ERA5) para detectar discrepancias de
   reanálisis, etiquetado como **no NASA**.
 - Capas de incendios y tormentas activas (EONET) y comparación satelital (GIBS).
-- **Mi parcela** (vista a pantalla completa tipo panel de monitoreo): el globo
-  vuela hasta Constanza y entra al mapa satelital real con las tres parcelas
-  encima, sus sensores ESP32, la cámara y el techo. Al lado, el panel con
+- **Mi parcela** (la vista principal, a pantalla completa): mapa satelital real
+  con las tres parcelas encima, sus sensores ESP32, la cámara y el techo. Al lado,
   **lecturas de sensores** (humedad de suelo, temperatura, batería), **clima real**
   de la finca (NASA POWER/ERA5), **fotos** (satélite real recortado + foto de
-  cultivo simulada dibujada en el navegador) y **control de actuadores** (riego,
-  techo y ventilación, en automático o a mano). Incluye **registro de una parcela
-  nueva dibujándola** sobre el mapa (calcula el área) y **análisis de una foto**
-  del cultivo (mide color: verde, amarillo, marrón). Todo simulado salvo el mapa,
-  el clima y el bot: no hay hardware instalado y la app lo dice en pantalla.
+  cultivo simulada dibujada en el navegador), **control de actuadores** (riego,
+  techo y ventilación) y la **comparación de las tres rotaciones**. Incluye
+  **registro de una parcela nueva dibujándola** sobre el mapa (calcula el área y
+  queda donde la dibujaste) y **análisis de una foto** del cultivo (mide color:
+  verde, amarillo, marrón). Todo simulado salvo el mapa, el clima y el bot: no hay
+  hardware instalado y la app lo dice en pantalla.
+- **Cómo se comporta solo**: el riego se dispara con la humedad simulada bajo el
+  25 %, y el techo se cierra y el riego se suspende con la **lluvia real de ERA5**
+  (no hay un control para "hacer llover").
 - **Bot de Telegram real** ([@climaxeliobot](https://t.me/climaxeliobot)) con dos
   modos: **comandos** (`/estado`, `/clima`, `/riego off`, `/techo on`, `/foto`) y
   **API**, donde Elio responde en lenguaje natural con el contexto de los datos.
   El bot escribe el estado en `datos/estado_finca.json` y el panel lo refleja en
   segundos. Ver [`docs/bot-telegram.md`](docs/bot-telegram.md).
-- Pestaña **Finca** · "Esta temporada": últimos 30 días de lluvia, temperatura y
-  humedad superficial (0–7 cm) contra la banda normal P25–P75, más pronóstico de
-  7 días. Fuente **Open-Meteo (no NASA)**, con fecha visible.
-- Pestaña **Rotaciones**: 3 estrategias (incluida la actual) con índice
-  orientativo, **evidencia NASA** (meses secos de la finca), motivos, beneficios,
-  datos faltantes y riesgos. Deslizadores de prioridades (agua/diversidad) y un
-  **escenario de sequía** que muestra cuánto aguanta cada plan.
-- Panel **Método y límites**: qué es reanálisis, diferencia entre satélite, modelo
-  y medición en terreno, y dónde hace falta un agrónomo.
-- **Glosario** de términos (anomalía, banda P25–P75, FDR, humedad superficial, ET₀, NDVI).
-- **Elio**: asistente que responde solo con los datos de la app, cita la fuente y
-  dice "no tengo ese dato" cuando falta. No controla dispositivos.
+- **Globo 3D** (mapa global): la cara NASA de la herramienta. Al abrir una celda
+  se ve la pendiente por década, el p-valor con corrección FDR y la serie
+  1984–2025; desde ahí se vuelve al monitoreo de la finca en un clic.
+- **Rotación: 3 estrategias** (actual y dos alternativas) dentro del monitor, con
+  el porqué de cada una, su evidencia NASA (meses secos), beneficios, datos que
+  faltan y riesgo a revisar con un agrónomo. Deslizadores de prioridad
+  (agua/diversidad) y un escenario de lluvia de sensibilidad, no un pronóstico.
+- **Método y límites**: plegado dentro del monitor; explica qué es reanálisis,
+  qué es simulado y qué falta validar con un agrónomo.
+- **Elio** es el bot de Telegram: responde solo con los datos y sus fuentes, y
+  dice "no tengo ese dato" cuando falta.
 
-Los datos de las pestañas nuevas están precalculados en `datos/` y se regeneran
-con:
+Los datos de la capa agrícola están precalculados en `datos/` y se regeneran con:
 
 ```bash
 python3 generar_fincas.py        # climatología POWER 1991-2020
@@ -64,15 +65,15 @@ El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las textur
 son locales. La app no carga ninguna librería de terceros: las únicas llamadas
 externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 
-### Pestañas
-
-| Finca · esta temporada | Rotaciones | Método y límites |
-|---|---|---|
-| ![Finca](docs/capturas/finca.png) | ![Rotaciones](docs/capturas/rotaciones.png) | ![Método](docs/capturas/metodo.png) |
+### Capturas
 
 | Mi parcela · monitor | Fotos de la parcela | En el móvil |
 |---|---|---|
 | ![Monitoreo](docs/capturas/monitor.png) | ![Fotos](docs/capturas/monitor-fotos.png) | ![Móvil](docs/capturas/monitor-movil.png) |
+
+| El globo · mapa global | Techo cerrado | Rotaciones |
+|---|---|---|
+| ![Globo](docs/capturas/portada.png) | ![Techo](docs/capturas/monitor-techo.png) | ![Rotaciones](docs/capturas/monitor-rotacion.png) |
 
 ## Presentaciones
 
@@ -81,8 +82,9 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
   [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
 - **Diapositivas** (11, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
-- **Video de respaldo** de 52 s con el recorrido completo:
-  [`docs/demo.mp4`](docs/demo.mp4).
+- **Video de respaldo** de 52 s (versión anterior de la vista):
+  [`docs/demo.mp4`](docs/demo.mp4). Actualízalo con `tools/grabar_demo.py` si
+  cambias la app.
 
 ```bash
 python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/
@@ -104,14 +106,24 @@ Necesita un navegador con WebGL 2 (Chrome, Edge o Firefox recientes).
 Necesita internet: three.js, las texturas y las capas en vivo (POWER, GIBS,
 EONET) se descargan al abrir. Los datos de tendencia van incrustados en el HTML.
 
+## Reto oficial
+
+Este proyecto responde al reto **«Field Shift: Adapting Farms with NASA Data»**
+de NASA Space Apps 2026. Los requisitos (3 rotaciones con evidencia, huecos y
+riesgos; incertidumbre; satélite frente a suelo) y la lista de recursos oficiales
+están mapeados en [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
+
 ## Datos y fuentes
 
 | Dato | Fuente | Tipo |
 |---|---|---|
 | Temperatura, lluvia, viento, humedad 1984–2025 | [NASA POWER](https://power.larc.nasa.gov/) (MERRA-2) | **reanálisis** |
-| Imágenes satelitales | NASA GIBS (MODIS Terra) | observación |
+| Climatología de la finca, heladas, temporada | NASA POWER | **reanálisis** |
+| Últimos 30 días y humedad superficial 0–7 cm | Open-Meteo (ERA5) | **no NASA** |
+| Imágenes satelitales de la finca | Esri World Imagery | **no NASA** |
+| Textura, carbono y pH del suelo | ISRIC SoilGrids 2.0 | **no NASA** |
+| Imágenes satelitales globales | NASA GIBS (MODIS Terra) | observación |
 | Incendios y tormentas | NASA EONET | eventos |
-| Contraste de lluvia | Open-Meteo (ERA5) | **no NASA** |
 
 POWER es reanálisis: no es una medición en tu parcela. La lluvia y el viento de
 reanálisis son poco fiables; la app los marca con aviso de confianza baja.
@@ -152,9 +164,12 @@ Reparto de tareas y contratos de datos en [`docs/tareas.md`](docs/tareas.md).
 
 - Abrir el HTML con doble clic (`file://`) no funciona: el navegador bloquea los
   módulos. Hay que servirlo con `python3 -m http.server` (la app lo avisa).
-- La capa agrícola y el asistente Elio están en diseño.
-- Los puntajes de rotación serán orientativos y se marcarán como provisionales
-  cuando falte una fuente citable.
+- Los sensores, el techo y la cámara son simulados: no hay hardware instalado.
+- Los índices de rotación son orientativos y sus parámetros de cultivo están
+  marcados como provisionales hasta validarlos con un agrónomo.
+- SMAP, GPM/IMERG, Landsat/MODIS, ECOSTRESS, SRTM y GEDI no están integrados
+  todavía; el listado oficial y la hoja de ruta están en
+  [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
 
 ## Licencia
 

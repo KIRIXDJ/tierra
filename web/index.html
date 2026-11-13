@@ -354,6 +354,30 @@
   #vision-dibujo span { flex: 1 1 100%; }
   #vision-aviso-campo { font-size: 9px; color: var(--secundario); line-height: 1.5;
     padding: 0 2px; }
+  #vision-automatico { margin-top: 7px; font-size: 9px; line-height: 1.5;
+    color: var(--secundario); border-left: 2px solid rgba(53, 214, 255, .35);
+    padding-left: 7px; }
+  #rotacion-filas { display: flex; flex-direction: column; gap: 4px; }
+  button.rotacion-fila { width: 100%; background: rgba(7, 16, 25, .6); font: inherit;
+    text-align: left; cursor: pointer; }
+  button.rotacion-fila:hover { border-color: rgba(53, 214, 255, .5); }
+  #rotacion-detalle { margin-top: 7px; font-size: 9px; color: var(--secundario);
+    line-height: 1.5; display: none; }
+  #rotacion-detalle.visible { display: block; }
+  #rotacion-detalle h4 { font-size: 10px; color: var(--texto); margin: 6px 0 2px; }
+  #rotacion-detalle ul { margin: 0 0 0 13px; }
+  #rotacion-detalle .fuente { color: var(--secundario); font-size: 8px; margin-top: 4px; }
+  .rotacion-fila { display: grid; grid-template-columns: 1fr auto; gap: 6px;
+    align-items: center; font-size: 10px; color: var(--secundario);
+    border: 1px solid var(--borde); border-radius: 8px; padding: 5px 8px; }
+  .rotacion-fila.gana { border-color: rgba(88, 227, 154, .55); color: var(--texto); }
+  .rotacion-fila b { font-family: ui-monospace, Consolas, monospace; font-size: 12px;
+    color: var(--cian); }
+  .rotacion-fila.gana b { color: var(--verde); }
+  #vision-metodo { font-size: 9px; color: var(--secundario); line-height: 1.5; }
+  #vision-metodo summary { cursor: pointer; color: var(--cian); font-size: 10px; }
+  #vision-metodo p { margin: 6px 0 0; }
+  #vision-metodo b { color: var(--texto); }
   #vision-aviso-campo b { color: var(--ambar); }
 
   #vision-lightbox { position: fixed; inset: 0; z-index: 60; display: none;
@@ -406,11 +430,7 @@
   <button id="capa-incendios" class="capa">Incendios</button>
   <button id="capa-tormentas" class="capa">Tormentas</button>
   <button id="capa-activos" class="capa">Activos 7 d</button>
-  <button id="finca-boton">Finca</button>
-  <button id="rotaciones-boton">Rotaciones</button>
-  <button id="elio-boton">Elio</button>
   <button id="vision-boton">Mi parcela</button>
-  <button id="metodo-boton">Método</button>
 </div>
 <div id="resumen-global"></div>
 <aside id="leyenda"></aside>
@@ -437,52 +457,6 @@
   </div>
 </aside>
 
-<aside id="finca">
-  <button class="cerrar" data-cierra="finca" aria-label="Cerrar">×</button>
-  <h2>Esta temporada</h2>
-  <select id="finca-selector"></select>
-  <div id="finca-filas"></div>
-  <canvas id="finca-serie"></canvas>
-  <canvas id="finca-banda"></canvas>
-  <div id="finca-pronostico"></div>
-  <div id="finca-avisos"></div>
-  <button id="finca-globo">Ver esta celda en el globo</button>
-  <details id="glosario">
-    <summary>Qué significa cada término</summary>
-    <dl>
-      <dt>Anomalía</dt><dd>Cuánto se aparta un periodo de lo normal para esas mismas fechas.</dd>
-      <dt>Banda normal (P25–P75)</dt><dd>Rango donde cae el 50 % de los años parecidos.
-        Dentro de la banda = dentro de lo esperado.</dd>
-      <dt>Reanálisis</dt><dd>Modelo que reconstruye el clima pasado con observaciones.
-        No es un termómetro en tu finca.</dd>
-      <dt>FDR</dt><dd>Corrección que evita llamar «tendencia» a lo que es azar cuando se
-        prueban 2.592 celdas a la vez.</dd>
-      <dt>Humedad superficial (0–7 cm)</dt><dd>Agua en la capa más superficial del suelo,
-        no en toda la zona de raíces.</dd>
-      <dt>ET₀ (evapotranspiración)</dt><dd>Agua que se pierde por evaporación del suelo y
-        por las plantas. Esta herramienta no la calcula.</dd>
-      <dt>NDVI</dt><dd>Índice de verde de la vegetación visto por satélite. No se usa aquí.</dd>
-    </dl>
-  </details>
-  <div id="finca-pie"></div>
-</aside>
-<aside id="rotaciones">
-  <button class="cerrar" data-cierra="rotaciones" aria-label="Cerrar">×</button>
-  <h2>Rotaciones</h2>
-  <div class="control"><label for="peso-agua">Ahorrar agua</label>
-    <input type="range" id="peso-agua" min="0" max="10" value="5"></div>
-  <div class="control"><label for="peso-diversidad">Diversificar</label>
-    <input type="range" id="peso-diversidad" min="0" max="10" value="5"></div>
-  <div class="control escenario"><label for="escenario-lluvia">Escenario de lluvia:
-    <b id="escenario-valor">como la normal</b></label>
-    <input type="range" id="escenario-lluvia" min="-40" max="40" value="0" step="5">
-    <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.
-      Comprueba cómo cambiaría el orden si la temporada fuera más seca o más húmeda.</span></div>
-  <div id="rotaciones-parcela"></div>
-  <div id="rotaciones-tabla"></div>
-  <div id="rotaciones-tarjetas"></div>
-  <div id="rotaciones-pie"></div>
-</aside>
 
 
 <section id="vision" aria-label="Monitoreo de la finca">
@@ -548,12 +522,23 @@
       <div class="bloque">
         <h3>Actuadores <span>simulados</span></h3>
         <div id="vision-actuadores"></div>
-        <div class="control"><label for="vision-humedad">Humedad del suelo
-          <b id="vision-humedad-valor">18 %</b></label>
-          <input type="range" id="vision-humedad" min="5" max="50" value="18"></div>
-        <div class="control"><label for="vision-lluvia">Lluvia
-          <b id="vision-lluvia-valor">0 mm/h</b></label>
-          <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
+        <p id="vision-automatico">Automático: riega si el suelo baja de 25 % y cierra el
+          techo con lluvia. La lluvia viene de ERA5; el tiempo no se cambia desde aquí.</p>
+      </div>
+      <div class="bloque">
+        <h3>Rotación: 3 estrategias <span>NASA POWER</span></h3>
+        <div id="rotacion-filas"></div>
+        <div id="rotacion-detalle"></div>
+        <div class="control"><label for="peso-agua">Tu prioridad: ahorrar agua
+          <b id="peso-agua-valor">5</b></label>
+          <input type="range" id="peso-agua" min="0" max="10" value="5"></div>
+        <div class="control"><label for="peso-diversidad">Diversificar
+          <b id="peso-diversidad-valor">5</b></label>
+          <input type="range" id="peso-diversidad" min="0" max="10" value="5"></div>
+        <div class="control"><label for="escenario-lluvia">Escenario de lluvia
+          <b id="escenario-lluvia-valor">como la normal</b></label>
+          <input type="range" id="escenario-lluvia" min="-40" max="40" step="5" value="0">
+          <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.</span></div>
       </div>
       <div class="bloque" id="vision-campo">
         <h3>Registrar otra parcela</h3>
@@ -569,6 +554,23 @@
         <div id="vision-diagnostico"></div>
       </div>
       <div id="parcela-camara"></div>
+      <details id="vision-metodo">
+        <summary>Método y límites</summary>
+        <p><b>Clima:</b> 42 años de tendencia NASA POWER (Sen + Mann-Kendall con
+          corrección FDR) y los últimos 30 días de ERA5 contra su normal 1991–2020.
+          Son <b>reanálisis</b>: modelos alimentados con observaciones, no un sensor
+          en tu parcela.</p>
+        <p><b>Rotación:</b> el índice cruza los meses secos de la finca con la
+          demanda de agua de cada cultivo. Es orientativo, no una recomendación
+          agronómica; los parámetros de cultivo están por validar con un agrónomo.</p>
+        <p><b>Sensores y techo:</b> simulados. La lluvia que mueve el techo viene de
+          ERA5 (no se ajusta a mano). El bot de Telegram es real; los relés, no.</p>
+        <p><b>Satélite frente a suelo:</b> el pixel de SMAP (~9 km), IMERG (~10 km),
+          MODIS (250–1000 m) o ECOSTRESS (~70 m) es mayor que una parcela de 1 ha.
+          Por eso aquí no se finge medir en la parcela: se usan POWER/ERA5 a escala de
+          celda y el sensor de la finca dice "simulado". NDVI, evapotranspiración y
+          biomasa (GEDI) son la siguiente integración, no un dato que hoy mostremos.</p>
+      </details>
     </aside>
   </div>
   <div id="vision-lightbox">
@@ -578,50 +580,6 @@
     </figure>
   </div>
 </section>
-<aside id="metodo">
-  <button class="cerrar" data-cierra="metodo" aria-label="Cerrar">×</button>
-  <h2>Método y límites</h2>
-  <div class="fila"><b>Tendencias 1984–2025</b><br>
-    Pendiente de Sen y p de Mann-Kendall sobre NASA POWER, corregida por pruebas
-    múltiples (FDR, Benjamini-Hochberg) en 2.592 celdas. El panel añade intervalo
-    de confianza por bootstrap y p ajustada por autocorrelación.</div>
-  <div class="fila"><b>Temporada</b><br>
-    Open-Meteo (ERA5) para los últimos 30 días y su normal 1991–2020 de la
-    <i>misma</i> fuente. La banda es P25–P75 de los años comparables. No se resta
-    una normal de POWER a un dato de ERA5: serían dos modelos distintos.</div>
-  <div class="fila"><b>Rotaciones</b><br>
-    El motor cruza los meses secos de la finca (NASA POWER) con los meses en que
-    cada cultivo necesita agua, y suma diversidad. El índice es orientativo; los
-    pesos y el escenario son de diseño, no agronómicos.</div>
-  <div class="fila"><b>Satélite, modelo y terreno</b><br>
-    POWER y ERA5 son <i>reanálisis</i>: modelos alimentados con observaciones.
-    No son un termómetro ni un pluviómetro en tu parcela. Un satélite mide
-    radiación o humedad desde arriba, con píxeles de kilómetros; el terreno mide
-    en un punto. Por eso aquí todo va con fecha, fuente y banda de incertidumbre.</div>
-  <div class="fila"><b>Salud del suelo</b><br>
-    La herramienta mira dos cosas: que la rotación no riegue en los meses secos y
-    que diversifique cultivos; si incluye una leguminosa, lo señala como aporte de
-    nitrógeno. No mide materia orgánica ni erosión: para eso hace falta análisis
-    de suelo.</div>
-  <div class="fila"><b>Qué sigue (hoja de ruta)</b><br>
-    Los parámetros de cultivo están marcados como provisionales: se validarán con
-    agrónomos y con parcelas reales en la siguiente fase. Lo mismo con el riego y
-    el techo: la vista «Granja conectada» muestra cómo funcionaría con sensores
-    ESP32 instalados, y hoy es una simulación.</div>
-  <div class="fila"><b>Lo que no hace</b><br>
-    No controla riego ni sensores, no mide en la parcela y no decide por el
-    agricultor. Elio responde solo con lo que hay en pantalla y dice «no tengo
-    ese dato» cuando falta.</div>
-</aside>
-<aside id="elio">
-  <button class="cerrar" data-cierra="elio" aria-label="Cerrar">×</button>
-  <h2>Elio</h2>
-  <textarea id="elio-pregunta" placeholder="¿Cómo va la temporada en Constanza?"></textarea>
-  <button id="elio-enviar">Preguntar</button>
-  <div id="elio-respuesta"></div>
-  <div id="elio-nota">Responde solo con los datos de la herramienta y cita su fuente.
-    Es apoyo: valida con un agrónomo local. No controla ningún dispositivo.</div>
-</aside>
 <div id="aviso" hidden>
   <div>
     <h2>Este navegador no puede dibujar el globo</h2>
@@ -1634,15 +1592,14 @@ function pintarFincaCercana(celda) {
   const caja = document.getElementById('panel-finca');
   const dentro = fincasEnCelda(celda);
   if (!dentro.length) { caja.innerHTML = ''; return; }
-  const titulo = dentro.length === 1 ? 'Finca en esta celda' : 'Fincas en esta celda';
-  caja.innerHTML = `<div style="font-size:10px;color:var(--secundario);margin-bottom:4px">${titulo}</div>`
-    + dentro.map((f) => `<button class="panel-finca-abrir" data-finca="${f.id}">${f.nombre}</button>`).join('');
-  caja.querySelectorAll('.panel-finca-abrir').forEach((boton) => {
-    boton.addEventListener('click', () => {
-      fincaId = boton.dataset.finca;
-      panel('finca');
-    });
-  });
+  const piloto = dentro.find((f) => f.id === FINCA_PARCELAS);
+  caja.innerHTML = `<div style="font-size:10px;color:var(--secundario);margin-bottom:4px">`
+    + `Fincas piloto en esta celda: ${dentro.map((f) => f.nombre).join(', ')}</div>`
+    + (piloto ? '<button id="panel-monitor">Abrir el monitoreo de ' + piloto.nombre + '</button>' : '');
+  const boton = document.getElementById('panel-monitor');
+  if (boton) {
+    boton.addEventListener('click', () => { cerrarPanel(); volarAlaParcela(); });
+  }
 }
 
 function abrirPanel(celda) {
@@ -2089,280 +2046,18 @@ window.addEventListener('keydown', (evento) => {
 });
 
 
-// ---------- Capa agrícola: Finca, Rotaciones y Elio ----------
-// Los datos vienen de datos/*.js (snapshot del repo). Si no existen, se avisa.
+// ---------- Datos de la finca (snapshots del repo) ----------
 const RECIENTE = window.__RECIENTE__ || null;
 const ROTACIONES = window.__ROTACIONES__ || null;
 const FINCAS = (window.__FINCAS__ && window.__FINCAS__.fincas) || [];
-const SUELO = window.__SUELO__ || null;
-let fincaId = FINCAS.length ? FINCAS[0].id : null;
 
+/* Una sola vista: el monitoreo. El globo queda detrás y se vuelve con la ×. */
 function panel(id) {
-  ['finca', 'rotaciones', 'elio', 'metodo', 'vision'].forEach((otro) => {
-    document.getElementById(otro).classList.toggle('visible', otro === id);
-    const boton = document.getElementById(`${otro}-boton`);
-    if (boton) { boton.classList.toggle('activa', otro === id); }
-  });
-  // Abrir otra vista cierra el monitoreo: si no, seguiría el reloj y el sondeo.
+  const vision = document.getElementById('vision');
+  if (vision) { vision.classList.toggle('visible', id === 'vision'); }
   if (id !== 'vision' && monitorAbierto) { cerrarMonitor(); }
-  if (id === 'finca') { pintarFinca(); }
-  if (id === 'rotaciones') { pintarRotaciones(); }
 }
-
 function cerrarPaneles() { panel(null); }
-
-// La lógica pura (textos, Elio, índice) vive en web/elio.js.
-// Si faltara, el globo debe seguir: respaldo inerte en una línea.
-const Elio = window.Elio || { textoLluvia: () => 'sin dato',
-  textoTemperatura: () => 'sin dato', textoHumedad: () => 'sin dato',
-  diasDesde: () => null, indicesRotaciones: () => null,
-  responderElio: () => 'No tengo ese dato.' };
-const { textoLluvia, textoTemperatura, textoHumedad, diasDesde } = Elio;
-
-function bloqueFinca(id) {
-  return (RECIENTE && (RECIENTE.fincas || []).find((f) => f.id === id)) || null;
-}
-
-function dibujarLluvia(canvas, serie) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const ancho = canvas.clientWidth || 344;
-  const alto = 90;
-  canvas.width = Math.round(ancho * dpr);
-  canvas.height = Math.round(alto * dpr);
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, ancho, alto);
-  const lluvias = serie.map((d) => d.lluvia_mm).filter((v) => v !== null && v !== undefined);
-  if (!lluvias.length) { return; }
-  const maximo = Math.max(1, ...lluvias);
-  const anchoBarra = ancho / serie.length;
-  serie.forEach((dia, i) => {
-    const valor = dia.lluvia_mm;
-    if (valor === null || valor === undefined || valor <= 0) { return; }
-    const h = (valor / maximo) * (alto - 18);
-    ctx.fillStyle = 'rgba(53, 214, 255, 0.75)';
-    ctx.fillRect(i * anchoBarra + 1, alto - 14 - h, Math.max(1, anchoBarra - 2), h);
-  });
-  ctx.fillStyle = 'rgba(126, 151, 173, 0.9)';
-  ctx.font = '10px ui-monospace, Consolas, monospace';
-  ctx.fillText(`lluvia diaria · máx ${maximo.toFixed(1)} mm`, 2, 10);
-}
-
-function dibujarBanda(canvas, lluvia) {
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const ancho = canvas.clientWidth || 344;
-  const alto = 42;
-  canvas.width = Math.round(ancho * dpr);
-  canvas.height = Math.round(alto * dpr);
-  const ctx = canvas.getContext('2d');
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, ancho, alto);
-  if (!lluvia || !lluvia.banda || lluvia.banda[0] === null) {
-    ctx.fillStyle = 'rgba(126,151,173,.85)';
-    ctx.font = '10px ui-monospace, Consolas, monospace';
-    ctx.fillText('sin banda normal comparable', 2, 22);
-    return;
-  }
-  const [p25, p75] = lluvia.banda;
-  const valor = lluvia['30d_mm'];
-  const maximo = Math.max(p75 * 1.6, (valor || 0) * 1.2, 1);
-  const x = (mm) => 4 + (Math.max(0, mm) / maximo) * (ancho - 8);
-  ctx.fillStyle = 'rgba(88, 227, 154, 0.18)';
-  ctx.fillRect(x(p25), 8, Math.max(2, x(p75) - x(p25)), 16);
-  ctx.strokeStyle = 'rgba(88, 227, 154, 0.6)';
-  ctx.strokeRect(x(p25), 8, Math.max(2, x(p75) - x(p25)), 16);
-  if (valor !== null && valor !== undefined) {
-    ctx.fillStyle = '#ffb454';
-    ctx.fillRect(x(valor) - 1, 4, 3, 24);
-  }
-  ctx.fillStyle = 'rgba(126,151,173,.9)';
-  ctx.font = '10px ui-monospace, Consolas, monospace';
-  ctx.fillText(`banda normal P25–P75: ${p25.toFixed(0)}–${p75.toFixed(0)} mm ·`
-    + ` ahora ${valor === null ? 'sin dato' : valor.toFixed(0)} mm`, 2, 38);
-}
-
-function pintarFinca() {
-  const selector = document.getElementById('finca-selector');
-  const filas = document.getElementById('finca-filas');
-  const avisos = document.getElementById('finca-avisos');
-  const pie = document.getElementById('finca-pie');
-  if (!RECIENTE) {
-    selector.innerHTML = '';
-    filas.innerHTML = '<div class="fila">Sin datos recientes. Falta <code>datos/reciente.js</code>.</div>';
-    document.getElementById('finca-pronostico').innerHTML = '';
-    avisos.textContent = '';
-    pie.textContent = '';
-    return;
-  }
-  const opciones = FINCAS.length ? FINCAS : (RECIENTE.fincas || []);
-  selector.innerHTML = opciones.map((f) =>
-    `<option value="${f.id}"${f.id === fincaId ? ' selected' : ''}>${f.nombre}</option>`).join('');
-  const bloque = bloqueFinca(fincaId);
-  if (!bloque) {
-    filas.innerHTML = '<div class="fila">Esta finca no tiene datos recientes.</div>';
-    return;
-  }
-  const lluvia = bloque.lluvia || {};
-  const temp = bloque.temperatura || {};
-  const humedad = bloque.humedad_superficial || {};
-  filas.innerHTML = `
-    <div class="fila">${textoLluvia(lluvia)}</div>
-    <div class="fila">${textoTemperatura(temp)}</div>
-    <div class="fila">${textoHumedad(humedad)}</div>
-    <div class="fila">${textoSuelo()}</div>
-    <div class="fila"><b>Estado de la lluvia:</b>
-      <span class="estado-${lluvia.estado || 'normal'}">${lluvia.estado || 'sin dato'}</span></div>`;
-  dibujarLluvia(document.getElementById('finca-serie'), bloque.serie_30d || []);
-  dibujarBanda(document.getElementById('finca-banda'), lluvia);
-  const dias = (bloque.pronostico || []).slice(0, 7);
-  document.getElementById('finca-pronostico').innerHTML = dias.length
-    ? dias.map((d) => `<div>${d.fecha.slice(8)}/${d.fecha.slice(5, 7)}`
-        + `<b>${d.lluvia_mm === null ? '–' : d.lluvia_mm.toFixed(1)}</b>mm</div>`).join('')
-    : '<div style="flex:1">sin pronóstico</div>';
-  const frescura = diasDesde(RECIENTE.actualizado);
-  const viejo = frescura !== null && frescura > 3;
-  avisos.innerHTML = (viejo ? `Datos de hace ${frescura} días. ` : '')
-    + (RECIENTE.avisos || []).join(' · ')
-    + '<br>Estimación de celda de modelo, no monitoreo de tu parcela.'
-    + '<br>No mezclar con las tendencias 1984–2025: otra fuente y otra escala.';
-  pie.innerHTML = `Fuente: <b>${(RECIENTE.fuente || {}).nombre || 'sin dato'}</b>`
-    + ' · <b>no NASA</b> · actualizado ' + (RECIENTE.actualizado || 'sin fecha')
-    + `<br>Ventana: ${(RECIENTE.ventana || {}).inicio} a ${(RECIENTE.ventana || {}).fin}`;
-}
-
-function indicesRotaciones(estrategia) {
-  const agua = Number(document.getElementById('peso-agua').value) || 0;
-  const div = Number(document.getElementById('peso-diversidad').value) || 0;
-  const escenario = Number(document.getElementById('escenario-lluvia').value) || 0;
-  return Elio.indiceEscenario(estrategia, agua, div, escenario);
-}
-
-function textoSuelo() {
-  const fila = SUELO && (SUELO.fincas || []).find((f) => f.id === fincaId);
-  if (!fila) { return 'Suelo: <b>sin dato</b> (no se cargó la capa de suelo).'; }
-  if (fila.arcilla_pct === null && fila.carbono_organico_g_kg === null) {
-    return 'Suelo: <b>sin dato</b> para esta finca.';
-  }
-  const partes = [];
-  if (fila.textura) { partes.push(`textura <b>${fila.textura}</b>`); }
-  if (fila.arcilla_pct !== null) { partes.push(`arcilla ${fila.arcilla_pct} %`); }
-  if (fila.arena_pct !== null) { partes.push(`arena ${fila.arena_pct} %`); }
-  if (fila.carbono_organico_g_kg !== null) {
-    partes.push(`carbono orgánico ${fila.carbono_organico_g_kg} g/kg`);
-  }
-  if (fila.ph !== null) { partes.push(`pH ${fila.ph}`); }
-  return `Suelo (0–5 cm): ${partes.join(' · ')}. Fuente: ISRIC SoilGrids, no NASA.`;
-}
-
-function textoCultivos(estrategia) {
-  if ((estrategia.cultivos || []).length) { return estrategia.cultivos.join(', '); }
-  if (estrategia.id === 'actual') {
-    const parcela = typeof parcelaActual === 'function' ? parcelaActual() : null;
-    if (parcela && parcela.cultivo) {
-      return `${parcela.cultivo} (lo que hay hoy en ${parcela.nombre})`;
-    }
-    return 'La rotación que ya usa el agricultor: hay que levantarla en campo con el agrónomo.';
-  }
-  return 'sin definir (validar con el agricultor)';
-}
-
-function tablaComparativa(lista, finca) {
-  const secos = (finca && finca.meses_secos) || [];
-  const filas = lista.map((e) => {
-    const criticos = e.meses_criticos || [];
-    const coincide = criticos.length && secos.length
-      ? `${criticos.filter((m) => secos.includes(m)).length}/${secos.length}`
-      : '—';
-    const nombre = e.id === 'actual' ? 'Actual' : (e.titulo || e.id).replace('Alternativa ', 'Alt. ');
-    const clases = [e.id === 'actual' ? 'actual' : '',
-                    e.calculado === lista[0].calculado ? 'gana' : ''].join(' ').trim();
-    return `<tr class="${clases}"><td>${nombre}</td>`
-      + `<td class="num">${e.calculado === null ? '—' : e.calculado}</td>`
-      + `<td>${e.demanda_agua || '—'}</td><td>${coincide}</td>`
-      + `<td>${e.provisional ? 'sí' : 'no'}</td></tr>`;
-  }).join('');
-  return `<table><thead><tr><th>Plan</th><th>Índice</th><th>Demanda</th>`
-    + `<th>Secos</th><th>Provisional</th></tr></thead><tbody>${filas}</tbody></table>`
-    + '<span class="nota">«Secos» = meses en que el plan necesita agua que caen dentro de '
-    + 'los meses secos de la finca (NASA POWER): menos es mejor.</span>';
-}
-
-function evidenciaNasa(estrategia) {
-  const finca = (ROTACIONES.fincas || []).find((f) => f.id === fincaId);
-  const secos = (finca && finca.meses_secos) || [];
-  const criticos = estrategia.meses_criticos || [];
-  if (!secos.length) {
-    return 'Sin climatología NASA POWER para esta finca: la recomendación no usa el clima.';
-  }
-  const coincide = criticos.filter((mes) => secos.includes(mes)).length;
-  return `NASA POWER · meses secos ${secos.join(', ')}`
-    + (criticos.length
-      ? ` · este plan riega en ${criticos.join(', ')} → coincide en ${coincide}`
-      : '') + '.';
-}
-
-function pintarRotaciones() {
-  const caja = document.getElementById('rotaciones-tarjetas');
-  const pie = document.getElementById('rotaciones-pie');
-  if (!ROTACIONES) {
-    caja.innerHTML = '<div class="fila">Sin datos de rotaciones. Falta <code>datos/rotaciones.js</code>.</div>';
-    pie.textContent = '';
-    return;
-  }
-  const finca = (ROTACIONES.fincas || []).find((f) => f.id === fincaId) || (ROTACIONES.fincas || [])[0];
-  if (!finca) { caja.innerHTML = '<div class="fila">Sin rotaciones para esta finca.</div>'; return; }
-  const lista = (finca.estrategias || [])
-    .map((e) => ({ ...e, calculado: indicesRotaciones(e) }))
-    .sort((a, b) => (b.calculado ?? -1) - (a.calculado ?? -1));
-  const parcela = typeof parcelaActual === 'function' ? parcelaActual() : null;
-  document.getElementById('rotaciones-parcela').innerHTML = parcela
-    ? `Pensado para <b>${parcela.nombre}</b> · ${parcela.area_ha} ha · `
-      + `hoy con <b>${parcela.cultivo}</b>. El clima es el de la finca `
-      + `${(ROTACIONES && ROTACIONES.fincas || []).find((f) => f.id === finca.id)
-          ? (FINCAS.find((f) => f.id === finca.id) || {}).nombre || finca.id : finca.id}.`
-    : '';
-  document.getElementById('rotaciones-tabla').innerHTML = tablaComparativa(lista, finca);
-  caja.innerHTML = lista.map((e) => {
-    const puntos = e.calculado === null ? 'sin dato' : e.calculado;
-    return `<div class="tarjeta">
-      <h3>${e.titulo}${e.provisional ? '<span class="insignia">provisional</span>' : ''}</h3>
-      <div class="indice">${puntos}<span style="font-size:11px;color:var(--secundario)">/100 orientativo</span></div>
-      <div class="barra-indice"><i style="width:${Math.max(0, Math.min(100, puntos || 0))}%"></i></div>
-      <div class="evidencia">${evidenciaNasa(e)}</div>
-      <span class="rotulo">Cultivos</span>
-      <div style="font-size:11px">${textoCultivos(e)}</div>
-      <span class="rotulo">Por qué se sugiere</span>
-      <ul>${(e.motivos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
-      <span class="rotulo">Beneficios</span>
-      <ul>${(Elio.beneficios ? Elio.beneficios(e) : []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
-      <span class="rotulo">Qué datos faltan</span>
-      <ul>${(e.datos_faltantes || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
-      <span class="rotulo">Revisar con un agrónomo</span>
-      <ul>${(e.riesgos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
-    </div>`;
-  }).join('');
-  const escenario = Number(document.getElementById('escenario-lluvia').value) || 0;
-  document.getElementById('escenario-valor').textContent = escenario === 0
-    ? 'como la normal' : `${escenario > 0 ? '+' : ''}${escenario} % de lluvia`;
-  pie.innerHTML = `Clima: <b>${ROTACIONES.fuente_clima || 'NASA POWER'}</b> · generado ${ROTACIONES.generado || ''}`
-    + (escenario < 0 ? '<br><b>Escenario simulado</b>: sequía del '
-      + `${Math.abs(escenario)} %. No es un pronóstico; penaliza a las estrategias`
-      + ' con peor componente de agua.' : '')
-    + `<br>Meses secos en ${finca.id}: ${(finca.meses_secos || []).join(', ') || 'sin dato'}`
-    + (ROTACIONES.fuente_suelo ? `<br>Suelo: <b>${ROTACIONES.fuente_suelo}</b> (no NASA).` : '')
-    + '<br>Índice orientativo. No reemplaza el juicio del agricultor ni de un agrónomo local.';
-}
-
-function contextoElio() {
-  const bloque = bloqueFinca(fincaId);
-  const finca = FINCAS.find((f) => f.id === fincaId) || { nombre: fincaId, id: fincaId };
-  const rot = ROTACIONES && (ROTACIONES.fincas || []).find((f) => f.id === fincaId);
-  return { nombre: finca.nombre, reciente: bloque, rotaciones: rot, fuente: (RECIENTE || {}).fuente };
-}
-
-function responderElio(pregunta, contexto) {
-  return Elio.responderElio(pregunta, contexto || contextoElio());
-}
 
 // Datos en vivo: solo si se sirve por http(s). Si falla, queda el snapshot.
 async function refrescarDatos() {
@@ -2382,37 +2077,6 @@ async function refrescarDatos() {
     } catch (error) { /* sin red: se queda el snapshot */ }
   }
 }
-
-document.getElementById('finca-boton').addEventListener('click', () => panel('finca'));
-document.getElementById('rotaciones-boton').addEventListener('click', () => panel('rotaciones'));
-document.getElementById('elio-boton').addEventListener('click', () => panel('elio'));
-document.getElementById('metodo-boton').addEventListener('click', () => panel('metodo'));
-document.querySelectorAll('[data-cierra]').forEach((boton) => {
-  boton.addEventListener('click', cerrarPaneles);
-});
-document.getElementById('finca-selector').addEventListener('change', (evento) => {
-  fincaId = evento.target.value;
-  const finca = FINCAS.find((f) => f.id === fincaId);
-  if (finca) { volarA(finca.lat, finca.lon); }
-  pintarFinca();
-});
-['peso-agua', 'peso-diversidad', 'escenario-lluvia'].forEach((id) => {
-  document.getElementById(id).addEventListener('input', pintarRotaciones);
-});
-
-document.getElementById('finca-globo').addEventListener('click', () => {
-  const finca = FINCAS.find((f) => f.id === fincaId);
-  if (!finca) { return; }
-  cerrarPaneles();
-  volarA(finca.lat, finca.lon);
-  seleccionar(finca.lat, finca.lon);
-});
-document.getElementById('elio-enviar').addEventListener('click', () => {
-  const pregunta = document.getElementById('elio-pregunta').value;
-  document.getElementById('elio-respuesta').textContent = responderElio(pregunta);
-});
-refrescarDatos().then(() => { if (document.getElementById('finca').classList.contains('visible')) { pintarFinca(); } });
-
 
 // ---------- Mi parcela: monitoreo de la finca (demo tipo Hiroki Tomiyasu) ----------
 // El mapa y el clima son reales (Esri / NASA POWER / ERA5). Las parcelas, los
@@ -2772,22 +2436,25 @@ function dibujarMapa(estado) {
 }
 
 /* ---------- Estado y lecturas de la parcela activa ---------- */
-function humedadSlider() {
-  const campo = document.getElementById('vision-humedad');
-  const parcela = parcelaActual();
-  const valor = campo ? Number(campo.value) : (parcela && parcela.humedad_inicial) || 25;
-  return valor;
+/* Humedad de partida de cada parcela: es el valor simulado del sensor. */
+function humedadBase(parcela) {
+  return Number((parcela && parcela.humedad_inicial) ?? 26);
 }
 
-function lluviaSlider() {
-  const campo = document.getElementById('vision-lluvia');
-  return campo ? Number(campo.value) : 0;
+/* Lluvia de las últimas 24 h (ERA5, mm) convertida a mm/h orientativos.
+   No hay control para cambiarla: el tiempo no se inventa desde la interfaz. */
+function lluviaReal() {
+  const bloque = (RECIENTE && (RECIENTE.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
+  const serie = (bloque && bloque.serie_30d) || [];
+  const ultimo = serie[serie.length - 1];
+  const mm = ultimo ? Number(ultimo.lluvia_mm) : NaN;
+  return Number.isFinite(mm) ? Math.round((mm / 24) * 100) / 100 : 0;
 }
 
 function lecturasActuales(parcela, estado, ahora) {
   return Monitor.lecturas(parcela, ahora || Date.now(), {
-    humedad: humedadSlider(),
-    lluvia_mm_h: lluviaSlider(),
+    humedad: humedadBase(parcela),
+    lluvia_mm_h: lluviaReal(),
     riego: Boolean(estado && estado.riego),
     techo: Boolean(estado && estado.techo),
   });
@@ -2796,8 +2463,8 @@ function lecturasActuales(parcela, estado, ahora) {
 /* Estado automático (riego/techo/ventilación) + lo que hayan pedido a mano o
    por Telegram. El override más reciente gana. */
 function calcularEstado(parcela) {
-  const humedad = humedadSlider();
-  const lluvia = lluviaSlider();
+  const humedad = humedadBase(parcela);
+  const lluvia = lluviaReal();
   const entrada = {
     id: parcela.id, nombre: parcela.nombre, cultivo: parcela.cultivo,
     humedad, area_ha: parcela.area_ha, sensores: (parcela.sensores || []).length,
@@ -2840,7 +2507,7 @@ function pintarHistorial(parcela, sensor) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, ancho, alto);
   const serie = Monitor.historial(parcela, Date.now(), {
-    humedad: humedadSlider(), riego: Boolean(parcelaEstado && parcelaEstado.riego),
+    humedad: humedadBase(parcela), riego: Boolean(parcelaEstado && parcelaEstado.riego),
   });
   if (!serie.length) { return; }
   const valores = serie.map((p) => p.valor);
@@ -2897,6 +2564,21 @@ function pintarClima() {
   const manana = (bloque.pronostico || [])[0] || {};
   const pct = lluvia.pct;
   const delta = temp.delta;
+  const serie = bloque.serie_30d || [];
+  const valoresHumedad = serie.map((d) => d.humedad).filter((v) => v !== null && v !== undefined);
+  const mediaHumedad = valoresHumedad.length
+    ? valoresHumedad.reduce((a, b) => a + b, 0) / valoresHumedad.length : null;
+  const ultimaHumedad = valoresHumedad.length ? valoresHumedad[valoresHumedad.length - 1] : null;
+  const lluvias = serie.map((d) => d.lluvia_mm).filter((v) => v !== null && v !== undefined);
+  const diasLluvia = lluvias.filter((v) => v >= 1).length;
+  const extremos = lluvias.filter((v) => v >= 20).length;
+  // Heladas: mínima de las medias mensuales de NASA POWER 1991–2020.
+  const finca = FINCAS.find((f) => f.id === FINCA_PARCELAS) || null;
+  const mensual = (finca && finca.climatologia && finca.climatologia.mensual) || {};
+  const temperaturas = Object.values(mensual)
+    .flatMap((anio) => (anio && anio.t2m) || [])
+    .filter((v) => v !== null && v !== undefined);
+  const minimaMensual = temperaturas.length ? Math.min(...temperaturas) : null;
   caja.innerHTML = `
     <div>LLUVIA 30 D<b>${lluvia['30d_mm'] ?? '–'} mm</b>
       <span>${pct === null || pct === undefined ? 'sin normal' : `${pct > 0 ? '+' : ''}${Math.round(pct)} % vs normal`}</span></div>
@@ -2906,9 +2588,16 @@ function pintarClima() {
       <span>capa 0–7 cm</span></div>
     <div>MAÑANA<b>${manana.lluvia_mm ?? '–'} mm</b>
       <span>${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C</span></div>
-    <div class="fuente">Fuente: Open-Meteo / ERA5-Land (no NASA), ventana
-      ${(RECIENTE.ventana || {}).inicio || '–'} a ${(RECIENTE.ventana || {}).fin || '–'}.
-      La humedad del suelo de los sensores es simulada; esta de arriba es de modelo.</div>`;
+    <div>SUELO VS SU MEDIA<b>${ultimaHumedad === null ? '–' : ultimaHumedad.toFixed(3)}
+      ${mediaHumedad === null ? '' : `/ ${mediaHumedad.toFixed(3)}`}</b>
+      <span>m³/m³ · media de los últimos ${serie.length} días</span></div>
+    <div>DÍAS DE LLUVIA<b>${diasLluvia}/${serie.length}</b>
+      <span>${extremos} día(s) sobre 20 mm</span></div>
+    <div>HELADAS<b>${minimaMensual === null ? 'sin dato'
+      : (minimaMensual <= 2 ? 'riesgo' : 'sin riesgo')}</b>
+      <span>${minimaMensual === null ? 'POWER' : `mínima media ${minimaMensual.toFixed(1)} °C`}</span></div>
+    <div class="fuente">Fuente: Open-Meteo / ERA5-Land (no NASA) para la temporada;
+      heladas y clima histórico: NASA POWER. La humedad de los sensores es simulada.</div>`;
 }
 
 function pintarActuadores(parcela, estado) {
@@ -2967,7 +2656,7 @@ function pintarActuadores(parcela, estado) {
 function pintarLecturas(parcela, sensor, estado, lecturas) {
   const caja = document.getElementById('parcela-lecturas');
   if (!caja) { return; }
-  const lluvia = lluviaSlider();
+  const lluvia = lluviaReal();
   const seco = sensor.humedad < Vision.UMBRAL_RIEGO;
   caja.innerHTML = `
     <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${sensor.humedad}<small style="font-size:9px"> %</small></b></div>
@@ -3266,16 +2955,102 @@ function cerrarFoto() {
 }
 
 /* ---------- Render general ---------- */
+/* Comparación de las tres rotaciones (la que pide el desafío) dentro del monitor:
+   índice orientativo, evidencia NASA, beneficios, huecos y riesgos. */
+let rotacionId = null;
+
+function estrategiasDeLaFinca() {
+  const finca = (ROTACIONES && (ROTACIONES.fincas || []).find((f) => f.id === FINCA_PARCELAS))
+    || (ROTACIONES && (ROTACIONES.fincas || [])[0]) || null;
+  if (!finca) { return { finca: null, estrategias: [] }; }
+  const valor = (id, defecto) => {
+    const campo = document.getElementById(id);
+    return campo ? Number(campo.value) : defecto;
+  };
+  const agua = valor('peso-agua', 5);
+  const diversidad = valor('peso-diversidad', 5);
+  const escenario = valor('escenario-lluvia', 0);
+  const Elio = window.Elio || {};
+  const estrategias = (finca.estrategias || []).map((e) => ({
+    ...e,
+    indice: Elio.indiceEscenario ? Elio.indiceEscenario(e, agua, diversidad, escenario) : e.indice,
+  }));
+  return { finca, estrategias };
+}
+
+function pintarRotacion() {
+  const caja = document.getElementById('rotacion-filas');
+  const detalle = document.getElementById('rotacion-detalle');
+  if (!caja || !detalle) { return; }
+  const { finca, estrategias } = estrategiasDeLaFinca();
+  if (!estrategias.length) {
+    caja.innerHTML = '<div class="rotacion-fila">Sin dato de rotación.</div>';
+    detalle.innerHTML = '';
+    return;
+  }
+  const mejor = Math.max(...estrategias.map((e) => e.indice ?? 0));
+  if (!estrategias.some((e) => e.id === rotacionId)) {
+    rotacionId = (estrategias.find((e) => e.indice === mejor) || estrategias[0]).id;
+  }
+  caja.innerHTML = estrategias.map((e) => `
+    <button class="rotacion-fila${e.indice === mejor ? ' gana' : ''}" data-id="${e.id}">
+      <span>${e.titulo}${e.provisional ? ' · provisional' : ''}</span>
+      <b>${e.indice ?? '–'}/100</b>
+    </button>`).join('');
+  caja.querySelectorAll('button.rotacion-fila').forEach((boton) => {
+    boton.addEventListener('click', () => { rotacionId = boton.dataset.id; pintarRotacion(); });
+  });
+
+  const elegida = estrategias.find((e) => e.id === rotacionId) || estrategias[0];
+  const Elio = window.Elio || {};
+  const lista = (valores) => (valores && valores.length
+    ? valores.map((v) => `<li>${v}</li>`).join('') : '<li>sin dato</li>');
+  const beneficios = (Elio.beneficios ? Elio.beneficios(elegida) : []);
+  const evidencia = [];
+  if ((finca.meses_secos || []).length) {
+    evidencia.push(`Meses secos de la finca: ${finca.meses_secos.join(', ')} (NASA POWER).`);
+  }
+  if (elegida.demanda_agua) {
+    evidencia.push(`Demanda de agua de esta rotación: ${elegida.demanda_agua.toLowerCase()}.`);
+  }
+  if ((elegida.meses_criticos || []).length) {
+    evidencia.push(`Meses críticos: ${elegida.meses_criticos.join(', ')}.`);
+  }
+  detalle.innerHTML = `<h4>Por qué se sugiere</h4><ul>${lista(elegida.motivos)}</ul>
+    <h4>Evidencia</h4><ul>${lista(evidencia)}</ul>
+    <h4>Beneficios</h4><ul>${lista(beneficios)}</ul>
+    <h4>Datos que faltan</h4><ul>${lista(elegida.datos_faltantes)}</ul>
+    <h4>Riesgo a revisar con un agrónomo</h4><ul>${lista(elegida.riesgos)}</ul>
+    <div class="fuente">Índice orientativo, no una recomendación agronómica.
+      Clima: ${(ROTACIONES && ROTACIONES.fuente_clima) || 'NASA POWER'} ·
+      Suelo: ${(ROTACIONES && ROTACIONES.fuente_suelo) || 'ISRIC SoilGrids (no NASA)'}.</div>`;
+  detalle.classList.add('visible');
+  caja.dataset.pintada = '1';
+}
+
+function actualizarPrioridades() {
+  const agua = document.getElementById('peso-agua');
+  const diversidad = document.getElementById('peso-diversidad');
+  const escenario = document.getElementById('escenario-lluvia');
+  if (!agua || !diversidad || !escenario) { return; }
+  const texto = (id, valor) => {
+    const campo = document.getElementById(id);
+    if (campo) { campo.textContent = valor; }
+  };
+  texto('peso-agua-valor', agua.value);
+  texto('peso-diversidad-valor', diversidad.value);
+  texto('escenario-lluvia-valor', Number(escenario.value) === 0
+    ? 'como la normal' : `${escenario.value > 0 ? '+' : ''}${escenario.value} % de lluvia`);
+  pintarRotacion();
+}
+
 function pintarVision() {
   const parcela = parcelaActual();
   if (!parcela) { return; }
   const { estado, avisos } = calcularEstado(parcela);
   parcelaEstado = estado;
   const lecturas = lecturasActuales(parcela, estado);
-  const sensor = lecturas[0] || { humedad: humedadSlider(), temperatura: parcela.temperatura, humedad_aire: 80, bateria: 4 };
-
-  document.getElementById('vision-humedad-valor').textContent = `${humedadSlider()} %`;
-  document.getElementById('vision-lluvia-valor').textContent = `${lluviaSlider()} mm/h`;
+  const sensor = lecturas[0] || { humedad: humedadBase(parcela), temperatura: parcela.temperatura, humedad_aire: 80, bateria: 4 };
 
   dibujarMapa(estado);
   pintarLecturas(parcela, sensor, estado, lecturas);
@@ -3283,6 +3058,7 @@ function pintarVision() {
   pintarHistorial(parcela, sensor);
   pintarClima();
   pintarActuadores(parcela, estado);
+  if (!document.getElementById('rotacion-filas').dataset.pintada) { pintarRotacion(); }
   const hora = Monitor.formatoHora(Date.now());
   const cajaHora = document.getElementById('vision-sensores-hora');
   if (cajaHora) { cajaHora.textContent = `lectura ${hora} · simulado`; }
@@ -3310,11 +3086,8 @@ function elegirParcela(id, sinRepintar) {
   parcelaEstado = null;
   const parcela = parcelaActual();
   if (!parcela) { return; }
-  const slider = document.getElementById('vision-humedad');
-  if (slider) { slider.value = String(parcela.humedad_inicial ?? 26); }
   const selector = document.getElementById('parcela-selector');
   if (selector) { selector.value = id; }
-  if (FINCAS.some((f) => f.id === FINCA_PARCELAS)) { fincaId = FINCA_PARCELAS; }
   const tira = document.getElementById('vision-tira');
   if (tira) {
     tira.querySelectorAll('.tarjeta-parcela').forEach((boton) => {
@@ -3502,9 +3275,6 @@ async function refrescarBot() {
 /* ---------- Eventos de la vista ---------- */
 document.getElementById('vision-cerrar').addEventListener('click', () => cerrarMonitor());
 document.getElementById('vision-lightbox').addEventListener('click', () => cerrarFoto());
-['vision-humedad', 'vision-lluvia'].forEach((id) => {
-  document.getElementById(id).addEventListener('input', () => { pintarVision(); });
-});
 document.getElementById('vision-registrar').addEventListener('click', () => {
   dibujo = { activo: true, puntos: [] };
   document.getElementById('vision-dibujo').hidden = false;
@@ -3523,7 +3293,6 @@ document.getElementById('vision-terminar').addEventListener('click', () => {
       'Necesito al menos 3 esquinas para cerrar la parcela.';
     return;
   }
-  const centro = centroParcelas();
   const hectareas = areaHa(dibujo.puntos);
   const nueva = {
     id: `registrada-${PARCELAS.length + 1}`,
@@ -3533,8 +3302,8 @@ document.getElementById('vision-terminar').addEventListener('click', () => {
     humedad_inicial: 25,
     temperatura: 24.0,
     plantas_georreferenciadas: Math.round(hectareas * 2000),
-    poligono_m: dibujo.puntos.map(([x, y]) => [x - centro.x, y - centro.y]),
-    sensores: [{ id: 'ESP-N', x_m: dibujo.puntos[0][0] - centro.x, y_m: dibujo.puntos[0][1] - centro.y }],
+    poligono_m: dibujo.puntos.map(([x, y]) => [Math.round(x), Math.round(y)]),
+    sensores: [{ id: 'ESP-N', x_m: Math.round(dibujo.puntos[0][0]), y_m: Math.round(dibujo.puntos[0][1]) }],
     camara: 'Parcela recién registrada: aún sin capturas de cámara.',
     registrada: true,
     area_ha: Math.round(hectareas * 100) / 100,
@@ -3630,6 +3399,10 @@ document.getElementById('chat-forma').addEventListener('submit', (evento) => {
   campo.value = '';
 });
 document.getElementById('vision-boton').addEventListener('click', () => volarAlaParcela());
+['peso-agua', 'peso-diversidad', 'escenario-lluvia'].forEach((id) => {
+  const campo = document.getElementById(id);
+  if (campo) { campo.addEventListener('input', actualizarPrioridades); }
+});
 
 montarParcelas();
 pintarChipBot();
@@ -3660,11 +3433,6 @@ window.__tierra = {
   fincas: FINCAS,
   reciente: RECIENTE,
   rotaciones: ROTACIONES,
-  abrirFinca: () => panel('finca'),
-  abrirRotaciones: () => panel('rotaciones'),
-  pintarFinca,
-  pintarRotaciones,
-  responderElio,
   parcelas: PARCELAS,
   parcelaActual,
   plantasDeParcela,
@@ -3672,9 +3440,10 @@ window.__tierra = {
   registrarParcela: () => PARCELAS.filter((p) => p.registrada),
   elegirParcela,
   pintarVision,
-  contextoElio,
-  indicesRotaciones,
-  diasDesde,
+  pintarRotacion,
+  abrirMonitor,
+  cerrarMonitor,
+  volarAlaParcela,
   globo: { escena, camara, renderer, controles, texturas, THREE, capaMalla },
 };
 
@@ -3686,9 +3455,16 @@ window.addEventListener('resize', () => {
 
 construirPestanas();
 pintar();
+refrescarDatos().then(() => {
+  const caja = document.getElementById('rotacion-filas');
+  if (caja) { delete caja.dataset.pintada; }
+  if (monitorAbierto) { pintarRotacion(); pintarVision(); }
+});
 
 montarGlobo().finally(() => {
   animar();
+  // La demo arranca donde está el producto: el panel de monitoreo.
+  setTimeout(() => abrirMonitor(), 500);
 });
 </script>
 </body>

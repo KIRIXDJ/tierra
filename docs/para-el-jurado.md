@@ -23,8 +23,9 @@ Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
    que faltan y riesgos a validar. Deslizadores de prioridades (agua/diversidad) y
    un escenario de sequía para ver qué plan aguanta peor.
 
-Y **Elio**, un asistente que responde solo con lo que hay en pantalla, cita la
-fuente de cada cifra y dice «no tengo ese dato» cuando falta. No controla nada.
+Y **Elio**, el bot real de Telegram: responde solo con lo que hay en los datos,
+cita la fuente de cada cifra y dice «no tengo ese dato» cuando falta. El bot mueve
+los actuadores *simulados* del panel; no hay hardware conectado.
 
 ## Qué datos NASA usa, y para qué
 
@@ -46,7 +47,7 @@ fuente de cada cifra y dice «no tengo ese dato» cuando falta. No controla nada
 - **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
 - **La app no carga ninguna librería de terceros**: three.js y las texturas están
   en el repo. Solo se piden datos a las APIs.
-- **127 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
+- **125 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
   el caso con la red caída).
 
 ## Límites, dichos sin rodeos
@@ -68,8 +69,9 @@ python3 -m http.server 8000
 # http://localhost:8000/web/
 ```
 
-Girar el globo → clic en el Caribe → **Finca** (Constanza y Azua) →
-**Rotaciones** (mover "Ahorrar agua" y el escenario de sequía) → **Elio**
-("¿está seco?" y "activa el riego") → **Método**.
+La app abre en **Mi parcela**: mapa, sensores, clima, fotos, techo y la
+comparación de las tres rotaciones (con evidencia, huecos y riesgos). Escribir al
+bot **@climaxeliobot** (`/estado`, `/techo on`, o una pregunta libre). **×** para
+volver al globo → Caribe → celda → "Abrir el monitoreo".
 
 El guion completo, con cifras del día, está en [`demo.md`](demo.md).

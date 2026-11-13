@@ -21,9 +21,10 @@ globales que no contestan su pregunta: *¿cómo viene esta temporada y qué siem
 
 **3. Lo que ya funciona (60 s)**
 Tres lentes sobre la misma finca: 42 años de tendencia NASA (con corrección por
-pruebas múltiples), los últimos 30 días contra su propia normal, y tres rotaciones
-comparadas con los meses secos de esa finca.
-"Esto no es un mockup: se clona, se abre y funciona sin internet."
+pruebas múltiples), los últimos 30 días contra su propia normal, y **tres rotaciones
+comparadas** con su porqué, evidencia, beneficios, huecos y riesgos.
+"El reto oficial (Field Shift) pide exactamente eso; y esto no es un mockup: se
+clona, se abre y funciona sin internet, con el bot real por Telegram."
 
 **4. Producto completo (60 s)**
 "Cómo se ve cuando está instalado: sensores ESP32 por parcela, riego que se
@@ -48,7 +49,7 @@ pruebas múltiples y el asistente responde «no tengo ese dato» cuando falta.
 Eso es lo que un agrónomo puede auditar."
 
 **6. Estado y huecos (30 s)**
-"Hecho: app funcionando, 127 pruebas automáticas, repositorio público.
+"Hecho: app funcionando, 125 pruebas automáticas, repositorio público.
 No hecho: validación agronómica, hardware en campo y precio."
 
 **7. El ask (30 s)**
@@ -104,6 +105,7 @@ falta."
 - [ ] Completar nombres y roles del equipo (diapositiva 10).
 - [ ] Ensayar con cronómetro: no pasar de 5:00.
 - [ ] Probar el deck y la app **sin internet** en el portátil que se va a usar.
-- [ ] Tener la app abierta en **Mi parcela** (con el chat del bot a la vista) y en **Rotaciones**.
+- [ ] Tener la app abierta en **Mi parcela**, con el chat del bot a la vista y la
+      comparación de rotaciones lista para bajar el panel.
 - [ ] Decidir quién responde cada bloque de preguntas.
 - [ ] Video de respaldo de 2 minutos.
