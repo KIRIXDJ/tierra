@@ -55,7 +55,7 @@ los actuadores *simulados* del panel; no hay hardware conectado.
 - **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
 - **La app no carga ninguna librería de terceros**: three.js y las texturas están
   en el repo. Solo se piden datos a las APIs.
-- **145 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
+- **148 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
   el caso con la red caída).
 
 ## Lo que el reto pide y aún no cubrimos
