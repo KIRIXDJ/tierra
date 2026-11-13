@@ -79,4 +79,12 @@ assert.ok(b.some((x) => /diversidad/.test(x)));
 assert.deepStrictEqual(Elio.beneficios({ componentes: { agua: 2, diversidad: 0 } }),
   ['Coincide con los meses secos: necesitaría apoyo de riego.']);
 
+// 11. Leguminosas: se reconoce el aporte a la salud del suelo.
+const conLeguminosa = Elio.beneficios({ cultivos: ['yuca', 'mani', 'sorgo'],
+                                        componentes: { agua: 7, diversidad: 10 } });
+assert.ok(conLeguminosa.some((x) => /leguminosa/i.test(x) && /nitrógeno/.test(x)));
+const sinLeguminosa = Elio.beneficios({ cultivos: ['yuca', 'sorgo'],
+                                        componentes: { agua: 7, diversidad: 7 } });
+assert.ok(!sinLeguminosa.some((x) => /leguminosa/i.test(x)));
+
 console.log('OK');

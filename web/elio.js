@@ -148,6 +148,13 @@
     } else if (typeof c.diversidad === 'number' && c.diversidad > 0) {
       lista.push('Dos cultivos: diversidad parcial.');
     }
+    // Hecho agronómico general: las leguminosas fijan nitrógeno y ayudan al suelo.
+    const LEGUMINOSAS = ['frijol', 'mani', 'maní', 'habichuela', 'guandul', 'guandú', 'soya'];
+    const cultivos = (estrategia && estrategia.cultivos) || [];
+    const leguminosa = cultivos.find((nombre) => LEGUMINOSAS.includes(String(nombre).toLowerCase()));
+    if (leguminosa) {
+      lista.push(`Incluye leguminosa (${leguminosa}): fija nitrógeno y ayuda a la salud del suelo.`);
+    }
     return lista;
   }
 
