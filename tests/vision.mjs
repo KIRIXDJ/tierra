@@ -76,4 +76,27 @@ assert.match(foto.hallazgo, /No se ve planta/);
 
 assert.strictEqual(Vision.analizarFoto(null, 0, 0), null);
 
+// 9. Bot de Telegram: comandos y cambios de estado.
+const ctxBot = { parcela: { nombre: 'La Esperanza', cultivo: 'yuca', area_ha: 1.06, temperatura: 28.4 },
+                 estado: { humedad: 18, riego: true, ventilacion: true, techo: false } };
+
+const respuestaEstado = Vision.interpretarComando('/estado', ctxBot).respuesta;
+assert.match(respuestaEstado, /Humedad: 18/);
+assert.match(respuestaEstado, /Falta agua/);
+
+const riegoOff = Vision.interpretarComando('/riego off', ctxBot);
+assert.strictEqual(riegoOff.cambios.riego, false);
+assert.match(riegoOff.respuesta, /Riego cerrado/);
+
+assert.strictEqual(Vision.interpretarComando('/ventilacion on', ctxBot).cambios.ventilacion, true);
+assert.strictEqual(Vision.interpretarComando('cierra el techo', ctxBot).cambios.techo, true);
+assert.strictEqual(Vision.interpretarComando('/riego', ctxBot).cambios.riego, undefined);
+assert.match(Vision.interpretarComando('/riego', ctxBot).respuesta, /on o riego off/);
+
+const auto = Vision.interpretarComando('/auto', ctxBot);
+assert.deepStrictEqual(auto.cambios, { riego: null, ventilacion: null, techo: null });
+
+assert.match(Vision.interpretarComando('/foto', ctxBot).respuesta, /agrónomo/);
+assert.match(Vision.interpretarComando('cualquier cosa', ctxBot).respuesta, /No entendí/);
+
 console.log('OK');

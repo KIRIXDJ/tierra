@@ -218,9 +218,24 @@
     border-left: 2px solid rgba(88, 227, 154, .55); padding-left: 7px; line-height: 1.45; }
   #vision-mapa { width: 100%; height: 210px; display: block; border-radius: 8px;
     background: #08111c; border: 1px solid var(--borde); }
-  #vision-telegram { width: 100%; margin-top: 10px; background: transparent; color: var(--cian);
-    border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
-    font-size: 12px; cursor: pointer; }
+  #vision-chat { margin-top: 10px; border: 1px solid var(--borde); border-radius: 10px;
+    overflow: hidden; background: #071019; }
+  .chat-cabecera { font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--secundario); padding: 6px 10px; background: rgba(53, 214, 255, .06);
+    border-bottom: 1px solid var(--borde); }
+  #chat-mensajes { max-height: 132px; overflow-y: auto; padding: 8px 10px;
+    display: flex; flex-direction: column; gap: 6px; }
+  .burbuja { max-width: 88%; font-size: 11px; line-height: 1.4; padding: 6px 9px;
+    border-radius: 10px; white-space: pre-wrap; }
+  .burbuja.yo { align-self: flex-end; background: rgba(53, 214, 255, .16); color: var(--texto);
+    border-bottom-right-radius: 3px; }
+  .burbuja.bot { align-self: flex-start; background: rgba(255, 255, 255, .06);
+    color: var(--texto); border-bottom-left-radius: 3px; }
+  #chat-forma { display: flex; border-top: 1px solid var(--borde); }
+  #chat-texto { flex: 1; background: transparent; border: 0; color: var(--texto);
+    padding: 8px 10px; font: inherit; font-size: 12px; outline: none; }
+  #chat-forma button { background: transparent; border: 0; color: var(--cian);
+    padding: 0 12px; font-size: 15px; cursor: pointer; }
   #vision-registrar { width: 100%; margin-top: 8px; background: transparent; color: var(--verde);
     border: 1px solid rgba(88, 227, 154, .5); border-radius: 7px; padding: 7px; font: inherit;
     font-size: 12px; cursor: pointer; }
@@ -375,7 +390,14 @@
   <div class="control"><label for="vision-lluvia">Lluvia:
     <b id="vision-lluvia-valor">0 mm/h</b></label>
     <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
-  <button id="vision-telegram">Enviar aviso al móvil</button>
+  <div id="vision-chat">
+    <div class="chat-cabecera">Bot de la finca · Telegram</div>
+    <div id="chat-mensajes" aria-live="polite"></div>
+    <form id="chat-forma">
+      <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
+      <button type="submit" aria-label="Enviar">➤</button>
+    </form>
+  </div>
   <div id="vision-log" aria-live="polite"></div>
 </aside>
 <aside id="metodo">
@@ -2216,6 +2238,7 @@ const FINCA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.finca) || nul
 let parcelaId = PARCELAS.length ? PARCELAS[0].id : null;
 let parcelaEstado = null;
 let dibujo = { activo: false, puntos: [] };
+let manual = { riego: null, ventilacion: null, techo: null };
 let imagenMapa = null;
 let imagenLista = false;
 
@@ -2468,7 +2491,11 @@ function pintarVision() {
     ventilacion: parcelaEstado ? parcelaEstado.ventilacion : false,
   };
   const salida = Vision.evaluar([entrada], { lluvia_mm_h: lluvia });
-  parcelaEstado = salida.parcelas[0];
+  parcelaEstado = { ...salida.parcelas[0] };
+  ['riego', 'ventilacion', 'techo'].forEach((clave) => {
+    if (manual[clave] !== null) { parcelaEstado[clave] = manual[clave]; }
+  });
+
 
   document.getElementById('vision-humedad-valor').textContent = `${humedad} %`;
   document.getElementById('vision-lluvia-valor').textContent = `${lluvia} mm/h`;
@@ -2667,20 +2694,38 @@ document.getElementById('vision-archivo').addEventListener('change', (evento) =>
   lector.readAsDataURL(archivo);
 });
 
-document.getElementById('vision-telegram').addEventListener('click', () => {
+function burbuja(texto, quien) {
+  const caja = document.getElementById('chat-mensajes');
+  const div = document.createElement('div');
+  div.className = `burbuja ${quien}`;
+  div.textContent = texto;
+  caja.appendChild(div);
+  caja.scrollTop = caja.scrollHeight;
+}
+
+function enviarAlBot(texto) {
+  const limpio = String(texto || '').trim();
+  if (!limpio) { return; }
   const parcela = parcelaActual();
-  const humedad = Number(document.getElementById('vision-humedad').value);
-  const lluvia = Number(document.getElementById('vision-lluvia').value);
-  const salida = Vision.evaluar([{ ...parcela, humedad, riego: false, techo: false }],
-                                { lluvia_mm_h: lluvia });
-  const hora = new Date().toTimeString().slice(0, 5);
-  const mensaje = Vision.mensajeTelegram(
-    salida.avisos.length ? salida.avisos
-      : [`${parcela.nombre}: humedad ${humedad} %, lluvia ${lluvia} mm/h. Sin cambios.`], hora);
-  const log = document.getElementById('vision-log');
-  log.innerHTML = mensaje.split('\n').map((l) => `<div>${l}</div>`).join('') + log.innerHTML;
+  burbuja(limpio, 'yo');
+  const salida = Vision.interpretarComando(limpio, { parcela, estado: parcelaEstado || {} });
+  // Aplicar los cambios que pida el bot: null vuelve a automático.
+  Object.entries(salida.cambios || {}).forEach(([clave, valor]) => {
+    if (clave in manual) { manual[clave] = valor; }
+  });
+  pintarVision();
+  burbuja(salida.respuesta, 'bot');
+}
+
+document.getElementById('chat-forma').addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  const campo = document.getElementById('chat-texto');
+  enviarAlBot(campo.value);
+  campo.value = '';
 });
+
 montarParcelas();
+enviarAlBot('/estado');
 
 window.__tierra = {
   listo: false,

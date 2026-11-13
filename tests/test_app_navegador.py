@@ -228,8 +228,10 @@ class TestApp(unittest.TestCase):
         pag.fill("#vision-lluvia", "5")
         pag.dispatch_event("#vision-lluvia", "input")
         self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
-        pag.click("#vision-telegram")
-        self.assertIn("[", pag.inner_text("#vision-log"))
+        pag.fill("#chat-texto", "/estado")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
 
         # Ventilación (invernadero) y plantas georreferenciadas.
         self.assertIn("VENTILA", pag.inner_text("#parcela-lecturas"))
@@ -237,6 +239,20 @@ class TestApp(unittest.TestCase):
         plantas = pag.evaluate(
             "window.__tierra.plantasDeParcela(window.__tierra.parcelaActual()).length")
         self.assertGreater(plantas, 50)
+
+        # Control por Telegram (el bot responde y cambia los actuadores).
+        pag.fill("#chat-texto", "/riego off")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("Riego cerrado", pag.inner_text("#chat-mensajes"))
+        pag.fill("#chat-texto", "/techo on")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
+        pag.fill("#chat-texto", "/estado")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
         self.assertEqual(errores, [])
         pag.close()
 
@@ -348,8 +364,10 @@ class TestApp(unittest.TestCase):
         pag.fill("#vision-lluvia", "6")
         pag.dispatch_event("#vision-lluvia", "input")
         self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
-        pag.click("#vision-telegram")
-        self.assertIn("[", pag.inner_text("#vision-log"))
+        pag.fill("#chat-texto", "/estado")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
 
         # 6. Método y Elio.
         pag.click("#metodo-boton")

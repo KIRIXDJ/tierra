@@ -165,9 +165,97 @@
     };
   }
 
+
+  /* ---- Bot de Telegram: interpreta lo que escribe el agricultor ----
+     Puro: recibe el texto y el estado, devuelve la respuesta y qué cambiar.
+     En producción esto lo haría un bot real con su token en el servidor. */
+  function interpretarComando(texto, contexto) {
+    const c = contexto || {};
+    const parcela = c.parcela || {};
+    const estado = c.estado || {};
+    const t = String(texto || '').trim().toLowerCase();
+    const nombre = parcela.nombre || 'tu parcela';
+    const cambios = {};
+    const ayuda = [
+      'Comandos:',
+      '/estado — cómo va la parcela',
+      '/riego on|off — abrir o cerrar el riego',
+      '/ventilacion on|off — abrir o cerrar la ventilación',
+      '/techo on|off — cerrar o abrir el techo',
+      '/auto — volver a automático',
+      '/foto — analizar la última foto',
+    ].join('\n');
+
+    if (!t || t === '/ayuda' || t === 'ayuda' || t === '/start') {
+      return { respuesta: `Hola. Soy el bot de ${nombre}.\n\n${ayuda}`, cambios };
+    }
+    if (t === '/estado' || t === 'estado') {
+      return {
+        respuesta: `*${nombre}* (${parcela.cultivo || 'sin cultivo'}, ${parcela.area_ha ?? '?'} ha)\n`
+          + `Humedad: ${estado.humedad ?? '?'} %\n`
+          + `Temperatura: ${parcela.temperatura ?? '?'} °C\n`
+          + `Riego: ${estado.riego ? 'encendido' : 'apagado'}\n`
+          + `Ventilación: ${estado.ventilacion ? 'abierta' : 'cerrada'}\n`
+          + `Techo: ${estado.techo ? 'cerrado' : 'abierto'}\n`
+          + `${estado.humedad !== null && estado.humedad < UMBRAL_RIEGO
+            ? '⚠️ Falta agua: por debajo del umbral.' : 'Sin alertas.'}`,
+        cambios,
+      };
+    }
+    const orden = (clave) => {
+      if (/(\bon\b|encend|abre|abrir|activa|cierra|cerrar@sí)/.test(t)) { return true; }
+      if (/(\boff\b|apag|cierra|cerrar|desactiva)/.test(t)) { return false; }
+      return null;
+    };
+    if (/\/riego|riega|regar/.test(t)) {
+      const valor = orden(t);
+      if (valor === null) {
+        return { respuesta: '¿Riego on o riego off?', cambios };
+      }
+      cambios.riego = valor;
+      return { respuesta: valor ? `Riego abierto en ${nombre}.` : `Riego cerrado en ${nombre}.`, cambios };
+    }
+    if (/\/ventilacion|ventila/.test(t)) {
+      const valor = orden(t);
+      if (valor === null) {
+        return { respuesta: '¿Ventilación on o ventilación off?', cambios };
+      }
+      cambios.ventilacion = valor;
+      return { respuesta: valor ? 'Ventilación abierta.' : 'Ventilación cerrada.', cambios };
+    }
+    if (/\/techo|techo|lona/.test(t)) {
+      const valor = orden(t);
+      if (valor === null) {
+        return { respuesta: '¿Techo on (cerrado) o techo off (abierto)?', cambios };
+      }
+      cambios.techo = valor;
+      return { respuesta: valor ? 'Techo cerrado.' : 'Techo abierto.', cambios };
+    }
+    if (/\/auto|automatico|automático/.test(t)) {
+      cambios.riego = null;
+      cambios.ventilacion = null;
+      cambios.techo = null;
+      return { respuesta: 'Vuelto a modo automático: decido yo con los sensores.', cambios };
+    }
+    if (/\/foto|foto|fotografia/.test(t)) {
+      return {
+        respuesta: 'Mándame una foto de la hoja y te digo qué color veo. '
+          + 'No diagnostico enfermedades: eso lo confirma un agrónomo.',
+        cambios,
+      };
+    }
+    if (/hola|buenas/.test(t)) {
+      return { respuesta: `Hola. Soy el bot de ${nombre}.\n\n${ayuda}`, cambios };
+    }
+    return {
+      respuesta: 'No entendí. ' + ayuda,
+      cambios,
+    };
+  }
+
   const Vision = {
     UMBRAL_RIEGO, HISTERESIS, LLUVIA_TECHO, CALOR_VENTILACION,
-    clasificarPixel, analizarFoto,
+    clasificarPixel, analizarFoto, interpretarComando,
     parcela, parcelasIniciales, evaluar, mensajeTelegram, resumen,
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Vision; }
