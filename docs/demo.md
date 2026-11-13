@@ -40,6 +40,12 @@ rotación conviene y por qué."
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
   preguntas mejores para llevar al agrónomo."
 
+**Si sobra tiempo o el jurado pide más:**
+- **Abrir la app en el móvil** (misma wifi): los paneles se adaptan. El agricultor
+  no lleva un portátil al campo.
+- **Botón Método**: responde de un vistazo a "¿esto es válido?" — reanálisis,
+  satélite frente a terreno y dónde entra el agrónomo.
+
 Si sobra tiempo y Elio está integrado: preguntar "¿está seco?" y mostrar que
 responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
 
@@ -54,6 +60,10 @@ responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
 - [ ] Pestañas Finca y Rotaciones abiertas una vez (calienta la caché).
 - [ ] Zoom del navegador al 100 %, notificaciones silenciadas, pestañas limpias.
 - [ ] Ensayo completo una vez con la red del lugar o con hotspot.
+- [ ] **Probarlo en un móvil** (o en el modo móvil del navegador): el panel debe
+      entrar entero y los botones tocarse con el dedo.
+- [ ] Servir con `python3 -m http.server`: abrir el archivo con doble clic
+      (`file://`) no funciona y la app lo avisa.
 - [ ] Cronómetro: el guion no pasa de 3:10.
 
 ## Plan B
