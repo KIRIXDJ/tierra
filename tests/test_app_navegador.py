@@ -216,6 +216,27 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [])
         pag.close()
 
+    def test_riesgos_de_la_finca(self):
+        """Riesgos climáticos reales de NASA POWER en el monitor."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        texto = pag.inner_text("#vision-riesgos")
+        for campo in ("CALOR", "LLUVIA ≥ 20 MM", "DÍAS SECOS", "HELADAS",
+                      "SUELO DE RAÍZ", "EVAPOTRANSP."):
+            self.assertIn(campo, texto)
+        self.assertIn("NASA POWER", texto)
+        self.assertIn("Reanálisis", texto)
+        pixeles = pag.evaluate("""() => {
+            const c = document.getElementById('riesgos-serie');
+            const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+            let n = 0;
+            for (let i = 0; i < d.length; i += 4) { if (d[i] + d[i+1] + d[i+2] > 60) n += 1; }
+            return n;
+        }""")
+        self.assertGreater(pixeles, 200)
+        self.assertEqual(errores, [])
+        pag.close()
+
     def test_estado_del_bot_telegram(self):
         """Si el bot real escribe el estado, la vista lo refleja (sin red)."""
         ahora = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")

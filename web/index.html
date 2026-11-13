@@ -297,13 +297,14 @@
   .sensor-fila small { font-size: 8px; color: var(--secundario); margin-left: 2px; }
   .sensor-fila .punto { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
     background: var(--verde); margin-right: 3px; box-shadow: 0 0 6px rgba(88, 227, 154, .8); }
-  #vision-clima { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
-  #vision-clima div { border: 1px solid var(--borde); border-radius: 8px; padding: 4px 6px;
-    font-size: 8px; color: var(--secundario); }
-  #vision-clima b { display: block; color: var(--texto); font-size: 13px;
+  #vision-clima, #vision-riesgos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+  #vision-clima div, #vision-riesgos div { border: 1px solid var(--borde); border-radius: 8px;
+    padding: 4px 6px; font-size: 8px; color: var(--secundario); }
+  #vision-clima b, #vision-riesgos b { display: block; color: var(--texto); font-size: 13px;
     font-family: ui-monospace, Consolas, monospace; margin-top: 1px; }
-  #vision-clima .fuente { grid-column: 1 / -1; font-size: 8px; color: var(--secundario);
-    border: 0; padding: 0; line-height: 1.4; }
+  #vision-clima .fuente, #vision-riesgos .fuente { grid-column: 1 / -1; font-size: 8px;
+    color: var(--secundario); border: 0; padding: 0; line-height: 1.4; }
+  #riesgos-serie { width: 100%; height: 44px; display: block; margin-top: 6px; }
   #vision-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .foto-mini { padding: 0; border: 1px solid var(--borde); border-radius: 9px;
     background: #071019; overflow: hidden; cursor: zoom-in; color: var(--secundario);
@@ -520,6 +521,11 @@
         <div id="vision-clima"></div>
       </div>
       <div class="bloque">
+        <h3>Riesgos de la finca <span>NASA POWER</span></h3>
+        <div id="vision-riesgos"></div>
+        <canvas id="riesgos-serie"></canvas>
+      </div>
+      <div class="bloque">
         <h3>Actuadores <span>simulados</span></h3>
         <div id="vision-actuadores"></div>
         <p id="vision-automatico">Automático: riega si el suelo baja de 25 % y cierra el
@@ -597,6 +603,7 @@
 <script src="../datos/rotaciones.js"></script>
 <script src="../datos/fincas.js"></script>
 <script src="../datos/suelo.js"></script>
+<script src="../datos/riesgos.js"></script>
 <script src="../datos/parcelas.js"></script>
 <script>
   // Con file:// el navegador bloquea los módulos locales (CORS): avisar en claro.
@@ -2048,6 +2055,7 @@ window.addEventListener('keydown', (evento) => {
 
 // ---------- Datos de la finca (snapshots del repo) ----------
 const RECIENTE = window.__RECIENTE__ || null;
+const RIESGOS = window.__RIESGOS__ || null;
 const ROTACIONES = window.__ROTACIONES__ || null;
 const FINCAS = (window.__FINCAS__ && window.__FINCAS__.fincas) || [];
 
@@ -2572,13 +2580,12 @@ function pintarClima() {
   const lluvias = serie.map((d) => d.lluvia_mm).filter((v) => v !== null && v !== undefined);
   const diasLluvia = lluvias.filter((v) => v >= 1).length;
   const extremos = lluvias.filter((v) => v >= 20).length;
-  // Heladas: mínima de las medias mensuales de NASA POWER 1991–2020.
-  const finca = FINCAS.find((f) => f.id === FINCA_PARCELAS) || null;
-  const mensual = (finca && finca.climatologia && finca.climatologia.mensual) || {};
-  const temperaturas = Object.values(mensual)
-    .flatMap((anio) => (anio && anio.t2m) || [])
-    .filter((v) => v !== null && v !== undefined);
-  const minimaMensual = temperaturas.length ? Math.min(...temperaturas) : null;
+  // Heladas: mínimo de las medias mensuales de NASA POWER (snapshot de riesgos).
+  const riesgoFinca = (RIESGOS && (RIESGOS.fincas || []).find((f) => f.id === FINCA_PARCELAS))
+    || null;
+  const heladasFinca = riesgoFinca && (riesgoFinca.anual || {}).heladas;
+  const minimaMensual = riesgoFinca && (riesgoFinca.mensual || {}).T2M
+    ? riesgoFinca.mensual.T2M.minima : null;
   caja.innerHTML = `
     <div>LLUVIA 30 D<b>${lluvia['30d_mm'] ?? '–'} mm</b>
       <span>${pct === null || pct === undefined ? 'sin normal' : `${pct > 0 ? '+' : ''}${Math.round(pct)} % vs normal`}</span></div>
@@ -2593,11 +2600,79 @@ function pintarClima() {
       <span>m³/m³ · media de los últimos ${serie.length} días</span></div>
     <div>DÍAS DE LLUVIA<b>${diasLluvia}/${serie.length}</b>
       <span>${extremos} día(s) sobre 20 mm</span></div>
-    <div>HELADAS<b>${minimaMensual === null ? 'sin dato'
-      : (minimaMensual <= 2 ? 'riesgo' : 'sin riesgo')}</b>
-      <span>${minimaMensual === null ? 'POWER' : `mínima media ${minimaMensual.toFixed(1)} °C`}</span></div>
+    <div>HELADAS<b>${heladasFinca && heladasFinca.reciente !== null
+      && heladasFinca.reciente !== undefined
+      ? (heladasFinca.reciente === 0 ? 'sin riesgo' : `${heladasFinca.reciente}/año`)
+      : 'sin dato'}</b>
+      <span>${minimaMensual === null ? 'POWER' : `mínima media ${minimaMensual} °C`}</span></div>
     <div class="fuente">Fuente: Open-Meteo / ERA5-Land (no NASA) para la temporada;
       heladas y clima histórico: NASA POWER. La humedad de los sensores es simulada.</div>`;
+}
+
+/* Riesgos de la finca con NASA POWER: calor, lluvia intensa, días secos,
+   heladas, suelo de raíz y evapotranspiración. Reanálisis, no sensor. */
+let riesgosPintados = false;
+
+function pintarRiesgos(parcela) {
+  const caja = document.getElementById('vision-riesgos');
+  if (!caja) { return; }
+  const finca = (RIESGOS && (RIESGOS.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
+  if (!finca) {
+    caja.innerHTML = '<div class="fuente">Riesgos: sin dato cargado.</div>';
+    return;
+  }
+  const anual = finca.anual || {};
+  const mensual = finca.mensual || {};
+  const valor = (dato) => (dato && dato.reciente !== null && dato.reciente !== undefined
+    ? dato.reciente : '–');
+  const cambio = (dato) => {
+    if (!dato || dato.reciente === null || dato.reciente === undefined
+      || dato.base === null || dato.base === undefined) { return 'sin base'; }
+    const delta = dato.reciente - dato.base;
+    return `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} vs 1991–2020`;
+  };
+  caja.innerHTML = `
+    <div>CALOR ${finca.umbrales ? `≥ ${finca.umbrales.calor_c} °C` : '≥ 35 °C'}
+      <b>${valor(anual.calor_35)}<span style="font-size:8px"> d/año</span></b>
+      <span>${cambio(anual.calor_35)}</span></div>
+    <div>LLUVIA ≥ 20 MM<b>${valor(anual.lluvia_20)}<span style="font-size:8px"> d/año</span></b>
+      <span>${cambio(anual.lluvia_20)}</span></div>
+    <div>DÍAS SECOS<b>${valor(anual.secos)}<span style="font-size:8px"> d/año</span></b>
+      <span>${cambio(anual.secos)}</span></div>
+    <div>HELADAS<b>${valor(anual.heladas)}<span style="font-size:8px"> d/año</span></b>
+      <span>${cambio(anual.heladas)}</span></div>
+    <div>SUELO DE RAÍZ<b>${valor(mensual.GWETROOT)}</b>
+      <span>${cambio(mensual.GWETROOT)} · 0–1</span></div>
+    <div>EVAPOTRANSP.<b>${valor(mensual.EVLAND)}<span style="font-size:8px"> mm/día</span></b>
+      <span>${cambio(mensual.EVLAND)}</span></div>
+    <div class="fuente">Fuente: NASA POWER (MERRA-2), diario y mensual, 1991–2025.
+      Reanálisis, no un sensor: los umbrales son de referencia.
+      ${parcela ? `Parcela: ${parcela.nombre}.` : ''}</div>`;
+  dibujarRiesgos(finca);
+}
+
+function dibujarRiesgos(finca) {
+  const canvas = document.getElementById('riesgos-serie');
+  if (!canvas || !finca.por_anio) { return; }
+  const serie = finca.por_anio.slice(-12);
+  const ancho = canvas.clientWidth || 380;
+  const alto = 44;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(ancho * dpr);
+  canvas.height = Math.round(alto * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, ancho, alto);
+  const maximo = Math.max(1, ...serie.map((f) => f.lluvia_20 || 0));
+  const paso = ancho / serie.length;
+  serie.forEach((fila, i) => {
+    const h = ((fila.lluvia_20 || 0) / maximo) * (alto - 12);
+    ctx.fillStyle = 'rgba(53, 214, 255, 0.75)';
+    ctx.fillRect(i * paso + 1, alto - 8 - h, Math.max(1, paso - 2), h);
+  });
+  ctx.fillStyle = 'rgba(126, 151, 173, 0.9)';
+  ctx.font = '8px ui-monospace, Consolas, monospace';
+  ctx.fillText(`${serie[0].anio}–${serie[serie.length - 1].anio} · días con ≥ 20 mm (NASA POWER)`, 2, 9);
 }
 
 function pintarActuadores(parcela, estado) {
@@ -3057,6 +3132,7 @@ function pintarVision() {
   pintarSensores(parcela, lecturas);
   pintarHistorial(parcela, sensor);
   pintarClima();
+  if (!riesgosPintados) { pintarRiesgos(parcela); riesgosPintados = true; }
   pintarActuadores(parcela, estado);
   if (!document.getElementById('rotacion-filas').dataset.pintada) { pintarRotacion(); }
   const hora = Monitor.formatoHora(Date.now());

@@ -35,6 +35,7 @@ imprime el token ni lo escribe en los datos.
 | `/parcelas` | Lista de parcelas con id, cultivo y hectáreas |
 | `/clima [parcela]` | Lluvia, temperatura y humedad de los últimos 30 días (ERA5/Open-Meteo) |
 | `/rotaciones [parcela]` | Meses secos y las tres estrategias de rotación |
+| `/riesgos [parcela]` | Calor ≥ 35 °C, lluvia ≥ 20 mm, días secos, heladas, suelo de raíz y ET (NASA POWER) |
 | `/riego on\|off\|auto [parcela]` | Abre o cierra el riego; `auto` quita el override |
 | `/techo on\|off\|auto [parcela]` | Cierra o abre el techo; `auto` quita el override |
 | `/ventilar on\|off [parcela]` | Abre o cierra la ventilación |

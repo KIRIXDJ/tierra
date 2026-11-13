@@ -65,14 +65,16 @@ FUENTES = {
     "fincas": "NASA POWER (reanálisis MERRA-2)",
     "suelo": "ISRIC SoilGrids 2.0",
     "mapa": "Esri World Imagery (no NASA)",
+    "riesgos": "NASA POWER (reanálisis MERRA-2)",
 }
 
 PROMPT_SISTEMA = (
     "Eres Elio, el asistente agrícola de TIERRA (NASA Space Apps 2026). "
     "Reglas: respondes SOLO con el contexto JSON que se te adjunta (parcelas, "
-    "clima reciente ERA5/Open-Meteo, fincas NASA POWER, rotaciones y suelo ISRIC "
-    "SoilGrids). Español, máximo 3 frases, sin markdown. Cita la fuente de cada "
-    "cifra: POWER, ERA5/Open-Meteo, ISRIC SoilGrids o Esri. Si el dato no está "
+    "clima reciente ERA5/Open-Meteo, fincas NASA POWER, rotaciones, suelo ISRIC "
+    "SoilGrids y riesgos POWER: calor, lluvia intensa, días secos, heladas, "
+    "humedad de raíz y evapotranspiración). Español, máximo 3 frases, sin markdown. "
+    "Cita la fuente de cada cifra: POWER, ERA5/Open-Meteo, ISRIC SoilGrids o Esri. Si el dato no está "
     "en el contexto, responde exactamente: \"No tengo ese dato.\" "
     "Jamás inventes cifras, fechas ni URLs."
 )
@@ -83,6 +85,7 @@ AYUDA = "\n".join([
     "/parcelas — lista de parcelas",
     "/clima [parcela] — últimos 30 días (ERA5/Open-Meteo)",
     "/rotaciones [parcela] — estrategias y meses secos",
+    "/riesgos [parcela] — calor, lluvia intensa, secos, heladas, suelo y ET",
     "/riego on|off|auto [parcela]",
     "/techo on|off|auto [parcela]",
     "/ventilar on|off [parcela]",
@@ -145,7 +148,7 @@ def leer_env(ruta=None):
 def cargar_datos(carpeta=None):
     """Carga los JSON de datos/. Un archivo que falle queda como {} (tolerante)."""
     carpeta = pathlib.Path(carpeta or DATOS)
-    nombres = ("parcelas", "reciente", "fincas", "rotaciones", "suelo")
+    nombres = ("parcelas", "reciente", "fincas", "rotaciones", "suelo", "riesgos")
     return {nombre: _leer_json(carpeta / f"{nombre}.json") for nombre in nombres}
 
 
@@ -194,6 +197,26 @@ def _clima_reciente(reciente):
         "ventana": reciente.get("ventana"),
         "fincas": bloques,
     }
+
+
+def _riesgos_resumen(riesgos):
+    """Resume el snapshot de riesgos de NASA POWER (sin URLs)."""
+    salida = []
+    for finca in riesgos.get("fincas") or []:
+        anual = finca.get("anual") or {}
+        mensual = finca.get("mensual") or {}
+        salida.append({
+            "id": finca.get("id"),
+            "nombre": finca.get("nombre"),
+            "periodo": finca.get("periodo"),
+            "calor_35_dias_anio": (anual.get("calor_35") or {}).get("reciente"),
+            "lluvia_20_dias_anio": (anual.get("lluvia_20") or {}).get("reciente"),
+            "secos_dias_anio": (anual.get("secos") or {}).get("reciente"),
+            "heladas_dias_anio": (anual.get("heladas") or {}).get("reciente"),
+            "suelo_raiz": (mensual.get("GWETROOT") or {}).get("reciente"),
+            "et_mm_dia": (mensual.get("EVLAND") or {}).get("reciente"),
+        })
+    return {"fuente": riesgos.get("fuente"), "nota": riesgos.get("nota"), "fincas": salida}
 
 
 def _fincas_power(fincas):
@@ -271,6 +294,7 @@ def construir_contexto(datos):
         "fincas_power": _fincas_power(datos.get("fincas") or {}),
         "rotaciones": _rotaciones(datos.get("rotaciones") or {}),
         "suelo": _suelo(datos.get("suelo") or {}),
+        "riesgos_power": _riesgos_resumen(datos.get("riesgos") or {}),
         "fuentes": dict(FUENTES),
     }
 
@@ -430,6 +454,25 @@ def _texto_clima(contexto):
     )
 
 
+def _texto_riesgos(contexto):
+    """Riesgos de la finca según NASA POWER (reanálisis, no sensor)."""
+    finca = contexto.get("finca")
+    bloque = next((b for b in (contexto.get("riesgos_power") or {}).get("fincas") or []
+                   if b.get("id") == finca), None)
+    if not bloque:
+        return "No tengo ese dato."
+    return (
+        f"Riesgos de {bloque.get('nombre')} (NASA POWER, reanálisis):\n"
+        f"Calor ≥ 35 °C: {_fmt(bloque.get('calor_35_dias_anio'), ' días/año')} · "
+        f"lluvia ≥ 20 mm: {_fmt(bloque.get('lluvia_20_dias_anio'), ' días/año')} · "
+        f"días secos: {_fmt(bloque.get('secos_dias_anio'), ' días/año')}\n"
+        f"Heladas: {_fmt(bloque.get('heladas_dias_anio'), ' días/año')} · "
+        f"suelo de raíz: {_fmt(bloque.get('suelo_raiz'))} (0–1) · "
+        f"evapotranspiración: {_fmt(bloque.get('et_mm_dia'), ' mm/día')}\n"
+        "MERRA-2, no un sensor; umbrales de referencia."
+    )
+
+
 def _texto_rotaciones(contexto):
     finca = contexto.get("finca")
     bloque = next((b for b in (contexto.get("rotaciones") or {}).get("fincas") or []
@@ -509,7 +552,7 @@ def interpretar_comando(texto, estado, contexto):
         return _orden(AYUDA)
     if comando == "/parcelas":
         return _orden(_texto_parcelas(contexto))
-    if comando in ("/estado", "/clima", "/rotaciones"):
+    if comando in ("/estado", "/clima", "/rotaciones", "/riesgos"):
         parcelas = _resolver(argumentos, contexto)
         if not parcelas:
             return _orden(_no_conozco(argumentos))
@@ -517,6 +560,8 @@ def interpretar_comando(texto, estado, contexto):
             return _orden(_texto_estado(estado, parcelas))
         if comando == "/clima":
             return _orden(_texto_clima(contexto))
+        if comando == "/riesgos":
+            return _orden(_texto_riesgos(contexto))
         return _orden(_texto_rotaciones(contexto))
     if comando in ("/riego", "/techo", "/ventilar"):
         return _actuadores(comando.lstrip("/"), argumentos, contexto)

@@ -32,6 +32,9 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
   queda donde la dibujaste) y **análisis de una foto** del cultivo (mide color:
   verde, amarillo, marrón). Todo simulado salvo el mapa, el clima y el bot: no hay
   hardware instalado y la app lo dice en pantalla.
+- **Riesgos de la finca** (NASA POWER): días ≥ 35 °C, lluvia ≥ 20 mm, días
+  secos, heladas, humedad de raíz y evapotranspiración, comparando 1991–2020 con
+  2021–2025 y con un gráfico de los últimos 12 años.
 - **Cómo se comporta solo**: el riego se dispara con la humedad simulada bajo el
   25 %, y el techo se cierra y el riego se suspende con la **lluvia real de ERA5**
   (no hay un control para "hacer llover").
@@ -59,6 +62,7 @@ python3 generar_fincas.py        # climatología POWER 1991-2020
 python3 actualizar_reciente.py   # últimos 30 días (Open-Meteo)
 python3 generar_rotaciones.py    # motor de rotaciones
 python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
+python3 generar_riesgos.py      # riesgos: calor, lluvia intensa, secos, heladas, suelo y ET (POWER)
 ```
 
 El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las texturas
@@ -74,6 +78,10 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 | El globo · mapa global | Techo cerrado | Rotaciones |
 |---|---|---|
 | ![Globo](docs/capturas/portada.png) | ![Techo](docs/capturas/monitor-techo.png) | ![Rotaciones](docs/capturas/monitor-rotacion.png) |
+
+| Riesgos NASA POWER |
+|---|
+| ![Riesgos](docs/capturas/monitor-riesgos.png) |
 
 ## Presentaciones
 
@@ -119,6 +127,7 @@ están mapeados en [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
 |---|---|---|
 | Temperatura, lluvia, viento, humedad 1984–2025 | [NASA POWER](https://power.larc.nasa.gov/) (MERRA-2) | **reanálisis** |
 | Climatología de la finca, heladas, temporada | NASA POWER | **reanálisis** |
+| Calor extremo, lluvia intensa, días secos, suelo de raíz y ET | NASA POWER | **reanálisis** |
 | Últimos 30 días y humedad superficial 0–7 cm | Open-Meteo (ERA5) | **no NASA** |
 | Imágenes satelitales de la finca | Esri World Imagery | **no NASA** |
 | Textura, carbono y pH del suelo | ISRIC SoilGrids 2.0 | **no NASA** |

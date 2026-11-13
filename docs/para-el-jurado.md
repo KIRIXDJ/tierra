@@ -18,7 +18,10 @@ Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
 2. **Lente de la temporada (30 días).** Lluvia, temperatura y humedad superficial
    frente a la banda normal P25–P75 calculada con la **misma fuente**
    (Open-Meteo/ERA5, rotulada como no NASA), más pronóstico de 7 días.
-3. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
+3. **Riesgos.** Días de calor extremo, lluvia intensa, días secos, heladas,
+   humedad de raíz y evapotranspiración con NASA POWER (MERRA-2), comparados
+   contra la base 1991–2020.
+4. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
    **evidencia NASA** (los meses secos de esa finca), motivos, beneficios, datos
    que faltan y riesgos a validar. Deslizadores de prioridades (agua/diversidad) y
    un escenario de sequía para ver qué plan aguanta peor.

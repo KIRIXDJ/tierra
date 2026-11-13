@@ -203,6 +203,20 @@ class TestComandos(Base):
         self.assertIn("126.8", respuesta)          # lluvia real de 30 días de Constanza
         self.assertNotIn("http", respuesta)
 
+    def test_riesgos_cita_power(self):
+        respuesta = self.interpretar("/riesgos")["respuesta"]
+        self.assertIn("NASA POWER", respuesta)
+        self.assertIn("lluvia ≥ 20 mm", respuesta)
+        self.assertIn("suelo de raíz", respuesta)
+        self.assertIn("MERRA-2", respuesta)
+        self.assertNotIn("http", respuesta)
+
+    def test_contexto_incluye_riesgos(self):
+        self.assertTrue(self.contexto["riesgos_power"]["fincas"])
+        self.assertEqual(len(self.contexto["riesgos_power"]["fincas"]), 3)
+        self.assertTrue(all("calor_35_dias_anio" in f
+                            for f in self.contexto["riesgos_power"]["fincas"]))
+
     def test_rotaciones_cita_fuentes(self):
         respuesta = self.interpretar("/rotaciones")["respuesta"]
         self.assertIn("POWER", respuesta)

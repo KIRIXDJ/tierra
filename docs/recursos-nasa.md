@@ -24,6 +24,7 @@ Leído el 2026-11-13.
 | Dataset | Uso | Fuente |
 |---|---|---|
 | **NASA POWER** (MERRA-2) | tendencia 1984–2025, climatología 1991–2020, lluvia/temperatura/radiación, heladas | NASA |
+| **NASA POWER** · riesgos | días ≥ 35 °C, lluvia ≥ 20 mm, días secos, heladas, **humedad de raíz (GWETROOT)** y **evapotranspiración (EVLAND)**, base 1991–2020 vs 2021–2025 | NASA |
 | **ERA5** (Open-Meteo) | últimos 30 días, normal 1991–2020 de la misma fuente, humedad superficial 0–7 cm | ESA/ECMWF · **no NASA** |
 | **Esri World Imagery** | mapa satelital real de las parcelas | Esri · **no NASA** |
 | **ISRIC SoilGrids 2.0** | textura, arcilla, arena, carbono orgánico, pH (0–5 cm) | ISRIC · **no NASA** |
@@ -32,7 +33,7 @@ Leído el 2026-11-13.
 
 | Dataset | Resolución | Por qué no está todavía |
 |---|---|---|
-| **SMAP** | ~9 km | el píxel es miles de veces la parcela demo; requiere Earthdata y armonización |
+| **SMAP** | ~9 km | el píxel es miles de veces la parcela demo; requiere Earthdata y armonización. La variable de humedad de suelo sí se cubre con POWER (GWETROOT), marcada como reanálisis |
 | **GPM / IMERG** | ~0,1° (10 km) | igual, y la app ya usa lluvia ERA5/POWER |
 | **Landsat** | 30 m | NDVI a escala de campo: siguiente paso natural |
 | **MODIS / VIIRS** | 250–1000 m | NDVI/estado de vegetación; se puede añadir vía GIBS |
