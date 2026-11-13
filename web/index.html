@@ -260,8 +260,8 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+    "three": "./vendor/three.module.js",
+    "three/addons/": "./vendor/addons/",
     "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/vision_bundle.mjs"
   }
 }
@@ -272,7 +272,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const EQUIPO = '';
-const TEXTURAS = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/';
+const TEXTURAS = '../textures/';
 const lienzo = document.getElementById('lienzo');
 
 if (EQUIPO) {
@@ -723,9 +723,9 @@ function materialGlobo(dia, noche) {
 
 async function montarGlobo() {
   const [dia, noche, nubesTex] = await Promise.all([
-    cargarTextura('earth_atmos_2048.jpg'),
-    cargarTextura('earth_lights_2048.png'),
-    cargarTextura('earth_clouds_1024.png'),
+    cargarTextura('earth_day.jpg'),
+    cargarTextura('earth_night.png'),
+    cargarTextura('earth_clouds.png'),
   ]);
   texturas.ok = Boolean(dia && noche && nubesTex);
 
