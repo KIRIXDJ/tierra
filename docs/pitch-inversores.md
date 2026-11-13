@@ -56,7 +56,7 @@ pruebas múltiples y el asistente responde «no tengo ese dato» cuando falta.
 Eso es lo que un agrónomo puede auditar."
 
 **6. Estado y huecos (30 s)**
-"Hecho: app funcionando, 148 pruebas automáticas, repositorio público.
+"Hecho: app funcionando, 155 pruebas automáticas, repositorio público.
 No hecho: validación agronómica, hardware en campo y precio."
 
 **7. El ask (30 s)**

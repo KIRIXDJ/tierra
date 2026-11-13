@@ -26,7 +26,7 @@ import re
 import sys
 
 import requests
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 
 RAIZ = pathlib.Path(__file__).resolve().parent
 DATOS = RAIZ / "datos"
@@ -37,7 +37,9 @@ CAPAS = {
         "colormap": "MODIS_L3_NDVI",
         "nivel": 9,
         "radio": 2,
-        "recorte": 64,
+        "recorte": 48,
+        "escala": 8,
+        "suavizado": 1.6,
         "nombre": "NDVI · MODIS/Terra 16 días",
         "imagen": "ndvi_modis.png",
         "unidad": "",
@@ -49,6 +51,7 @@ CAPAS = {
         "radio": 4,
         "recorte": 96,
         "escala": 3,
+        "suavizado": 1.0,
         "nombre": "Lluvia · GPM IMERG",
         "imagen": "imerg_gpm.png",
         "unidad": "mm/h",
@@ -121,7 +124,7 @@ def rango_de_color(mapa, valor):
     return [round(valor, 3)] if not candidatos else [round(valor, 3)]
 
 
-def recortar(imagen, px, py, lado, escala, ruta, fondo=None):
+def recortar(imagen, px, py, lado, escala, ruta, fondo=None, suavizado=0.0):
     """Guarda un recorte ampliado (vecino más cercano) con la finca marcada."""
     mitad = lado // 2
     caja = (max(0, px - mitad), max(0, py - mitad),
@@ -134,7 +137,11 @@ def recortar(imagen, px, py, lado, escala, ruta, fondo=None):
         trozo = base
     else:
         trozo = trozo.convert("RGB")
-    grande = trozo.resize((trozo.width * escala, trozo.height * escala), Image.NEAREST)
+    # Suavizado al ampliar: el dato es grueso (289 m–2,3 km), pero así se lee el
+    # patrón en vez de ver bloques de píxeles.
+    grande = trozo.resize((trozo.width * escala, trozo.height * escala), Image.BICUBIC)
+    if suavizado:
+        grande = grande.filter(ImageFilter.GaussianBlur(suavizado))
     dibujo = ImageDraw.Draw(grande)
     centro = ((px - caja[0]) * escala, (py - caja[1]) * escala)
     dibujo.rectangle([centro[0] - escala * 2, centro[1] - escala * 2,
@@ -179,7 +186,12 @@ def construir(parcelas):
         decodificado = decodificar_tile(imagen, px, py, capa["radio"], mapa)
         ruta = DATOS / capa["imagen"]
         fondo = (8, 17, 28) if clave == "lluvia" else None
-        recortar(imagen, px, py, capa["recorte"], capa.get("escala", 4), ruta, fondo)
+        # Si no hay lluvia, no se guarda imagen: la app muestra un dato limpio en
+        # vez de un mapa vacío lleno de bloques.
+        guardar_imagen = not (clave == "lluvia" and not decodificado["valor"])
+        if guardar_imagen:
+            recortar(imagen, px, py, capa["recorte"], capa.get("escala", 4), ruta,
+                     fondo, capa.get("suavizado", 0.0))
         nota = ("Valor aproximado decodificado del color oficial de GIBS; "
                 "el píxel es mayor que la parcela, no es una medición en el suelo.")
         if clave == "lluvia" and decodificado["valor"] is None:
@@ -194,7 +206,7 @@ def construir(parcelas):
             "cobertura": decodificado["cobertura"],
             "unidad": capa["unidad"],
             "resolucion_m": resolucion_m(nivel, lat),
-            "imagen": capa["imagen"],
+            "imagen": capa["imagen"] if guardar_imagen else None,
             "nota": nota,
         }
     return {
@@ -222,7 +234,12 @@ def revisar():
         return 1
     datos = json.loads(ruta.read_text(encoding="utf-8"))
     capas = datos.get("capas") or {}
-    faltan = [c for c in ("ndvi", "lluvia") if not (capas.get(c) or {}).get("imagen")]
+    faltan = []
+    for clave in ("ndvi", "lluvia"):
+        capa = capas.get(clave) or {}
+        # La lluvia puede no tener imagen (sin lluvia) pero sí valor y fecha.
+        if not capa.get("fecha") or (capa.get("imagen") is None and capa.get("valor") is None):
+            faltan.append(clave)
     print("OK" if not faltan else f"faltan capas: {faltan}")
     return 0 if not faltan else 1
 

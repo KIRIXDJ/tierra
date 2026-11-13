@@ -297,13 +297,17 @@
   .sensor-fila small { font-size: 8px; color: var(--secundario); margin-left: 2px; }
   .sensor-fila .punto { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
     background: var(--verde); margin-right: 3px; box-shadow: 0 0 6px rgba(88, 227, 154, .8); }
-  #vision-clima, #vision-riesgos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
-  #vision-clima div, #vision-riesgos div { border: 1px solid var(--borde); border-radius: 8px;
-    padding: 4px 6px; font-size: 8px; color: var(--secundario); }
-  #vision-clima b, #vision-riesgos b { display: block; color: var(--texto); font-size: 13px;
+  #vision-clima, #vision-riesgos, #vision-terreno {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+  #vision-clima div, #vision-riesgos div, #vision-terreno div {
+    border: 1px solid var(--borde); border-radius: 8px; padding: 4px 6px;
+    font-size: 8px; color: var(--secundario); }
+  #vision-clima b, #vision-riesgos b, #vision-terreno b {
+    display: block; color: var(--texto); font-size: 13px;
     font-family: ui-monospace, Consolas, monospace; margin-top: 1px; }
-  #vision-clima .fuente, #vision-riesgos .fuente { grid-column: 1 / -1; font-size: 8px;
-    color: var(--secundario); border: 0; padding: 0; line-height: 1.4; }
+  #vision-clima .fuente, #vision-riesgos .fuente, #vision-terreno .fuente {
+    grid-column: 1 / -1; font-size: 8px; color: var(--secundario); border: 0;
+    padding: 0; line-height: 1.4; }
   #riesgos-serie { width: 100%; height: 44px; display: block; margin-top: 6px; }
   #vision-satelite { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .satelite-mini { padding: 0; border: 1px solid var(--borde); border-radius: 9px;
@@ -313,6 +317,15 @@
     image-rendering: pixelated; background: #071019; }
   .satelite-mini span { display: block; font-size: 8px; padding: 4px 6px; line-height: 1.35; }
   .satelite-mini b { color: var(--texto); font-size: 9px; display: block; }
+  .satelite-sin { height: 92px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 2px; background: #071019; }
+  .satelite-sin b { font-size: 20px; font-family: ui-monospace, Consolas, monospace;
+    color: var(--cian); }
+  .satelite-sin span { font-size: 8px; color: var(--secundario); }
+  .escala-ndvi { display: flex; align-items: center; gap: 4px; margin: 5px 0 2px;
+    font-size: 8px; color: var(--secundario); }
+  .escala-ndvi i { flex: 1; height: 6px; border-radius: 3px;
+    background: linear-gradient(90deg, #8b5a2b, #d9c34a, #57b34a, #1b5e20); }
   #vision-satelite .fuente { grid-column: 1 / -1; font-size: 8px; color: var(--secundario);
     line-height: 1.4; }
   #vision-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -536,6 +549,10 @@
         <canvas id="riesgos-serie"></canvas>
       </div>
       <div class="bloque">
+        <h3>Terreno <span>SRTM · NASA</span></h3>
+        <div id="vision-terreno"></div>
+      </div>
+      <div class="bloque">
         <h3>Satélite NASA <span>MODIS · IMERG</span></h3>
         <div id="vision-satelite"></div>
       </div>
@@ -647,6 +664,7 @@
 <script src="../datos/suelo.js"></script>
 <script src="../datos/riesgos.js"></script>
 <script src="../datos/satelite.js"></script>
+<script src="../datos/terreno.js"></script>
 <script src="../datos/parcelas.js"></script>
 <script>
   // Con file:// el navegador bloquea los módulos locales (CORS): avisar en claro.
@@ -2100,6 +2118,8 @@ window.addEventListener('keydown', (evento) => {
 const RECIENTE = window.__RECIENTE__ || null;
 const RIESGOS = window.__RIESGOS__ || null;
 const SATELITE = window.__SATELITE__ || null;
+const TERRENO = window.__TERRENO__ || null;
+const SUELO = window.__SUELO__ || null;
 const ROTACIONES = window.__ROTACIONES__ || null;
 const FINCAS = (window.__FINCAS__ && window.__FINCAS__.fincas) || [];
 
@@ -2695,6 +2715,30 @@ function pintarRiesgos(parcela) {
   dibujarRiesgos(finca);
 }
 
+let terrenoPintado = false;
+
+function pintarTerreno() {
+  const caja = document.getElementById('vision-terreno');
+  if (!caja) { return; }
+  if (!TERRENO) {
+    caja.innerHTML = '<div class="fuente">Terreno: sin snapshot. Corre generar_terreno.py.</div>';
+    return;
+  }
+  caja.innerHTML = `
+    <div>ELEVACIÓN<b>${TERRENO.elevacion_media_m}<span style="font-size:8px"> m</span></b>
+      <span>${TERRENO.elevacion_min_m}–${TERRENO.elevacion_max_m} m</span></div>
+    <div>PENDIENTE<b>${TERRENO.pendiente_media_deg}<span style="font-size:8px"> °</span></b>
+      <span>media del área · máx ${TERRENO.pendiente_max_deg}°</span></div>
+    <div>PENDIENTE ≥ ${TERRENO.umbral_pendiente_deg}°<b>${TERRENO.pendiente_alta_pct}<span style="font-size:8px"> %</span></b>
+      <span>proxy de riesgo de erosión</span></div>
+    <div>PÍXEL<b>${TERRENO.metros_por_pixel}<span style="font-size:8px"> m</span></b>
+      <span>SRTM vía tiles Terrarium</span></div>
+    <div class="fuente">Fuente: SRTM (NASA) vía tiles Terrarium públicos.
+      La pendiente la calcula la demo; el umbral de 15° es orientativo, no un
+      modelo de erosión. ${TERRENO.nota || ''}</div>`;
+  terrenoPintado = true;
+}
+
 let satelitePintado = false;
 
 function pintarSatelite() {
@@ -2718,18 +2762,24 @@ function pintarSatelite() {
   const item = (clave, rotulo) => {
     const capa = capas[clave];
     if (!capa) { return ''; }
+    const contenido = capa.imagen
+      ? `<img src="../datos/${capa.imagen}" alt="${capa.nombre}" loading="lazy">`
+      : `<div class="satelite-sin"><b>0 mm/h</b><span>sin lluvia en el píxel</span></div>`;
     return `<button class="satelite-mini" data-satelite="${clave}"
       title="Ampliar ${capa.nombre}">
-      <img src="../datos/${capa.imagen}" alt="${capa.nombre}" loading="lazy">
+      ${contenido}
       <span><b>${rotulo}</b>${valor(clave, capa)} · ${capa.fecha} ·
         ${metros(capa.resolucion_m)}/px</span>
     </button>`;
   };
   caja.innerHTML = item('ndvi', 'NDVI MODIS')
     + item('lluvia', 'Lluvia IMERG')
+    + (capas.ndvi && capas.ndvi.imagen
+      ? '<div class="escala-ndvi"><span>0</span><i></i><span>1</span></div>' : '')
     + '<div class="fuente">NASA GIBS: valor aproximado decodificado del color '
-    + 'oficial de cada capa. El píxel es mayor que la parcela; no es un sensor '
-    + 'en el suelo.</div>';
+    + 'oficial de cada capa. El NDVI va ampliado y suavizado (289 m/px); si no '
+    + 'llovió, IMERG se muestra como dato, no como mapa vacío. El píxel es mayor '
+    + 'que la parcela; no es un sensor en el suelo.</div>';
   caja.querySelectorAll('button[data-satelite]').forEach((boton) => {
     boton.addEventListener('click', () => abrirFoto(boton.dataset.satelite));
   });
@@ -3098,6 +3148,21 @@ function abrirFoto(tipo) {
   if (tipo === 'ndvi' || tipo === 'lluvia') {
     const capa = SATELITE && SATELITE.capas && SATELITE.capas[tipo];
     if (!capa) { return; }
+    if (!capa.imagen) {
+      ctx.fillStyle = '#08111c';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(220, 233, 245, 0.9)';
+      ctx.font = '600 28px "Segoe UI", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sin lluvia en esta pasada de IMERG', canvas.width / 2, canvas.height / 2 - 10);
+      ctx.font = '16px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(126, 151, 173, 0.95)';
+      ctx.fillText('(< 0,1 mm/h en el píxel de ~2,3 km)', canvas.width / 2, canvas.height / 2 + 24);
+      ctx.textAlign = 'left';
+      pie.innerHTML = `<b>${capa.nombre}</b> · ${capa.fecha}. ${capa.nota} Imagen: NASA GIBS.`;
+      caja.classList.add('visible');
+      return;
+    }
     const imagen = new Image();
     imagen.onload = () => {
       ctx.fillStyle = '#08111c';
@@ -3188,6 +3253,9 @@ function pintarRotacion() {
   const lista = (valores) => (valores && valores.length
     ? valores.map((v) => `<li>${v}</li>`).join('') : '<li>sin dato</li>');
   const beneficios = (Elio.beneficios ? Elio.beneficios(elegida) : []);
+  const suelo = (SUELO && (SUELO.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
+  const carbono = suelo && suelo.carbono_organico_g_kg;
+  const materiaOrganica = Number.isFinite(carbono) ? (carbono * 1.724 / 10) : null;
   const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
   const mesesTexto = (lista) => (lista || [])
     .map((mes) => MESES[Number(mes) - 1] || mes).join(', ');
@@ -3212,6 +3280,11 @@ function pintarRotacion() {
   if ((elegida.meses_criticos || []).length) {
     evidencia.push(`Meses críticos: ${elegida.meses_criticos.join(', ')}.`);
   }
+  if (materiaOrganica !== null) {
+    evidencia.push(`Materia orgánica estimada: ≈ ${materiaOrganica.toFixed(1)} %`
+      + ` (carbono orgánico ${carbono} g/kg × 1,724, ISRIC 0–5 cm; conversión estándar,`
+      + ' no una medición local).');
+  }
   // Temporada vulnerable: cuántos meses secos de la finca caen dentro de los
   // meses críticos de esta rotación (evidencia, no recomendación).
   const mesesSecos = finca.meses_secos || [];
@@ -3231,10 +3304,10 @@ function pintarRotacion() {
     <h4>Datos que faltan</h4><ul>${lista(elegida.datos_faltantes)}</ul>
     <h4>Riesgo a revisar con un agrónomo</h4><ul>${lista(elegida.riesgos)}</ul>
     <h4>Lo que el reto pide y aún no cubrimos</h4>
-    <ul><li>Mercado local, ciclo de plagas, materia orgánica y erosión: sin dato
-      todavía (SRTM/ECOSTRESS en la hoja de ruta).</li>
+    <ul><li>Mercado local y ciclo de plagas: sin fuente todavía.</li>
       <li>El calendario de campo desnudo entre cosechas no está registrado por
-      parcela; por eso no se afirma.</li></ul>
+      parcela; por eso no se afirma.</li>
+      <li>Erosión: solo hay pendiente SRTM como proxy, no un modelo de erosión.</li></ul>
     <div class="fuente">Índice 0–100: suma la demanda de agua en los meses secos y la
       diversidad de cultivos (más alto = menos riego en seco y más cultivos).
       Orientativo, no una recomendación agronómica.
@@ -3274,6 +3347,7 @@ function pintarVision() {
   pintarHistorial(parcela, sensor);
   pintarClima();
   if (!riesgosPintados) { pintarRiesgos(parcela); riesgosPintados = true; }
+  if (!terrenoPintado) { pintarTerreno(); }
   if (!satelitePintado) { pintarSatelite(); }
   pintarActuadores(parcela, estado);
   if (!document.getElementById('rotacion-filas').dataset.pintada) { pintarRotacion(); }

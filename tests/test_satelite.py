@@ -76,8 +76,11 @@ class TestSnapshot(unittest.TestCase):
         self.assertIn("ndvi", datos["capas"])
         self.assertIn("lluvia", datos["capas"])
         for capa in datos["capas"].values():
-            self.assertTrue((RAIZ / "datos" / capa["imagen"]).exists())
             self.assertGreater(capa["resolucion_m"], 0)
+            if capa.get("imagen"):
+                self.assertTrue((RAIZ / "datos" / capa["imagen"]).exists())
+            else:
+                self.assertIn("lluvia", capa["nombre"].lower())
 
 
 if __name__ == "__main__":

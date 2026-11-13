@@ -24,10 +24,13 @@ qué se riega solo, y qué avisa por Telegram."
   (no NASA) + NASA POWER histórico.
 - **Automático**: el riego se activa con la humedad bajo el 25 % y el techo se
   cierra con la lluvia real de ERA5. No hay control para "hacer llover".
-- **Satélite NASA**: NDVI de MODIS/Terra y lluvia de GPM IMERG recortados sobre la
-  finca desde GIBS (fecha y tamaño de píxel a la vista; valor aproximado del color).
+- **Satélite NASA**: NDVI de MODIS/Terra (mapa suavizado, escala 0–1) y lluvia de
+  GPM IMERG (si no llovió se muestra el dato «0 mm/h», no un mapa vacío), con fecha
+  y tamaño de píxel; valor aproximado del color oficial de GIBS.
 - **Riesgos (NASA POWER)**: calor ≥ 35 °C, lluvia ≥ 20 mm, días secos, heladas,
   humedad de raíz y evapotranspiración, con la comparación 1991–2020 vs 2021–2025.
+- **Terreno (SRTM)**: elevación, pendiente y % de pendiente ≥ 15° como proxy de
+  erosión; la rotación muestra la materia orgánica estimada (carbono × 1,724).
 - **Fotos**: la de la izquierda es satélite real (Esri) recortada sobre el
   polígono; la de la derecha es la cámara simulada y lo dice al ampliarla.
 - **Techo**: pulsar `cerrar` / `abrir`. La parcela se cubre con el plástico en el

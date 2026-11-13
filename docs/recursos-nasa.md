@@ -27,7 +27,8 @@ Leído el 2026-11-13.
 | **NASA POWER** · riesgos | días ≥ 35 °C, lluvia ≥ 20 mm, días secos, heladas, **humedad de raíz (GWETROOT)** y **evapotranspiración (EVLAND)**, base 1991–2020 vs 2021–2025 | NASA |
 | **ERA5** (Open-Meteo) | últimos 30 días, normal 1991–2020 de la misma fuente, humedad superficial 0–7 cm | ESA/ECMWF · **no NASA** |
 | **Esri World Imagery** | mapa satelital real de las parcelas | Esri · **no NASA** |
-| **ISRIC SoilGrids 2.0** | textura, arcilla, arena, carbono orgánico, pH (0–5 cm) | ISRIC · **no NASA** |
+| **ISRIC SoilGrids 2.0** | textura, arcilla, arena, carbono orgánico, pH (0–5 cm); materia orgánica estimada con carbono × 1,724 | ISRIC · **no NASA** |
+| **SRTM** (vía tiles Terrarium) | elevación y pendiente del área de la finca; % de pendiente ≥ 15° como proxy de erosión | NASA |
 | **MODIS/Terra NDVI 16 días** (GIBS) | imagen oficial recortada sobre la finca y valor aproximado decodificado del color (píxel ~289 m) | NASA |
 | **GPM IMERG** (GIBS) | lluvia de la pasada sobre la finca (píxel ~2,3 km); “sin lluvia” si el píxel es transparente | NASA |
 
@@ -41,7 +42,7 @@ Leído el 2026-11-13.
 | **MODIS / VIIRS** | 250–1000 m | **NDVI ya integrado como imagen y valor aproximado vía GIBS**; VIIRS y series temporales, siguiente paso |
 | **GPM / IMERG** | ~0,1° (10 km) | **ya integrado como imagen y valor aproximado vía GIBS**; serie diaria completa, siguiente paso |
 | **ECOSTRESS** | ~70 m | ET y temperatura de superficie: requiere Earthdata |
-| **SRTM** | 30 m | pendiente/riesgo de erosión: falta descargar el tile de la zona |
+| **SRTM** | 30 m | **ya integrado**: elevación y pendiente del área de la finca (proxy de erosión) |
 | **GRACE / GRACE‑FO** | ~300 km | tendencia de agua subterránea: escala regional, se explica como contexto |
 | **GEDI** | ~25 m | biomasa/estructura: no hay bosque en la parcela demo |
 | **NLDAS / GLDAS** | ~12 km | proxies de ET y humedad: siguiente integración de series |

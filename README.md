@@ -37,7 +37,9 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
   hardware instalado y la app lo dice en pantalla.
 - **Riesgos de la finca** (NASA POWER): días ≥ 35 °C, lluvia ≥ 20 mm, días
   secos, heladas, humedad de raíz y evapotranspiración, comparando 1991–2020 con
-  2021–2025 y con un gráfico de los últimos 12 años.
+  2021–2025 y con un gráfico de los últimos 12 años. **Terreno (SRTM)**:
+  elevación, pendiente media y % de pendiente ≥ 15° como proxy de erosión.
+  La rotación añade la **materia orgánica estimada** (carbono × 1,724).
 - **Satélite NASA real**: NDVI de MODIS/Terra (16 días) y lluvia de GPM IMERG,
   recortados sobre la finca desde GIBS, con fecha, tamaño de píxel y un valor
   aproximado decodificado del color oficial. La app avisa de que el píxel es
@@ -70,6 +72,7 @@ python3 actualizar_reciente.py   # últimos 30 días (Open-Meteo)
 python3 generar_rotaciones.py    # motor de rotaciones
 python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
 python3 generar_riesgos.py      # riesgos: calor, lluvia intensa, secos, heladas, suelo y ET (POWER)
+python3 generar_terreno.py      # elevación y pendiente (SRTM) para el proxy de erosión
 python3 generar_satelite.py     # NDVI (MODIS) e IMERG (GPM) desde NASA GIBS
 ```
 
@@ -87,9 +90,9 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 |---|---|---|
 | ![Globo](docs/capturas/portada.png) | ![Techo](docs/capturas/monitor-techo.png) | ![Rotaciones](docs/capturas/monitor-rotacion.png) |
 
-| Riesgos NASA POWER | Satélite NASA (NDVI/IMERG) |
-|---|---|
-| ![Riesgos](docs/capturas/monitor-riesgos.png) | ![Satélite](docs/capturas/monitor-satelite.png) |
+| Riesgos NASA POWER | Terreno SRTM | Satélite NASA (NDVI/IMERG) |
+|---|---|---|
+| ![Riesgos](docs/capturas/monitor-riesgos.png) | ![Terreno](docs/capturas/monitor-terreno.png) | ![Satélite](docs/capturas/monitor-satelite.png) |
 
 ## Presentaciones
 
@@ -148,6 +151,7 @@ están mapeados en [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
 | Temperatura, lluvia, viento, humedad 1984–2025 | [NASA POWER](https://power.larc.nasa.gov/) (MERRA-2) | **reanálisis** |
 | Climatología de la finca, heladas, temporada | NASA POWER | **reanálisis** |
 | Calor extremo, lluvia intensa, días secos, suelo de raíz y ET | NASA POWER | **reanálisis** |
+| Elevación y pendiente del área de la finca | SRTM (NASA) vía tiles Terrarium | observación |
 | Últimos 30 días y humedad superficial 0–7 cm | Open-Meteo (ERA5) | **no NASA** |
 | Imágenes satelitales de la finca | Esri World Imagery | **no NASA** |
 | Textura, carbono y pH del suelo | ISRIC SoilGrids 2.0 | **no NASA** |

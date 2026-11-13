@@ -1,6 +1,6 @@
 {
  "version": 1,
- "generado": "2026-11-13T18:46:39-04:00",
+ "generado": "2026-11-13T19:18:53-04:00",
  "fuente": "NASA GIBS · MODIS/Terra (NDVI) y GPM IMERG (lluvia) · no NASA para el fondo Esri",
  "centro": {
   "lat": 18.9045,
@@ -26,7 +26,7 @@
    "cobertura": 0.0,
    "unidad": "mm/h",
    "resolucion_m": 2314.0,
-   "imagen": "imerg_gpm.png",
+   "imagen": null,
    "nota": "Sin lluvia significativa en esa pasada de IMERG (< 0,1 mm/h). El píxel (~2,3 km) es mayor que la parcela; no es un pluviómetro."
   }
  }

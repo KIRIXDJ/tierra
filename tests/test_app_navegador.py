@@ -242,6 +242,18 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [])
         pag.close()
 
+    def test_terreno_srtm(self):
+        """Terreno real de la finca: elevación y pendiente de SRTM."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        texto = pag.inner_text("#vision-terreno")
+        for campo in ("ELEVACIÓN", "PENDIENTE", "SRTM", "proxy de riesgo de erosión"):
+            self.assertIn(campo, texto)
+        self.assertIn("1185", texto)          # elevación media del área de la finca
+        self.assertIn("3.5", texto)           # pendiente media en grados
+        self.assertEqual(errores, [])
+        pag.close()
+
     def test_satelite_nasa_gibs(self):
         """NDVI (MODIS) e IMERG (GPM) reales de GIBS, en el monitor."""
         pag, errores = self.abrir()
@@ -251,10 +263,9 @@ class TestApp(unittest.TestCase):
             self.assertIn(esperado, texto)
         medidas = pag.eval_on_selector_all(
             "#vision-satelite img", "e => e.map(x => [x.naturalWidth, x.naturalHeight])")
-        self.assertEqual(len(medidas), 2)
-        for ancho, alto in medidas:
-            self.assertGreater(ancho, 0)
-            self.assertGreater(alto, 0)
+        self.assertEqual(len(medidas), 1)          # IMERG sin lluvia: dato, no mapa
+        self.assertGreater(medidas[0][0], 0)
+        self.assertGreater(medidas[0][1], 0)
         pag.click("button[data-satelite='ndvi']")
         pag.wait_for_selector("#vision-lightbox.visible")
         pie = pag.inner_text("#vision-lightbox-pie")
@@ -385,7 +396,7 @@ class TestApp(unittest.TestCase):
         # El satélite NASA también es local: sin wifi se sigue viendo.
         satelite = pag.eval_on_selector_all(
             "#vision-satelite img", "e => e.map(x => x.naturalWidth)")
-        self.assertEqual(satelite, [256, 288])
+        self.assertEqual(satelite, [384])
         self.assertEqual(errores, [], "errores de JS con la red caída")
         self.assertGreaterEqual(len(externas), 0)
         pag.close()

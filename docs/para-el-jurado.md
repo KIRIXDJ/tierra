@@ -55,14 +55,15 @@ los actuadores *simulados* del panel; no hay hardware conectado.
 - **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
 - **La app no carga ninguna librería de terceros**: three.js y las texturas están
   en el repo. Solo se piden datos a las APIs.
-- **148 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
+- **155 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
   el caso con la red caída).
 
 ## Lo que el reto pide y aún no cubrimos
 
-Mercado local, ciclo de plagas, materia orgánica, erosión y el calendario de campo
-desnudo **no se miden todavía** (SRTM/ECOSTRESS y datos de mercado están en la hoja
-de ruta). Se declaran como huecos, no se rellenan con supuestos.
+Mercado local, ciclo de plagas y el calendario de campo desnudo **no se miden
+todavía**. La materia orgánica se **estima** con el carbono de ISRIC (× 1,724) y la
+erosión solo tiene la pendiente SRTM como proxy, no un modelo. Se declaran como
+huecos, no se rellenan con supuestos.
 
 ## Límites, dichos sin rodeos
 

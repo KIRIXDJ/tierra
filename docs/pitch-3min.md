@@ -41,6 +41,8 @@ Demo en vivo para el jurado: **https://kirixdj.github.io/tierra/web/**
 
 - **Mapa**: parcelas, sensores y cámara sobre satélite real.
 - **Satélite NASA**: NDVI de MODIS e IMERG de GPM con fecha y tamaño de píxel.
+- **Terreno SRTM**: elevación, pendiente y % de pendiente ≥ 15° como proxy de
+  erosión; la rotación añade la materia orgánica estimada (carbono × 1,724).
 - **Rotación**: "tres estrategias —la actual y dos alternativas— con porqué,
   evidencia, beneficios, lo que falta y el riesgo a revisar".
 - Cambiar el **escenario de lluvia** a −40 %: "así se ve cuál aguanta peor".
