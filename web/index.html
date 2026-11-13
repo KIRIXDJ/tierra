@@ -1884,6 +1884,14 @@ function textoSuelo() {
   return `Suelo (0–5 cm): ${partes.join(' · ')}. Fuente: ISRIC SoilGrids, no NASA.`;
 }
 
+function textoCultivos(estrategia) {
+  if ((estrategia.cultivos || []).length) { return estrategia.cultivos.join(', '); }
+  if (estrategia.id === 'actual') {
+    return 'La rotación que ya usa el agricultor: hay que levantarla en campo con el agrónomo.';
+  }
+  return 'sin definir (validar con el agricultor)';
+}
+
 function evidenciaNasa(estrategia) {
   const finca = (ROTACIONES.fincas || []).find((f) => f.id === fincaId);
   const secos = (finca && finca.meses_secos) || [];
@@ -1919,7 +1927,7 @@ function pintarRotaciones() {
       <div class="barra-indice"><i style="width:${Math.max(0, Math.min(100, puntos || 0))}%"></i></div>
       <div class="evidencia">${evidenciaNasa(e)}</div>
       <span class="rotulo">Cultivos</span>
-      <div style="font-size:11px">${(e.cultivos || []).join(', ') || 'sin definir (validar con el agricultor)'}</div>
+      <div style="font-size:11px">${textoCultivos(e)}</div>
       <span class="rotulo">Por qué se sugiere</span>
       <ul>${(e.motivos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
       <span class="rotulo">Beneficios</span>
