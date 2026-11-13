@@ -78,7 +78,7 @@ qué se riega solo, y qué avisa por Telegram."
 
 - **Demo en vivo**: https://kirixdj.github.io/tierra/web/ (si el wifi del lugar
   aguanta; el bot va aparte en el portátil).
-- **Video ya grabado**: [`demo.mp4`](demo.mp4) — 46 s, 1280×720, con la vista
+- **Video ya grabado**: [`demo.mp4`](demo.mp4) — 48 s, 1280×720, con la vista
   actual (monitor, riesgos, satélite, rotaciones, techo y vuelo del globo).
   Se regenera con `python3 tools/grabar_demo.py` si la app cambia.
 - Capturas fijas en [`capturas/`](capturas/) por si el navegador falla.

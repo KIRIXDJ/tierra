@@ -414,7 +414,8 @@ class TestApp(unittest.TestCase):
         antes = pag.eval_on_selector_all("#parcela-selector option", "e => e.length")
         pag.click("#vision-registrar")
         caja = pag.locator("#vision-mapa").bounding_box()
-        puntos = [(0.42, 0.40), (0.58, 0.40), (0.58, 0.58), (0.42, 0.58)]
+        # Zona vacía del mapa (abajo a la izquierda): no pisa las parcelas de ejemplo.
+        puntos = [(0.10, 0.64), (0.26, 0.64), (0.26, 0.84), (0.10, 0.84)]
         for fx, fy in puntos:
             pag.mouse.click(caja["x"] + caja["width"] * fx, caja["y"] + caja["height"] * fy)
             pag.wait_for_timeout(120)
@@ -428,7 +429,7 @@ class TestApp(unittest.TestCase):
         self.assertGreater(area, 0.05)
         self.assertLess(area, 50)
         # La parcela queda bajo el clic: pulsar dentro del dibujo la vuelve a elegir.
-        pag.mouse.click(caja["x"] + caja["width"] * 0.5, caja["y"] + caja["height"] * 0.49)
+        pag.mouse.click(caja["x"] + caja["width"] * 0.18, caja["y"] + caja["height"] * 0.74)
         pag.wait_for_timeout(300)
         self.assertIn("registrada", pag.evaluate("window.__tierra.parcelaActual().id"))
         self.assertEqual(errores, [])

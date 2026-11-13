@@ -1,7 +1,7 @@
 {
  "version": 3,
  "simulado": true,
- "nota": "Mapa: imagen satelital real de la zona (Esri World Imagery, no NASA). Las parcelas dibujadas encima son simuladas: formas inventadas sobre campos reales.",
+ "nota": "Mapa: imagen satelital real de campos agrícolas al este del pueblo de Constanza (Esri World Imagery, no NASA). Las parcelas y sus formas son simuladas sobre esos campos reales.",
  "finca": "constanza",
  "finca_nombre": "Constanza",
  "parcelas": [
@@ -14,40 +14,36 @@
    "temperatura": 28.4,
    "poligono_m": [
     [
-     197,
-     232
+     -524,
+     177
     ],
     [
-     315,
-     224
+     -420,
+     172
     ],
     [
-     318,
-     306
+     -423,
+     50
     ],
     [
-     204,
-     330
-    ],
-    [
-     197,
-     268
+     -527,
+     55
     ]
    ],
    "sensores": [
     {
      "id": "ESP-01",
-     "x_m": 240,
-     "y_m": 258
+     "x_m": -480,
+     "y_m": 130
     },
     {
      "id": "ESP-02",
-     "x_m": 288,
-     "y_m": 296
+     "x_m": -455,
+     "y_m": 75
     }
    ],
    "camara": "Surcos de yuca con suelo visible entre matas; sin encharcamiento.",
-   "area_ha": 1.06,
+   "area_ha": 1.27,
    "plantas_georreferenciadas": 2480
   },
   {
@@ -59,31 +55,31 @@
    "temperatura": 24.1,
    "poligono_m": [
     [
-     346,
+     212,
      160
     ],
     [
-     440,
-     166
+     325,
+     155
     ],
     [
-     438,
-     238
+     320,
+     47
     ],
     [
-     350,
-     243
+     207,
+     53
     ]
    ],
    "sensores": [
     {
      "id": "ESP-03",
-     "x_m": 392,
-     "y_m": 202
+     "x_m": 265,
+     "y_m": 105
     }
    ],
    "camara": "Follaje cerrado entre hileras; hoja con brillo de rocío.",
-   "area_ha": 0.71,
+   "area_ha": 1.22,
    "plantas_georreferenciadas": 1620
   },
   {
@@ -95,36 +91,36 @@
    "temperatura": 29.2,
    "poligono_m": [
     [
-     148,
-     360
+     -56,
+     27
     ],
     [
-     274,
-     356
+     45,
+     23
     ],
     [
-     278,
-     470
+     41,
+     -77
     ],
     [
-     152,
-     474
+     -61,
+     -72
     ]
    ],
    "sensores": [
     {
      "id": "ESP-04",
-     "x_m": 196,
-     "y_m": 396
+     "x_m": -5,
+     "y_m": 0
     },
     {
      "id": "ESP-05",
-     "x_m": 246,
-     "y_m": 438
+     "x_m": -25,
+     "y_m": -40
     }
    ],
    "camara": "Plantas altas; alguna hoja enrollada por el sol del mediodía.",
-   "area_ha": 1.44,
+   "area_ha": 1.01,
    "plantas_georreferenciadas": 3100
   }
  ],
@@ -132,8 +128,8 @@
   "archivo": "mapa_constanza.jpg",
   "zoom": 17,
   "centro": {
-   "lat": 18.91,
-   "lon": -70.74
+   "lat": 18.9045,
+   "lon": -70.716
   },
   "ancho_px": 1024,
   "alto_px": 1024,
