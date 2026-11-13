@@ -28,7 +28,7 @@
     transition: opacity .35s ease; overflow: hidden; }
   .slide.active { opacity: 1; visibility: visible; }
   h1 { font-size: clamp(34px, 6vw, 76px); line-height: 1.05; letter-spacing: -.01em; }
-  h2 { font-size: clamp(24px, 3.4vw, 44px); line-height: 1.15; margin-bottom: 3vh; }
+  h2 { font-size: clamp(22px, 3.2vw, 42px); line-height: 1.15; margin-bottom: 2.2vh; }
   h3 { font-size: clamp(14px, 1.4vw, 19px); color: var(--cian); letter-spacing: .16em;
     text-transform: uppercase; margin-bottom: 1.6vh; font-weight: 600; }
   p { font-size: clamp(15px, 1.55vw, 21px); line-height: 1.5; color: var(--texto); }
@@ -40,7 +40,7 @@
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .rejilla { display: grid; gap: 1.6vw; grid-template-columns: 1fr 1fr; }
   .rejilla.tres { grid-template-columns: repeat(3, 1fr); }
-  .caja { border: 1px solid var(--borde); border-radius: 14px; padding: 2.2vh 1.6vw;
+  .caja { border: 1px solid var(--borde); border-radius: 14px; padding: 1.7vh 1.5vw;
     background: var(--panel); }
   .caja b { color: var(--cian); }
   .caja .titulo { color: var(--texto); font-size: clamp(14px, 1.5vw, 20px); font-weight: 600;
@@ -56,8 +56,8 @@
   .amarillo { color: var(--ambar); }
   .verde { color: var(--verde); }
   .aviso { border: 1px solid rgba(255, 180, 84, .5); background: rgba(255, 180, 84, .08);
-    border-radius: 12px; padding: 1.6vh 1.4vw; font-size: clamp(13px, 1.3vw, 17px);
-    color: var(--ambar); margin-top: 2.4vh; }
+    border-radius: 12px; padding: 1.3vh 1.3vw; font-size: clamp(12px, 1.25vw, 16px);
+    color: var(--ambar); margin-top: 1.7vh; }
   .pie { position: absolute; left: 6vw; right: 12vw; bottom: 3.4vh; display: flex;
     justify-content: space-between; font-size: 12px; color: var(--secundario); }
   .nav { position: fixed; bottom: 14px; right: 18px; display: flex; gap: 10px;
@@ -68,10 +68,32 @@
     transition: width .3s ease; z-index: 9; }
   .fila-datos { display: flex; gap: 3vw; flex-wrap: wrap; }
   .nota-pie { font-size: 11px; color: var(--secundario); margin-top: 1.6vh; line-height: 1.4; }
-  .capturas { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; margin-top: 2vh; }
-  .capturas img { width: 100%; border-radius: 10px; border: 1px solid var(--borde); display: block; }
+  .capturas { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; margin-top: 1.4vh; }
+  .capturas img { width: 100%; max-height: 26vh; object-fit: cover; object-position: top;
+    border-radius: 10px; border: 1px solid var(--borde); display: block; }
   .capturas.una { grid-template-columns: 1fr; }
-  .capturas.una img { max-height: 34vh; object-fit: cover; object-position: top; }
+  .capturas.una img { max-height: 25vh; object-fit: cover; object-position: top; }
+  @media (max-height: 700px) {
+    .slide { padding: 3.5vh 5vw; }
+    h2 { margin-bottom: 1.6vh; }
+    p { font-size: clamp(13px, 1.35vw, 18px); }
+    .caja { padding: 1.2vh 1.2vw; }
+    .caja .titulo { font-size: clamp(12px, 1.25vw, 17px); }
+    .caja p { font-size: clamp(11px, 1.05vw, 15px); }
+    .capturas img { max-height: 21vh; }
+    .capturas.una img { max-height: 20vh; }
+    .aviso { font-size: 11px; padding: 1vh 1vw; margin-top: 1.2vh; }
+  }
+  @media (max-aspect-ratio: 8/5) {
+    .slide { padding: 2.6vh 4.5vw; }
+    h2 { font-size: clamp(18px, 2.8vw, 34px); margin-bottom: 1.2vh; }
+    h3 { margin-bottom: 1vh; }
+    .caja { padding: .8vh 1vw; }
+    .capturas img { max-height: 16vh; }
+    .capturas.una img { max-height: 15vh; }
+    .pie { bottom: 2vh; }
+    li { font-size: clamp(12px, 1.2vw, 16px); margin-bottom: .5vh; }
+  }
   .borrador { display: inline-block; font-size: 11px; color: var(--ambar);
     border: 1px solid rgba(255,180,84,.5); border-radius: 999px; padding: 2px 9px;
     margin-left: 8px; vertical-align: middle; }
@@ -187,7 +209,7 @@
       <li><b>Funciona sin internet:</b> 0 librerías externas, 3 MB, 0,6 s de carga.</li>
     </ul>
     <div class="aviso">Esto es lo que un agrónomo o un inversor puede auditar. La confianza se gana así.</div>
-    <div class="pie"><span>125 pruebas automáticas · bot real incluido</span><span id="p5">5 / 11</span></div>
+    <div class="pie"><span>145 pruebas automáticas · bot real incluido</span><span id="p5">5 / 11</span></div>
   </section>
 
   <section class="slide">
@@ -227,7 +249,7 @@
     <div class="fila-datos">
       <div><div class="cifra chica">2.592</div><div class="etiqueta">celdas con tendencia<br>y significancia corregida</div></div>
       <div><div class="cifra chica">3</div><div class="etiqueta">fincas piloto con<br>climatología de 30 años</div></div>
-      <div><div class="cifra chica">143</div><div class="etiqueta">pruebas automáticas<br>+ navegador y satélite</div></div>
+      <div><div class="cifra chica">145</div><div class="etiqueta">pruebas automáticas<br>+ navegador y satélite</div></div>
       <div><div class="cifra chica">0</div><div class="etiqueta">librerías externas<br>en la demo</div></div>
     </div>
     <ul style="margin-top:3vh">

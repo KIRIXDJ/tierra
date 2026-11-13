@@ -9,7 +9,7 @@ rotación me conviene?*
 
 ## Qué construimos
 
-Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
+Una herramienta de apoyo a la decisión con tres lentes, los riesgos y una recomendación:
 
 1. **Lente NASA de largo plazo (1984–2025).** Globo con una malla de 2.592
    celdas de 5°: tendencia de Sen y p de Mann-Kendall para temperatura, lluvia,
@@ -24,7 +24,7 @@ Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
 4. **Riesgos.** Días de calor extremo, lluvia intensa, días secos, heladas,
    humedad de raíz y evapotranspiración con NASA POWER (MERRA-2), comparados
    contra la base 1991–2020.
-4. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
+5. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
    **evidencia NASA** (los meses secos de esa finca), motivos, beneficios, datos
    que faltan y riesgos a validar. Deslizadores de prioridades (agua/diversidad) y
    un escenario de sequía para ver qué plan aguanta peor.
@@ -42,6 +42,8 @@ los actuadores *simulados* del panel; no hay hardware conectado.
 | Incendios y tormentas | NASA EONET | capas de eventos |
 | Temporada actual | Open-Meteo / ERA5 (**no NASA**) | anomalía de 30 días |
 | Suelo (textura, carbono, pH) | ISRIC SoilGrids (**no NASA**) | contexto de la finca |
+| NDVI (MODIS/Terra 16 días) e IMERG (GPM) | NASA GIBS | vegetación y lluvia sobre la finca (valor aproximado por color) |
+| Calor, lluvia intensa, secos, heladas, suelo de raíz y ET | NASA POWER (MERRA-2) | riesgos por año, 1991–2025 |
 
 ## Qué tiene de distinto
 
@@ -53,7 +55,7 @@ los actuadores *simulados* del panel; no hay hardware conectado.
 - **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
 - **La app no carga ninguna librería de terceros**: three.js y las texturas están
   en el repo. Solo se piden datos a las APIs.
-- **125 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
+- **145 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
   el caso con la red caída).
 
 ## Límites, dichos sin rodeos

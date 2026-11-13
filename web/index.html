@@ -3170,6 +3170,16 @@ function pintarRotacion() {
   if ((elegida.meses_criticos || []).length) {
     evidencia.push(`Meses críticos: ${elegida.meses_criticos.join(', ')}.`);
   }
+  // Temporada vulnerable: cuántos meses secos de la finca caen dentro de los
+  // meses críticos de esta rotación (evidencia, no recomendación).
+  const mesesSecos = finca.meses_secos || [];
+  const criticos = elegida.meses_criticos || [];
+  const coinciden = criticos.filter((mes) => mesesSecos.includes(mes));
+  if (mesesSecos.length && criticos.length) {
+    evidencia.push(`Temporada vulnerable: ${coinciden.length} de ${mesesSecos.length} `
+      + 'meses secos de la finca caen en meses críticos de esta rotación'
+      + (coinciden.length ? ` (${coinciden.join(', ')}).` : '.'));
+  }
   detalle.innerHTML = `<h4>Por qué se sugiere</h4><ul>${lista(elegida.motivos)}</ul>
     <h4>Evidencia</h4><ul>${lista(evidencia)}</ul>
     <h4>Beneficios</h4><ul>${lista(beneficios)}</ul>

@@ -306,6 +306,23 @@ class TestApp(unittest.TestCase):
         # 1. El producto abre en el monitor con el mapa y la rotación.
         self.assertIn("La Esperanza", pag.inner_text("#parcela-selector"))
         self.assertEqual(pag.eval_on_selector_all(".rotacion-fila", "e => e.length"), 3)
+        # Bloque de riesgos y de satélite NASA (los dos pilares del reto).
+        self.assertIn("CALOR", pag.inner_text("#vision-riesgos"))
+        self.assertIn("NDVI MODIS", pag.inner_text("#vision-satelite"))
+        # Escenario de lluvia: cambia los índices de las tres estrategias.
+        pag.fill("#escenario-lluvia", "-40")
+        pag.dispatch_event("#escenario-lluvia", "input")
+        pag.wait_for_timeout(300)
+        self.assertIn("89/100", pag.inner_text("#rotacion-filas"))
+        # Método y límites, plegado en el propio monitor.
+        pag.click("#vision-metodo summary")
+        self.assertIn("reanálisis", pag.inner_text("#vision-metodo").lower())
+        # Fotos ampliables (la cámara simulada lo dice).
+        pag.click(".foto-mini[data-foto='cultivo']")
+        pag.wait_for_selector("#vision-lightbox.visible")
+        self.assertIn("simulada", pag.inner_text("#vision-lightbox-pie").lower())
+        pag.click("#vision-lightbox")
+        pag.wait_for_timeout(200)
         # 2. Volver al globo: la cara NASA de la herramienta.
         pag.click("#vision-cerrar")
         pag.wait_for_timeout(500)

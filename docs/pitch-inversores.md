@@ -22,7 +22,9 @@ globales que no contestan su pregunta: *¿cómo viene esta temporada y qué siem
 **3. Lo que ya funciona (60 s)**
 Tres lentes sobre la misma finca: 42 años de tendencia NASA (con corrección por
 pruebas múltiples), los últimos 30 días contra su propia normal, y **tres rotaciones
-comparadas** con su porqué, evidencia, beneficios, huecos y riesgos.
+comparadas** con su porqué, evidencia, beneficios, huecos y riesgos. Encima, dos
+capas reales del reto: **NDVI de MODIS e IMERG de GPM** y **riesgos climáticos de
+POWER** (calor, lluvia intensa, secos, heladas, suelo y ET).
 "El reto oficial (Field Shift) pide exactamente eso; y esto no es un mockup: se
 clona, se abre y funciona sin internet, con el bot real por Telegram."
 
@@ -49,7 +51,7 @@ pruebas múltiples y el asistente responde «no tengo ese dato» cuando falta.
 Eso es lo que un agrónomo puede auditar."
 
 **6. Estado y huecos (30 s)**
-"Hecho: app funcionando, 125 pruebas automáticas, repositorio público.
+"Hecho: app funcionando, 145 pruebas automáticas, repositorio público.
 No hecho: validación agronómica, hardware en campo y precio."
 
 **7. El ask (30 s)**
