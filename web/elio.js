@@ -132,9 +132,28 @@
     return Math.round(Math.max(0, base - 30 * severidad * deficit));
   }
 
+  /* Beneficios: traducción de los componentes ya calculados, sin añadir agronomía. */
+  function beneficios(estrategia) {
+    const c = (estrategia && estrategia.componentes) || {};
+    const lista = [];
+    if (typeof c.agua === 'number' && c.agua >= 8) {
+      lista.push('Riega poco en los meses secos de esta finca (climatología NASA POWER).');
+    } else if (typeof c.agua === 'number' && c.agua >= 5) {
+      lista.push('Riega en parte de los meses secos: margen intermedio.');
+    } else if (typeof c.agua === 'number') {
+      lista.push('Coincide con los meses secos: necesitaría apoyo de riego.');
+    }
+    if (typeof c.diversidad === 'number' && c.diversidad >= 7) {
+      lista.push('Tres cultivos distintos: más diversidad en la rotación.');
+    } else if (typeof c.diversidad === 'number' && c.diversidad > 0) {
+      lista.push('Dos cultivos: diversidad parcial.');
+    }
+    return lista;
+  }
+
   const Elio = {
     numero, diasDesde, textoLluvia, textoTemperatura, textoHumedad,
-    indicesRotaciones, responderElio, indiceEscenario,
+    indicesRotaciones, responderElio, indiceEscenario, beneficios,
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Elio; }
   if (typeof window !== 'undefined') { window.Elio = Elio; }

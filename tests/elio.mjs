@@ -72,4 +72,11 @@ assert.ok(Elio.indiceEscenario(seco, 5, 5, -40) < Elio.indicesRotaciones(seco, 5
 assert.strictEqual(Elio.indiceEscenario(seco, 5, 5, 0), Elio.indicesRotaciones(seco, 5, 5));
 assert.strictEqual(Elio.indiceEscenario(seco, 5, 5, 20), Elio.indicesRotaciones(seco, 5, 5));
 
+// 10. Beneficios: se derivan de los componentes, sin inventar agronomía.
+const b = Elio.beneficios({ componentes: { agua: 10, diversidad: 10 } });
+assert.ok(b.some((x) => /meses secos/.test(x)));
+assert.ok(b.some((x) => /diversidad/.test(x)));
+assert.deepStrictEqual(Elio.beneficios({ componentes: { agua: 2, diversidad: 0 } }),
+  ['Coincide con los meses secos: necesitaría apoyo de riego.']);
+
 console.log('OK');

@@ -324,6 +324,7 @@
 <script src="../datos/reciente.js"></script>
 <script src="../datos/rotaciones.js"></script>
 <script src="../datos/fincas.js"></script>
+<script src="../datos/suelo.js"></script>
 <script type="importmap">
 {
   "imports": {
@@ -1893,6 +1894,7 @@ window.addEventListener('keydown', (evento) => {
 const RECIENTE = window.__RECIENTE__ || null;
 const ROTACIONES = window.__ROTACIONES__ || null;
 const FINCAS = (window.__FINCAS__ && window.__FINCAS__.fincas) || [];
+const SUELO = window.__SUELO__ || null;
 let fincaId = FINCAS.length ? FINCAS[0].id : null;
 
 function panel(id) {
@@ -2005,6 +2007,7 @@ function pintarFinca() {
     <div class="fila">${textoLluvia(lluvia)}</div>
     <div class="fila">${textoTemperatura(temp)}</div>
     <div class="fila">${textoHumedad(humedad)}</div>
+    <div class="fila">${textoSuelo()}</div>
     <div class="fila"><b>Estado de la lluvia:</b>
       <span class="estado-${lluvia.estado || 'normal'}">${lluvia.estado || 'sin dato'}</span></div>`;
   dibujarLluvia(document.getElementById('finca-serie'), bloque.serie_30d || []);
@@ -2030,6 +2033,23 @@ function indicesRotaciones(estrategia) {
   const div = Number(document.getElementById('peso-diversidad').value) || 0;
   const escenario = Number(document.getElementById('escenario-lluvia').value) || 0;
   return Elio.indiceEscenario(estrategia, agua, div, escenario);
+}
+
+function textoSuelo() {
+  const fila = SUELO && (SUELO.fincas || []).find((f) => f.id === fincaId);
+  if (!fila) { return 'Suelo: <b>sin dato</b> (no se cargó la capa de suelo).'; }
+  if (fila.arcilla_pct === null && fila.carbono_organico_g_kg === null) {
+    return 'Suelo: <b>sin dato</b> para esta finca.';
+  }
+  const partes = [];
+  if (fila.textura) { partes.push(`textura <b>${fila.textura}</b>`); }
+  if (fila.arcilla_pct !== null) { partes.push(`arcilla ${fila.arcilla_pct} %`); }
+  if (fila.arena_pct !== null) { partes.push(`arena ${fila.arena_pct} %`); }
+  if (fila.carbono_organico_g_kg !== null) {
+    partes.push(`carbono orgánico ${fila.carbono_organico_g_kg} g/kg`);
+  }
+  if (fila.ph !== null) { partes.push(`pH ${fila.ph}`); }
+  return `Suelo (0–5 cm): ${partes.join(' · ')}. Fuente: ISRIC SoilGrids, no NASA.`;
 }
 
 function evidenciaNasa(estrategia) {
@@ -2070,6 +2090,8 @@ function pintarRotaciones() {
       <div style="font-size:11px">${(e.cultivos || []).join(', ') || 'sin definir (validar con el agricultor)'}</div>
       <span class="rotulo">Por qué se sugiere</span>
       <ul>${(e.motivos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
+      <span class="rotulo">Beneficios</span>
+      <ul>${(Elio.beneficios ? Elio.beneficios(e) : []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
       <span class="rotulo">Qué datos faltan</span>
       <ul>${(e.datos_faltantes || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
       <span class="rotulo">Revisar con un agrónomo</span>
