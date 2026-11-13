@@ -178,6 +178,15 @@ class TestApp(unittest.TestCase):
         pag.wait_for_selector("#rotaciones.visible")
         self.assertEqual(pag.eval_on_selector_all(".tarjeta", "e => e.length"), 3)
 
+        # Mi parcela y el bot funcionan sin red (datos y mapa son locales).
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        self.assertIn("HUMEDAD", pag.inner_text("#parcela-lecturas"))
+        pag.fill("#chat-texto", "/estado")
+        pag.press("#chat-texto", "Enter")
+        pag.wait_for_timeout(300)
+        self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
+
         pag.click("#elio-boton")
         pag.wait_for_selector("#elio.visible")
         pag.fill("#elio-pregunta", "¿cómo va la temporada?")

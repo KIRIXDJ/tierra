@@ -195,7 +195,7 @@
     #panel.visible { transform: none; }
   }
 
-  .simulacion { font-size: 11px; line-height: 1.45; color: var(--ambar);
+  .simulacion { font-size: 10px; line-height: 1.4; color: var(--ambar);
     border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
     border-radius: 8px; padding: 8px 10px; margin: 10px 0 12px; }
   .simulacion b { color: var(--ambar); }
@@ -216,14 +216,14 @@
   #vision-mapa { cursor: crosshair; }
   #parcela-camara { margin-top: 8px; font-size: 10px; color: var(--secundario);
     border-left: 2px solid rgba(88, 227, 154, .55); padding-left: 7px; line-height: 1.45; }
-  #vision-mapa { width: 100%; height: 210px; display: block; border-radius: 8px;
+  #vision-mapa { width: 100%; height: 180px; display: block; border-radius: 8px;
     background: #08111c; border: 1px solid var(--borde); }
   #vision-chat { margin-top: 10px; border: 1px solid var(--borde); border-radius: 10px;
     overflow: hidden; background: #071019; }
   .chat-cabecera { font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
     color: var(--secundario); padding: 6px 10px; background: rgba(53, 214, 255, .06);
     border-bottom: 1px solid var(--borde); }
-  #chat-mensajes { max-height: 132px; overflow-y: auto; padding: 8px 10px;
+  #chat-mensajes { max-height: 88px; overflow-y: auto; padding: 8px 10px;
     display: flex; flex-direction: column; gap: 6px; }
   .burbuja { max-width: 88%; font-size: 11px; line-height: 1.4; padding: 6px 9px;
     border-radius: 10px; white-space: pre-wrap; }
@@ -255,11 +255,6 @@
     border-radius: 8px; padding: 8px 10px; color: var(--texto); }
   #vision-diagnostico.visible { display: block; }
   #vision-diagnostico b { color: var(--ambar); }
-  #vision-log { margin-top: 10px; font-size: 11px; line-height: 1.5;
-    font-family: ui-monospace, Consolas, monospace; color: var(--secundario);
-    max-height: 140px; overflow-y: auto; }
-  #vision-log div { border-left: 2px solid rgba(53, 214, 255, .5); padding-left: 7px;
-    margin-bottom: 6px; }
 </style>
 </head>
 <body>
@@ -364,13 +359,21 @@
   <button class="cerrar" data-cierra="vision" aria-label="Cerrar">×</button>
   <h2>Mi parcela</h2>
   <div class="simulacion">
-    <b>Vista simulada.</b> El mapa es imagen satelital real de la zona; las parcelas
-    dibujadas encima son de ejemplo. Hoy no hay sensores instalados.
+    <b>Vista simulada.</b> Mapa satelital real de la zona; las parcelas de encima son
+    de ejemplo. Hoy no hay sensores instalados.
   </div>
   <label class="campo">Parcela (clic en el mapa o aquí)
     <select id="parcela-selector"></select>
   </label>
   <div id="parcela-lecturas"></div>
+  <div id="vision-chat">
+    <div class="chat-cabecera">Bot de la finca · Telegram</div>
+    <div id="chat-mensajes" aria-live="polite"></div>
+    <form id="chat-forma">
+      <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
+      <button type="submit" aria-label="Enviar">➤</button>
+    </form>
+  </div>
   <canvas id="vision-mapa"></canvas>
   <div id="vision-dibujo" hidden>
     <span id="vision-dibujo-info">Haz clic en el mapa para marcar las esquinas.</span>
@@ -390,15 +393,6 @@
   <div class="control"><label for="vision-lluvia">Lluvia:
     <b id="vision-lluvia-valor">0 mm/h</b></label>
     <input type="range" id="vision-lluvia" min="0" max="10" step="1" value="0"></div>
-  <div id="vision-chat">
-    <div class="chat-cabecera">Bot de la finca · Telegram</div>
-    <div id="chat-mensajes" aria-live="polite"></div>
-    <form id="chat-forma">
-      <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
-      <button type="submit" aria-label="Enviar">➤</button>
-    </form>
-  </div>
-  <div id="vision-log" aria-live="polite"></div>
 </aside>
 <aside id="metodo">
   <button class="cerrar" data-cierra="metodo" aria-label="Cerrar">×</button>
@@ -2525,13 +2519,12 @@ function pintarVision() {
 
   camara.innerHTML = `<b>Cámara</b> · última captura: ${parcela.camara}`;
 
-  const log = document.getElementById('vision-log');
-  if (salida.avisos.length) {
-    log.innerHTML = salida.avisos.map((a) => `<div>${a}</div>`).join('') + log.innerHTML;
-  }
-  if (!log.innerHTML.trim()) {
-    log.innerHTML = '<div>Sin cambios: todo dentro de lo previsto.</div>';
-  }
+  // Los cambios de los actuadores se avisan por el chat, como haría el bot.
+  salida.avisos.forEach((aviso) => {
+    if (typeof burbuja === 'function' && document.getElementById('chat-mensajes')) {
+      burbuja(aviso, 'bot');
+    }
+  });
 }
 
 function elegirParcela(id) {
@@ -2542,7 +2535,6 @@ function elegirParcela(id) {
   document.getElementById('vision-humedad').value = String(parcela.humedad_inicial ?? 26);
   document.getElementById('parcela-selector').value = id;
   if (FINCAS.some((f) => f.id === FINCA_PARCELAS)) { fincaId = FINCA_PARCELAS; }
-  document.getElementById('vision-log').innerHTML = '';
   pintarVision();
 }
 
