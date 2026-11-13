@@ -113,12 +113,12 @@
   #aviso h2 { font-size: 20px; margin-bottom: 10px; }
   #aviso p { color: var(--secundario); max-width: 460px; line-height: 1.5; }
 
-  #finca, #rotaciones, #elio { position: fixed; top: 142px; right: 22px; width: 380px;
+  #finca, #rotaciones, #elio, #metodo { position: fixed; top: 142px; right: 22px; width: 380px;
     max-height: calc(100vh - 110px); overflow-y: auto; background: var(--panel);
     border: 1px solid var(--borde); border-radius: 14px; padding: 18px;
     backdrop-filter: blur(10px); display: none; }
-  #finca.visible, #rotaciones.visible, #elio.visible { display: block; }
-  #finca h2, #rotaciones h2, #elio h2 { font-size: 13px; letter-spacing: .18em;
+  #finca.visible, #rotaciones.visible, #elio.visible, #metodo.visible { display: block; }
+  #finca h2, #rotaciones h2, #elio h2, #metodo h2 { font-size: 13px; letter-spacing: .18em;
     color: var(--cian); text-transform: uppercase; }
   #finca select { width: 100%; margin: 10px 0 14px; background: #0a1420;
     color: var(--texto); border: 1px solid var(--borde); border-radius: 7px;
@@ -142,6 +142,8 @@
   .indice { font-family: ui-monospace, Consolas, monospace; font-size: 22px; color: var(--cian); }
   .barra-indice { height: 6px; border-radius: 3px; background: rgba(120,200,255,.15); margin: 6px 0; }
   .barra-indice i { display: block; height: 100%; border-radius: 3px; background: var(--cian); }
+  .evidencia { font-size: 10px; color: var(--secundario); margin-top: 6px;
+    line-height: 1.45; border-left: 2px solid rgba(53, 214, 255, .45); padding-left: 7px; }
   .insignia { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 999px;
     border: 1px solid rgba(255,180,84,.5); color: var(--ambar); margin-left: 6px; }
   .tarjeta ul { margin: 6px 0 0 16px; font-size: 11px; color: var(--secundario); line-height: 1.45; }
@@ -190,6 +192,7 @@
   <button id="finca-boton">Finca</button>
   <button id="rotaciones-boton">Rotaciones</button>
   <button id="elio-boton">Elio</button>
+  <button id="metodo-boton">Método</button>
 </div>
 <div id="manos-hud" hidden>
   <video id="manos-video" playsinline muted></video>
@@ -267,6 +270,36 @@
       Comprueba cómo cambiaría el orden si la temporada fuera más seca o más húmeda.</span></div>
   <div id="rotaciones-tarjetas"></div>
   <div id="rotaciones-pie"></div>
+</aside>
+
+<aside id="metodo">
+  <button class="cerrar" data-cierra="metodo" aria-label="Cerrar">×</button>
+  <h2>Método y límites</h2>
+  <div class="fila"><b>Tendencias 1984–2025</b><br>
+    Pendiente de Sen y p de Mann-Kendall sobre NASA POWER, corregida por pruebas
+    múltiples (FDR, Benjamini-Hochberg) en 2.592 celdas. El panel añade intervalo
+    de confianza por bootstrap y p ajustada por autocorrelación.</div>
+  <div class="fila"><b>Temporada</b><br>
+    Open-Meteo (ERA5) para los últimos 30 días y su normal 1991–2020 de la
+    <i>misma</i> fuente. La banda es P25–P75 de los años comparables. No se resta
+    una normal de POWER a un dato de ERA5: serían dos modelos distintos.</div>
+  <div class="fila"><b>Rotaciones</b><br>
+    El motor cruza los meses secos de la finca (NASA POWER) con los meses en que
+    cada cultivo necesita agua, y suma diversidad. El índice es orientativo; los
+    pesos y el escenario son de diseño, no agronómicos.</div>
+  <div class="fila"><b>Satélite, modelo y terreno</b><br>
+    POWER y ERA5 son <i>reanálisis</i>: modelos alimentados con observaciones.
+    No son un termómetro ni un pluviómetro en tu parcela. Un satélite mide
+    radiación o humedad desde arriba, con píxeles de kilómetros; el terreno mide
+    en un punto. Por eso aquí todo va con fecha, fuente y banda de incertidumbre.</div>
+  <div class="fila"><b>Dónde hace falta un agrónomo</b><br>
+    Textura y profundidad del suelo, variedades locales, dosis, fechas de siembra
+    y rendimiento histórico. Nada de eso está en la herramienta: cada tarjeta
+    lista lo que falta.</div>
+  <div class="fila"><b>Lo que no hace</b><br>
+    No controla riego ni sensores, no mide en la parcela y no decide por el
+    agricultor. Elio responde solo con lo que hay en pantalla y dice «no tengo
+    ese dato» cuando falta.</div>
 </aside>
 <aside id="elio">
   <button class="cerrar" data-cierra="elio" aria-label="Cerrar">×</button>
@@ -1850,6 +1883,7 @@ document.getElementById('manos-boton').addEventListener('click', activarManos);
 window.addEventListener('keydown', (evento) => {
   if (evento.key === 'Escape') {
     cerrarPanel();
+    cerrarPaneles();
   }
 });
 
@@ -1862,7 +1896,7 @@ const FINCAS = (window.__FINCAS__ && window.__FINCAS__.fincas) || [];
 let fincaId = FINCAS.length ? FINCAS[0].id : null;
 
 function panel(id) {
-  ['finca', 'rotaciones', 'elio'].forEach((otro) => {
+  ['finca', 'rotaciones', 'elio', 'metodo'].forEach((otro) => {
     document.getElementById(otro).classList.toggle('visible', otro === id);
     const boton = document.getElementById(`${otro}-boton`);
     if (boton) { boton.classList.toggle('activa', otro === id); }
@@ -1998,6 +2032,20 @@ function indicesRotaciones(estrategia) {
   return Elio.indiceEscenario(estrategia, agua, div, escenario);
 }
 
+function evidenciaNasa(estrategia) {
+  const finca = (ROTACIONES.fincas || []).find((f) => f.id === fincaId);
+  const secos = (finca && finca.meses_secos) || [];
+  const criticos = estrategia.meses_criticos || [];
+  if (!secos.length) {
+    return 'Sin climatología NASA POWER para esta finca: la recomendación no usa el clima.';
+  }
+  const coincide = criticos.filter((mes) => secos.includes(mes)).length;
+  return `NASA POWER · meses secos ${secos.join(', ')}`
+    + (criticos.length
+      ? ` · este plan riega en ${criticos.join(', ')} → coincide en ${coincide}`
+      : '') + '.';
+}
+
 function pintarRotaciones() {
   const caja = document.getElementById('rotaciones-tarjetas');
   const pie = document.getElementById('rotaciones-pie');
@@ -2017,8 +2065,9 @@ function pintarRotaciones() {
       <h3>${e.titulo}${e.provisional ? '<span class="insignia">provisional</span>' : ''}</h3>
       <div class="indice">${puntos}<span style="font-size:11px;color:var(--secundario)">/100 orientativo</span></div>
       <div class="barra-indice"><i style="width:${Math.max(0, Math.min(100, puntos || 0))}%"></i></div>
+      <div class="evidencia">${evidenciaNasa(e)}</div>
       <span class="rotulo">Cultivos</span>
-      <div style="font-size:11px">${(e.cultivos || []).join(', ') || 'sin dato'}</div>
+      <div style="font-size:11px">${(e.cultivos || []).join(', ') || 'sin definir (validar con el agricultor)'}</div>
       <span class="rotulo">Por qué se sugiere</span>
       <ul>${(e.motivos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
       <span class="rotulo">Qué datos faltan</span>
@@ -2071,6 +2120,7 @@ async function refrescarDatos() {
 document.getElementById('finca-boton').addEventListener('click', () => panel('finca'));
 document.getElementById('rotaciones-boton').addEventListener('click', () => panel('rotaciones'));
 document.getElementById('elio-boton').addEventListener('click', () => panel('elio'));
+document.getElementById('metodo-boton').addEventListener('click', () => panel('metodo'));
 document.querySelectorAll('[data-cierra]').forEach((boton) => {
   boton.addEventListener('click', cerrarPaneles);
 });
