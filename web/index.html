@@ -325,6 +325,21 @@
 <script src="../datos/rotaciones.js"></script>
 <script src="../datos/fincas.js"></script>
 <script src="../datos/suelo.js"></script>
+<script>
+  // Con file:// el navegador bloquea los módulos locales (CORS): avisar en claro.
+  if (location.protocol === 'file:') {
+    document.addEventListener('DOMContentLoaded', () => {
+      const caja = document.getElementById('aviso');
+      caja.hidden = false;
+      caja.querySelector('h2').textContent = 'Abre la app desde un servidor local';
+      caja.querySelector('p').innerHTML =
+        'El navegador bloquea los módulos cuando el archivo se abre con doble clic.'
+        + '<br><br>En la carpeta del proyecto ejecuta:<br>'
+        + '<code style="color:#35d6ff">python3 -m http.server 8000</code>'
+        + '<br><br>y entra en <code style="color:#35d6ff">http://localhost:8000/web/</code>';
+    });
+  }
+</script>
 <script type="importmap">
 {
   "imports": {

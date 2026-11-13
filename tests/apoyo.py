@@ -38,9 +38,32 @@ def malla_pequena():
 
 
 def html_de_prueba(destino, malla=None):
-    """Copia el demo con la malla indicada y devuelve su URI ``file://``."""
+    """Copia el demo con la malla indicada y devuelve su URI ``file://``.
+
+    Replica la estructura del repo (``web/vendor``, ``web/elio.js``, ``datos``,
+    ``textures``) porque el demo carga esas rutas relativas y sin ellas el
+    módulo no arrancaría: así la prueba ve la app real, no un HTML suelto.
+    """
+    import shutil
+
+    base = Path(tempfile.gettempdir()) / f"tierra_prueba_{Path(destino).stem}"
+    if base.exists():
+        shutil.rmtree(base)
+    (base / "web").mkdir(parents=True)
+
     html = (RAIZ / "web" / "index.html").read_text(encoding="utf-8")
     html = reemplazar_malla(html, malla or malla_pequena())
-    ruta = Path(tempfile.gettempdir()) / Path(destino).name
-    ruta.write_text(html, encoding="utf-8")
-    return ruta.as_uri()
+    (base / "web" / "index.html").write_text(html, encoding="utf-8")
+
+    shutil.copy2(RAIZ / "web" / "elio.js", base / "web" / "elio.js")
+    shutil.copytree(RAIZ / "web" / "vendor", base / "web" / "vendor")
+    for carpeta in ("datos", "textures"):
+        origen = RAIZ / carpeta
+        if origen.is_dir():
+            shutil.copytree(origen, base / carpeta)
+    return (base / "web" / "index.html").as_uri()
+
+
+# Chromium bloquea módulos desde file:// salvo con este flag: el test abre el HTML
+# copiado con file://, así que lo necesita.
+ARGUMENTOS_FILE = ["--allow-file-access-from-files"]

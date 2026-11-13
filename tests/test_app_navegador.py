@@ -39,7 +39,10 @@ class TestApp(unittest.TestCase):
     def setUpClass(cls):
         cls._pw = sync_playwright().start()
         try:
-            cls.nav = cls._pw.chromium.launch(headless=True)
+            cls.nav = cls._pw.chromium.launch(headless=True, args=["--use-fake-device-for-media-stream",
+                      "--use-fake-ui-for-media-stream",
+                      # Sin GPU en el CI: render por software para que WebGL exista.
+                      "--use-angle=swiftshader", "--enable-unsafe-swiftshader"])
         except Exception:
             cls._pw.stop()
             raise unittest.SkipTest("requiere un navegador de playwright")
@@ -57,7 +60,7 @@ class TestApp(unittest.TestCase):
         errores = []
         pag.on("pageerror", lambda e: errores.append(str(e)))
         pag.goto(f"{self.base}/web/index.html")
-        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=45000)
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
         return pag, errores
 
     def test_globo_sin_cdn(self):
