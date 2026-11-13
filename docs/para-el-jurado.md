@@ -1,0 +1,74 @@
+# TIERRA · resumen para el jurado
+
+## El problema
+
+Un agricultor decide qué sembrar y cuándo con el clima del año pasado y con la
+memoria de la finca. Los datos satelitales existen, pero llegan como capas
+globales que no responden a su pregunta: *¿cómo viene esta temporada y qué
+rotación me conviene?*
+
+## Qué construimos
+
+Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
+
+1. **Lente NASA de largo plazo (1984–2025).** Globo con una malla de 2.592
+   celdas de 5°: tendencia de Sen y p de Mann-Kendall para temperatura, lluvia,
+   viento y humedad. Corregido por pruebas múltiples (**FDR**), con intervalo de
+   confianza por bootstrap y p ajustada por autocorrelación.
+2. **Lente de la temporada (30 días).** Lluvia, temperatura y humedad superficial
+   frente a la banda normal P25–P75 calculada con la **misma fuente**
+   (Open-Meteo/ERA5, rotulada como no NASA), más pronóstico de 7 días.
+3. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
+   **evidencia NASA** (los meses secos de esa finca), motivos, beneficios, datos
+   que faltan y riesgos a validar. Deslizadores de prioridades (agua/diversidad) y
+   un escenario de sequía para ver qué plan aguanta peor.
+
+Y **Elio**, un asistente que responde solo con lo que hay en pantalla, cita la
+fuente de cada cifra y dice «no tengo ese dato» cuando falta. No controla nada.
+
+## Qué datos NASA usa, y para qué
+
+| Dato | Fuente | Uso |
+|---|---|---|
+| Temperatura, lluvia, viento, humedad 1984–2025 | NASA POWER (MERRA-2, reanálisis) | tendencias y meses secos |
+| Imágenes satelitales 2000 / 2025 | NASA GIBS (MODIS Terra) | comparación visual |
+| Incendios y tormentas | NASA EONET | capas de eventos |
+| Temporada actual | Open-Meteo / ERA5 (**no NASA**) | anomalía de 30 días |
+| Suelo (textura, carbono, pH) | ISRIC SoilGrids (**no NASA**) | contexto de la finca |
+
+## Qué tiene de distinto
+
+- **No mezclamos fuentes en una anomalía.** Restar una normal de POWER a un dato
+  de ERA5 mide el desajuste entre modelos, no el clima: la validación del propio
+  repo vio cocientes de 0,36 a 4,78 en una misma finca. La normal se calcula con
+  la misma fuente que el dato reciente.
+- **La incertidumbre está a la vista**: FDR, IC, banda P25–P75, p ajustada.
+- **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
+- **La app no carga ninguna librería de terceros**: three.js y las texturas están
+  en el repo. Solo se piden datos a las APIs.
+- **78 pruebas automáticas** (Python + Node) y 5 de navegador, incluido móvil.
+
+## Límites, dichos sin rodeos
+
+- POWER y ERA5 son **reanálisis**: modelos, no un pluviómetro en la parcela.
+- El índice de rotaciones es **orientativo** y sus pesos son de diseño.
+- La tabla de cultivos está **provisional**: falta revisión de un agrónomo local.
+- No hay datos de rendimiento, precios ni textura medida en campo.
+- El suelo de dos fincas quedó sin dato porque el servidor de ISRIC no respondió.
+
+Por eso la app incluye un panel **Método y límites** y cada tarjeta dice qué
+revisar con un agrónomo. No sustituye al agricultor: le da mejores preguntas.
+
+## Cómo verlo en 2 minutos
+
+```bash
+git clone https://github.com/KIRIXDJ/tierra.git && cd tierra
+python3 -m http.server 8000
+# http://localhost:8000/web/
+```
+
+Girar el globo → clic en el Caribe → **Finca** (Constanza y Azua) →
+**Rotaciones** (mover "Ahorrar agua" y el escenario de sequía) → **Elio**
+("¿está seco?" y "activa el riego") → **Método**.
+
+El guion completo, con cifras del día, está en [`demo.md`](demo.md).

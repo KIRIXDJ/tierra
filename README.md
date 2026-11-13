@@ -8,6 +8,8 @@ Challenge 2026**.
 > Es una herramienta de apoyo: no reemplaza el juicio del agricultor ni de un
 > agrónomo local.
 
+![Portada: globo con la malla de tendencias](docs/capturas/portada.png)
+
 ## Qué hace
 
 - Globo 3D con una malla de 2.592 celdas de 5° y la tendencia (Sen) de
@@ -46,6 +48,16 @@ python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
 El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las texturas
 son locales. La app no carga ninguna librería de terceros: las únicas llamadas
 externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
+
+### Pestañas
+
+| Finca · esta temporada | Rotaciones | Método y límites |
+|---|---|---|
+| ![Finca](docs/capturas/finca.png) | ![Rotaciones](docs/capturas/rotaciones.png) | ![Método](docs/capturas/metodo.png) |
+
+## Para el jurado
+
+Resumen de una página: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
 
 ## Cómo abrirlo
 
