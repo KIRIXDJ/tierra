@@ -8,6 +8,7 @@
   const UMBRAL_RIEGO = 25;      // % de humedad por debajo del cual se riega
   const HISTERESIS = 5;         // se apaga al superar umbral + histeresis
   const LLUVIA_TECHO = 0.2;     // mm/h a partir de los cuales se cierra el techo
+  const CALOR_VENTILACION = 26; // °C a partir de los cuales se ventila el invernadero
 
   function parcela(id, nombre, cultivo, humedad, area) {
     return {
@@ -16,6 +17,7 @@
       area_ha: area === undefined ? null : area,
       riego: false,
       techo: false,
+      ventilacion: false,
       sensores: 2,
     };
   }
@@ -50,13 +52,30 @@
         riego = false;
         avisos.push(`${p.nombre}: llueve (${lluvia} mm/h) → riego suspendido.`);
       }
+      // Ventilación: abre con calor y sin lluvia (como el invernadero de Hiroki).
+      const temperatura = p.temperatura === null || p.temperatura === undefined
+        ? null : Number(p.temperatura);
+      let ventilacion = p.ventilacion;
+      if (temperatura !== null && lluvia < LLUVIA_TECHO) {
+        if (!ventilacion && temperatura >= CALOR_VENTILACION) {
+          ventilacion = true;
+          avisos.push(`${p.nombre}: ${temperatura} °C → ventilación abierta.`);
+        } else if (ventilacion && temperatura < CALOR_VENTILACION - 2) {
+          ventilacion = false;
+          avisos.push(`${p.nombre}: ${temperatura} °C → ventilación cerrada.`);
+        }
+      }
+      if (lluvia >= LLUVIA_TECHO && ventilacion) {
+        ventilacion = false;
+        avisos.push(`${p.nombre}: llueve → ventilación cerrada para no mojar.`);
+      }
       const techo = lluvia >= LLUVIA_TECHO;
       if (techo !== p.techo) {
         avisos.push(techo
           ? `Techo cerrado: lluvia de ${lluvia} mm/h sobre ${p.nombre}.`
           : `Techo abierto: sin lluvia sobre ${p.nombre}.`);
       }
-      return { ...p, riego, techo };
+      return { ...p, riego, techo, ventilacion };
     });
     return { parcelas: estado, avisos };
   }
@@ -74,11 +93,13 @@
     const regando = parcelas.filter((p) => p.riego).length;
     const cerrados = parcelas.filter((p) => p.techo).length;
     const secas = parcelas.filter((p) => p.humedad !== null && p.humedad < UMBRAL_RIEGO).length;
-    return { regando, techos_cerrados: cerrados, parcelas_secas: secas, total: parcelas.length };
+    const ventilando = parcelas.filter((p) => p.ventilacion).length;
+    return { regando, techos_cerrados: cerrados, ventilando,
+             parcelas_secas: secas, total: parcelas.length };
   }
 
   const Vision = {
-    UMBRAL_RIEGO, HISTERESIS, LLUVIA_TECHO,
+    UMBRAL_RIEGO, HISTERESIS, LLUVIA_TECHO, CALOR_VENTILACION,
     parcela, parcelasIniciales, evaluar, mensajeTelegram, resumen,
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Vision; }

@@ -202,34 +202,40 @@ class TestApp(unittest.TestCase):
         aviso = pag.inner_text(".simulacion")
         self.assertIn("Vista simulada", aviso)
         self.assertIn("No hay hardware conectado", aviso) if False else None
-        self.assertIn("no hay hardware instalado", aviso)
+        self.assertIn("no hay sensores instalados", aviso)
 
         # Hay parcelas registradas y se puede elegir.
         opciones = pag.eval_on_selector_all("#parcela-selector option", "e => e.map(x => x.textContent)")
         self.assertGreaterEqual(len(opciones), 2)
         self.assertIn("ha", opciones[0])
 
-        # La ficha muestra cultivo, área, sensores y cámara de ESA parcela.
-        ficha = pag.inner_text("#parcela-ficha")
-        for campo in ("Cultivo", "Área", "Sensores", "Humedad", "Riego", "Techo"):
+        # Las lecturas muestran humedad, temperatura, riego, ventilación, techo, lluvia.
+        ficha = pag.inner_text("#parcela-lecturas")
+        for campo in ("HUMEDAD", "TEMPERATURA", "RIEGO", "VENTILA", "TECHO", "LLUVIA", "PLANTAS"):
             self.assertIn(campo, ficha)
         self.assertIn("Cámara", pag.inner_text("#parcela-camara"))
 
-        # Cambiar de parcela cambia los datos.
-        primera = pag.inner_text("#parcela-ficha")
+        # Cambiar de parcela cambia los datos (temperatura distinta y área).
+        primera = pag.inner_text("#parcela-lecturas")
         pag.select_option("#parcela-selector", "el-hoyo")
-        pag.wait_for_timeout(400)
-        self.assertNotEqual(primera, pag.inner_text("#parcela-ficha"))
+        pag.wait_for_timeout(500)
+        self.assertNotEqual(primera, pag.inner_text("#parcela-lecturas"))
 
         # Con humedad baja riega; con lluvia cierra el techo.
         pag.fill("#vision-humedad", "6")
         pag.dispatch_event("#vision-humedad", "input")
-        self.assertIn("regando", pag.inner_text("#vision-resumen"))
+        self.assertIn("RIEGO", pag.inner_text("#parcela-lecturas"))
         pag.fill("#vision-lluvia", "5")
         pag.dispatch_event("#vision-lluvia", "input")
-        self.assertIn("cerrado", pag.inner_text("#vision-resumen"))
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
         pag.click("#vision-telegram")
         self.assertIn("[", pag.inner_text("#vision-log"))
+
+        # Ventilación (invernadero) y diagnóstico por foto simulado.
+        self.assertIn("VENTILA", pag.inner_text("#parcela-lecturas"))
+        pag.click("#vision-foto")
+        self.assertIn("Simulación de diagnóstico", pag.inner_text("#vision-diagnostico"))
+        self.assertIn("No es un diagnóstico real", pag.inner_text("#vision-diagnostico"))
         self.assertEqual(errores, [])
         pag.close()
 
@@ -340,7 +346,7 @@ class TestApp(unittest.TestCase):
         pag.dispatch_event("#vision-humedad", "input")
         pag.fill("#vision-lluvia", "6")
         pag.dispatch_event("#vision-lluvia", "input")
-        self.assertIn("cerrado", pag.inner_text("#vision-resumen"))
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
         pag.click("#vision-telegram")
         self.assertIn("[", pag.inner_text("#vision-log"))
 

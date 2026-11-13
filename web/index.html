@@ -105,8 +105,8 @@
   #aviso h2 { font-size: 20px; margin-bottom: 10px; }
   #aviso p { color: var(--secundario); max-width: 460px; line-height: 1.5; }
 
-  #finca, #rotaciones, #elio, #metodo, #vision { position: fixed; top: 142px; right: 22px; width: 380px;
-    max-height: calc(100vh - 110px); overflow-y: auto; background: var(--panel);
+  #finca, #rotaciones, #elio, #metodo, #vision { position: fixed; top: 140px; right: 22px; width: 398px;
+    max-height: calc(100vh - 168px); overflow-y: auto; background: var(--panel);
     border: 1px solid var(--borde); border-radius: 14px; padding: 18px;
     backdrop-filter: blur(10px); display: none; }
   #finca.visible, #rotaciones.visible, #elio.visible, #metodo.visible,
@@ -203,23 +203,32 @@
   .campo select { width: 100%; margin-top: 4px; background: #0a1420; color: var(--texto);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px 9px; font: inherit;
     font-size: 12px; }
-  #parcela-ficha { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-  #parcela-ficha div { border: 1px solid var(--borde); border-radius: 8px; padding: 6px 8px;
-    font-size: 10px; color: var(--secundario); }
-  #parcela-ficha b { display: block; color: var(--texto); font-size: 14px;
+  #parcela-lecturas { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto;
+    gap: 5px; margin-bottom: 8px; }
+  #parcela-lecturas div { border: 1px solid var(--borde); border-radius: 9px; padding: 5px 4px;
+    text-align: center; font-size: 9px; color: var(--secundario); letter-spacing: .04em; }
+  #parcela-lecturas b { display: block; color: var(--texto); font-size: 15px; margin: 0;
     font-family: ui-monospace, Consolas, monospace; }
+  #parcela-lecturas .alerta b { color: var(--ambar); }
+  #parcela-lecturas .bien b { color: var(--verde); }
+  #vision-clima { font-size: 10px; color: var(--secundario); margin-top: 8px;
+    line-height: 1.45; border-left: 2px solid rgba(53, 214, 255, .45); padding-left: 7px; }
+  #vision-mapa { cursor: crosshair; }
   #parcela-camara { margin-top: 8px; font-size: 10px; color: var(--secundario);
     border-left: 2px solid rgba(88, 227, 154, .55); padding-left: 7px; line-height: 1.45; }
-  #vision-mapa { width: 100%; height: 190px; display: block; border-radius: 8px;
+  #vision-mapa { width: 100%; height: 210px; display: block; border-radius: 8px;
     background: #08111c; border: 1px solid var(--borde); }
-  #vision-resumen { display: flex; gap: 8px; margin: 10px 0 4px; }
-  #vision-resumen div { flex: 1; text-align: center; font-size: 10px;
-    color: var(--secundario); border: 1px solid var(--borde); border-radius: 7px; padding: 6px 3px; }
-  #vision-resumen b { display: block; color: var(--texto); font-size: 15px;
-    font-family: ui-monospace, Consolas, monospace; }
   #vision-telegram { width: 100%; margin-top: 10px; background: transparent; color: var(--cian);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
     font-size: 12px; cursor: pointer; }
+  #vision-foto { width: 100%; margin-top: 8px; background: transparent; color: var(--cian);
+    border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
+    font-size: 12px; cursor: pointer; }
+  #vision-diagnostico { display: none; margin-top: 8px; font-size: 11px; line-height: 1.45;
+    border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
+    border-radius: 8px; padding: 8px 10px; color: var(--texto); }
+  #vision-diagnostico.visible { display: block; }
+  #vision-diagnostico b { color: var(--ambar); }
   #vision-log { margin-top: 10px; font-size: 11px; line-height: 1.5;
     font-family: ui-monospace, Consolas, monospace; color: var(--secundario);
     max-height: 140px; overflow-y: auto; }
@@ -329,16 +338,18 @@
   <button class="cerrar" data-cierra="vision" aria-label="Cerrar">×</button>
   <h2>Mi parcela</h2>
   <div class="simulacion">
-    <b>Vista simulada.</b> Estas parcelas están registradas con imagen aérea (dron).
-    Los sensores y la cámara son una demostración: hoy no hay hardware instalado.
+    <b>Vista simulada.</b> El mapa es imagen satelital real de la zona; las parcelas
+    dibujadas encima son de ejemplo. Hoy no hay sensores instalados.
   </div>
-  <label class="campo">Parcela
+  <label class="campo">Parcela (clic en el mapa o aquí)
     <select id="parcela-selector"></select>
   </label>
-  <div id="parcela-ficha"></div>
+  <div id="parcela-lecturas"></div>
   <canvas id="vision-mapa"></canvas>
+  <div id="vision-clima"></div>
   <div id="parcela-camara"></div>
-  <div id="vision-resumen"></div>
+  <button id="vision-foto">Analizar foto del cultivo</button>
+  <div id="vision-diagnostico"></div>
   <div class="control"><label for="vision-humedad">Humedad del suelo:
     <b id="vision-humedad-valor">18 %</b></label>
     <input type="range" id="vision-humedad" min="5" max="50" value="18"></div>
@@ -2179,101 +2190,191 @@ document.getElementById('elio-enviar').addEventListener('click', () => {
 refrescarDatos().then(() => { if (document.getElementById('finca').classList.contains('visible')) { pintarFinca(); } });
 
 
-// ---------- Mi parcela: una parcela registrada, con sus sensores ----------
+// ---------- Mi parcela: parcelas dibujadas sobre el mapa satelital ----------
 const PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.parcelas) || [];
+const MAPA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.mapa) || null;
 const FINCA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.finca) || null;
 let parcelaId = PARCELAS.length ? PARCELAS[0].id : null;
 let parcelaEstado = null;
+let imagenMapa = null;
+let imagenLista = false;
+
+// Ventana visible del mapa, en metros, centrada en el conjunto de parcelas.
+const VISTA_M = 470;
 
 function parcelaActual() {
   return PARCELAS.find((p) => p.id === parcelaId) || null;
 }
 
-/* Dibuja ESA parcela vista desde arriba: su forma real, surcos, sensores. */
+function centroParcelas() {
+  const puntos = PARCELAS.flatMap((p) => p.poligono_m || []);
+  if (!puntos.length) { return { x: 0, y: 0 }; }
+  const x = puntos.reduce((a, p) => a + p[0], 0) / puntos.length;
+  const y = puntos.reduce((a, p) => a + p[1], 0) / puntos.length;
+  return { x, y };
+}
+
+function cargarMapa() {
+  if (!MAPA_PARCELAS) { return; }
+  const img = new Image();
+  img.onload = () => { imagenMapa = img; imagenLista = true; pintarVision(); };
+  img.src = `../datos/${MAPA_PARCELAS.archivo}`;
+}
+
+/* Geometría: metros -> píxeles del canvas. */
+function transformacion(canvas) {
+  const ancho = canvas.clientWidth || 366;
+  const alto = canvas.clientHeight || 250;
+  const escala = ancho / VISTA_M;
+  const centro = centroParcelas();
+  return {
+    ancho, alto, escala,
+    aPantalla: (x, y) => [ancho / 2 + (x - centro.x) * escala, alto / 2 + (y - centro.y) * escala],
+  };
+}
+
+function dentroPoligono(x, y, puntos) {
+  let dentro = false;
+  for (let i = 0, j = puntos.length - 1; i < puntos.length; j = i++) {
+    const [xi, yi] = puntos[i];
+    const [xj, yj] = puntos[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
+      dentro = !dentro;
+    }
+  }
+  return dentro;
+}
+
+function colorParcela(humedad) {
+  if (humedad === null || humedad === undefined) { return 'rgba(126, 151, 173, 0.20)'; }
+  if (humedad < 25) { return 'rgba(255, 180, 84, 0.30)'; }
+  if (humedad > 40) { return 'rgba(53, 214, 255, 0.22)'; }
+  return 'rgba(88, 227, 154, 0.26)';
+}
+
 function dibujarParcela(parcela, estado) {
   const canvas = document.getElementById('vision-mapa');
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const ancho = canvas.clientWidth || 344;
-  const alto = 190;
+  const { ancho, alto, aPantalla } = transformacion(canvas);
   canvas.width = Math.round(ancho * dpr);
   canvas.height = Math.round(alto * dpr);
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, ancho, alto);
-  if (!parcela) { return; }
 
-  // Fondo: suelo de alrededor.
-  ctx.fillStyle = 'rgba(28, 40, 34, 0.55)';
+  // 1. Imagen satelital de fondo.
+  ctx.fillStyle = '#0a1410';
   ctx.fillRect(0, 0, ancho, alto);
-
-  const puntos = (parcela.poligono || []).map(([x, y]) => [x * ancho, y * alto]);
-  if (puntos.length < 3) { return; }
-
-  ctx.beginPath();
-  ctx.moveTo(puntos[0][0], puntos[0][1]);
-  puntos.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
-  ctx.closePath();
-
-  // Color del suelo según humedad.
-  const humedad = estado && estado.humedad !== null && estado.humedad !== undefined
-    ? estado.humedad : (parcela.humedad_inicial ?? 0);
-  const h = Math.max(0, Math.min(1, humedad / 50));
-  ctx.fillStyle = `rgb(${Math.round(122 - 46 * h)}, ${Math.round(92 - 26 * h)}, 56)`;
-  ctx.fill();
-
-  // Surcos dentro de la parcela.
-  ctx.save();
-  ctx.clip();
-  ctx.strokeStyle = 'rgba(0,0,0,0.20)';
-  for (let y = 0; y < alto; y += 7) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(ancho, y); ctx.stroke();
-  }
-  // Riego: franja azul sobre el suelo.
-  if (estado && estado.riego) {
-    ctx.fillStyle = 'rgba(53, 214, 255, 0.30)';
+  if (imagenLista && MAPA_PARCELAS) {
+    const escala = ancho / VISTA_M;
+    const mpp = MAPA_PARCELAS.metros_por_pixel;
+    const centro = centroParcelas();
+    const anchoImg = MAPA_PARCELAS.ancho_px * mpp * escala;
+    const altoImg = MAPA_PARCELAS.alto_px * mpp * escala;
+    // El centro del mapa (0,0 m) cae a la izquierda/arriba según el centro de parcelas.
+    const cx = ancho / 2 - centro.x * escala;
+    const cy = alto / 2 - centro.y * escala;
+    ctx.drawImage(imagenMapa, cx - anchoImg / 2, cy - altoImg / 2, anchoImg, altoImg);
+    // Velo suave para que las líneas se lean sin tapar la imagen.
+    ctx.fillStyle = 'rgba(4, 10, 18, 0.22)';
     ctx.fillRect(0, 0, ancho, alto);
   }
-  ctx.restore();
 
-  // Borde: sólido si el techo está cerrado.
-  ctx.lineWidth = estado && estado.techo ? 2.5 : 1.4;
-  ctx.strokeStyle = estado && estado.techo ? 'rgba(53, 214, 255, 0.95)' : 'rgba(220, 233, 245, 0.55)';
-  ctx.setLineDash(estado && estado.techo ? [] : [5, 4]);
-  ctx.stroke();
-  ctx.setLineDash([]);
+  // 2. Cada parcela dibujada sobre el campo.
+  PARCELAS.forEach((p) => {
+    const puntos = (p.poligono_m || []).map(([x, y]) => aPantalla(x, y));
+    if (puntos.length < 3) { return; }
+    const activa = p.id === parcelaId;
+    const humedad = activa && estado ? estado.humedad : p.humedad_inicial;
 
-  // Sensores.
-  (parcela.sensores || []).forEach((sensor) => {
-    const sx = sensor.x * ancho;
-    const sy = sensor.y * alto;
     ctx.beginPath();
-    ctx.fillStyle = estado && estado.riego ? '#35d6ff'
-      : (humedad < 25 ? '#ffb454' : '#58e39a');
-    ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+    ctx.moveTo(puntos[0][0], puntos[0][1]);
+    puntos.slice(1).forEach(([x, y]) => ctx.lineTo(x, y));
+    ctx.closePath();
+    ctx.fillStyle = colorParcela(humedad);
     ctx.fill();
-    ctx.fillStyle = 'rgba(6, 12, 20, 0.85)';
-    ctx.font = '8px ui-monospace, Consolas, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(sensor.id, sx, sy - 7);
-    ctx.textAlign = 'left';
+
+    if (activa && estado && estado.riego) {
+      ctx.fillStyle = 'rgba(53, 214, 255, 0.30)';
+      ctx.fill();
+    }
+    if (activa && estado && estado.ventilacion) {
+      ctx.fillStyle = 'rgba(88, 227, 154, 0.20)';
+      ctx.fill();
+    }
+    ctx.lineWidth = activa ? 2.4 : 1.2;
+    ctx.strokeStyle = activa ? '#dce9f5' : 'rgba(220, 233, 245, 0.55)';
+    ctx.setLineDash(activa ? [] : [4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Etiqueta con fondo para que se lea sobre la foto.
+    const [ex, ey] = puntos[0];
+    const texto = p.nombre;
+    ctx.font = '600 10px "Segoe UI", system-ui, sans-serif';
+    const anchoTexto = ctx.measureText(texto).width;
+    ctx.fillStyle = activa ? 'rgba(4, 7, 13, 0.85)' : 'rgba(4, 7, 13, 0.62)';
+    ctx.fillRect(ex - 2, ey - 15, anchoTexto + 8, 13);
+    ctx.fillStyle = activa ? '#35d6ff' : 'rgba(220, 233, 245, 0.85)';
+    ctx.fillText(texto, ex + 2, ey - 5);
   });
 
-  // Etiquetas.
-  ctx.fillStyle = 'rgba(220, 233, 245, 0.95)';
-  ctx.font = '10px ui-monospace, Consolas, monospace';
-  ctx.fillText(`${parcela.nombre} · ${parcela.area_ha} ha`, 8, 14);
-  ctx.fillStyle = 'rgba(126, 151, 173, 0.9)';
+  // 3. Sensores de la parcela activa.
+  const activa = parcelaActual();
+  if (activa) {
+    (activa.sensores || []).forEach((sensor) => {
+      const [sx, sy] = aPantalla(sensor.x_m, sensor.y_m);
+      const color = estado && estado.riego ? '#35d6ff'
+        : ((estado ? estado.humedad : activa.humedad_inicial) < 25 ? '#ffb454' : '#58e39a');
+      // halo
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba(53, 214, 255, 0.18)';
+      ctx.arc(sx, sy, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.arc(sx, sy, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(4, 7, 13, 0.9)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.font = '9px ui-monospace, Consolas, monospace';
+      ctx.fillStyle = 'rgba(220, 233, 245, 0.92)';
+      ctx.fillText(sensor.id, sx + 8, sy + 3);
+    });
+  }
+
+  // 4. Escala y atribución.
+  const escala = ancho / VISTA_M;
+  const metros = 100;
+  const largo = metros * escala;
+  ctx.strokeStyle = 'rgba(220, 233, 245, 0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(10, alto - 14); ctx.lineTo(10 + largo, alto - 14);
+  ctx.moveTo(10, alto - 18); ctx.lineTo(10, alto - 10);
+  ctx.moveTo(10 + largo, alto - 18); ctx.lineTo(10 + largo, alto - 10);
+  ctx.stroke();
   ctx.font = '9px ui-monospace, Consolas, monospace';
-  ctx.fillText('vista aérea · registro con dron', 8, alto - 6);
+  ctx.fillStyle = 'rgba(220, 233, 245, 0.85)';
+  ctx.fillText(`${metros} m`, 14, alto - 18);
+  if (MAPA_PARCELAS) {
+    ctx.fillStyle = 'rgba(220, 233, 245, 0.65)';
+    ctx.textAlign = 'right';
+    ctx.fillText('© Esri World Imagery', ancho - 6, alto - 5);
+    ctx.textAlign = 'left';
+  }
 }
 
 function pintarVision() {
   const parcela = parcelaActual();
-  const caja = document.getElementById('parcela-ficha');
+  const lecturas = document.getElementById('parcela-lecturas');
   const camara = document.getElementById('parcela-camara');
+  const clima = document.getElementById('vision-clima');
   if (!parcela) {
-    caja.innerHTML = '<div>Sin parcelas registradas.</div>';
+    lecturas.innerHTML = '<div>Sin parcelas</div>';
     camara.textContent = '';
+    clima.textContent = '';
     return;
   }
   const humedad = Number(document.getElementById('vision-humedad').value);
@@ -2282,8 +2383,10 @@ function pintarVision() {
   const entrada = {
     id: parcela.id, nombre: parcela.nombre, cultivo: parcela.cultivo,
     humedad, area_ha: parcela.area_ha, sensores: (parcela.sensores || []).length,
+    temperatura: parcela.temperatura,
     riego: parcelaEstado ? parcelaEstado.riego : false,
     techo: parcelaEstado ? parcelaEstado.techo : false,
+    ventilacion: parcelaEstado ? parcelaEstado.ventilacion : false,
   };
   const salida = Vision.evaluar([entrada], { lluvia_mm_h: lluvia });
   parcelaEstado = salida.parcelas[0];
@@ -2292,22 +2395,29 @@ function pintarVision() {
   document.getElementById('vision-lluvia-valor').textContent = `${lluvia} mm/h`;
   dibujarParcela(parcela, parcelaEstado);
 
-  const sensorTxt = (parcela.sensores || []).map((s) => s.id).join(' · ');
-  caja.innerHTML = `
-    <div>Cultivo<b>${parcela.cultivo}</b></div>
-    <div>Área<b>${parcela.area_ha} ha</b></div>
-    <div>Siembra<b>${parcela.siembra || 'sin dato'}</b></div>
-    <div>Sensores<b>${sensorTxt || 'ninguno'}</b></div>
-    <div>Humedad<b>${humedad} %</b></div>
-    <div>Temperatura<b>${parcela.temperatura} °C</b></div>
-    <div>Riego<b>${parcelaEstado.riego ? 'activo' : 'apagado'}</b></div>
-    <div>Techo<b>${parcelaEstado.techo ? 'cerrado' : 'abierto'}</b></div>`;
-  camara.innerHTML = `<b>Cámara</b> · última captura: ${parcela.camara}`;
+  const seco = humedad < Vision.UMBRAL_RIEGO;
+  lecturas.innerHTML = `
+    <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${humedad}%</b></div>
+    <div>TEMPERATURA<b>${parcela.temperatura}°</b></div>
+    <div class="${parcelaEstado.riego ? 'bien' : ''}">RIEGO<b>${parcelaEstado.riego ? 'ON' : 'off'}</b></div>
+    <div class="${parcelaEstado.ventilacion ? 'bien' : ''}">VENTILA<b>${parcelaEstado.ventilacion ? 'ON' : 'off'}</b></div>
+    <div class="${parcelaEstado.techo ? 'bien' : ''}">TECHO<b>${parcelaEstado.techo ? 'cerr.' : 'abierto'}</b></div>
+    <div>LLUVIA<b>${lluvia}</b><span style="font-size:8px">mm/h</span></div>
+    <div>PLANTAS<b>${parcela.plantas_georreferenciadas ?? '—'}</b></div>
+    <div>ÁREA<b>${parcela.area_ha}</b><span style="font-size:8px">ha</span></div>`;
 
-  document.getElementById('vision-resumen').innerHTML = `
-    <div><b>${parcelaEstado.riego ? 'regando' : 'sin riego'}</b>riego</div>
-    <div><b>${parcelaEstado.techo ? 'cerrado' : 'abierto'}</b>techo</div>
-    <div><b>${humedad < Vision.UMBRAL_RIEGO ? 'sí' : 'no'}</b>falta agua</div>`;
+  // Clima de la finca desde el snapshot (Open-Meteo). Honesto: es previsión, no sensor.
+  const bloque = (RECIENTE && (RECIENTE.fincas || []).find((f) => f.id === FINCA_PARCELAS)) || null;
+  const manana = bloque && (bloque.pronostico || [])[0];
+  if (manana) {
+    clima.innerHTML = `<b>Previsión</b> ${manana.fecha.slice(8)}/${manana.fecha.slice(5, 7)}: `
+      + `lluvia ${manana.lluvia_mm ?? '–'} mm · ${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C`
+      + ` · Fuente: Open-Meteo (no NASA)`;
+  } else {
+    clima.textContent = 'Previsión: sin dato.';
+  }
+
+  camara.innerHTML = `<b>Cámara</b> · última captura: ${parcela.camara}`;
 
   const log = document.getElementById('vision-log');
   if (salida.avisos.length) {
@@ -2324,7 +2434,7 @@ function elegirParcela(id) {
   const parcela = parcelaActual();
   if (!parcela) { return; }
   document.getElementById('vision-humedad').value = String(parcela.humedad_inicial ?? 26);
-  // La parcela vive en una finca: las rotaciones deben hablar de esa finca.
+  document.getElementById('parcela-selector').value = id;
   if (FINCAS.some((f) => f.id === FINCA_PARCELAS)) { fincaId = FINCA_PARCELAS; }
   document.getElementById('vision-log').innerHTML = '';
   pintarVision();
@@ -2340,6 +2450,21 @@ function montarParcelas() {
     `<option value="${p.id}"${p.id === parcelaId ? ' selected' : ''}>`
     + `${p.nombre} · ${p.area_ha} ha · ${p.cultivo}</option>`).join('');
   selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
+
+  // Clic en el mapa: seleccionar la parcela que hay debajo.
+  const canvas = document.getElementById('vision-mapa');
+  canvas.addEventListener('click', (evento) => {
+    const caja = canvas.getBoundingClientRect();
+    const { ancho, alto, aPantalla } = transformacion(canvas);
+    const centro = centroParcelas();
+    const escala = ancho / VISTA_M;
+    const mx = (evento.clientX - caja.left - ancho / 2) / escala + centro.x;
+    const my = (evento.clientY - caja.top - alto / 2) / escala + centro.y;
+    const tocada = PARCELAS.find((p) => dentroPoligono(mx, my, p.poligono_m || []));
+    if (tocada) { elegirParcela(tocada.id); }
+  });
+
+  cargarMapa();
   elegirParcela(parcelaId);
 }
 
@@ -2350,6 +2475,32 @@ document.getElementById('vision-boton').addEventListener('click', () => {
 ['vision-humedad', 'vision-lluvia'].forEach((id) => {
   document.getElementById(id).addEventListener('input', () => pintarVision());
 });
+/* Diagnóstico por foto: reglas fijas sobre el estado de la parcela.
+   No hay modelo de visión: es una simulación de la función, y así se dice. */
+document.getElementById('vision-foto').addEventListener('click', () => {
+  const parcela = parcelaActual();
+  const caja = document.getElementById('vision-diagnostico');
+  if (!parcela || !parcelaEstado) { return; }
+  const humedad = parcelaEstado.humedad;
+  let hallazgo;
+  let confianza;
+  if (humedad < 20) {
+    hallazgo = 'Hojas enrolladas y pérdida de turgencia: compatible con estrés hídrico.';
+    confianza = 0.72;
+  } else if (humedad > 45) {
+    hallazgo = 'Manchas amarillas en hoja baja: compatible con exceso de humedad y hongo.';
+    confianza = 0.64;
+  } else {
+    hallazgo = 'Follaje uniforme, sin manchas ni enrollamiento visible.';
+    confianza = 0.81;
+  }
+  caja.className = 'visible';
+  caja.innerHTML = `<b>Simulación de diagnóstico</b><br>${hallazgo}<br>`
+    + `Confianza simulada: ${Math.round(confianza * 100)} %. `
+    + 'No es un diagnóstico real: en el servicio usaría un modelo de visión validado y '
+    + 'la confirmación de un agrónomo.';
+});
+
 document.getElementById('vision-telegram').addEventListener('click', () => {
   const parcela = parcelaActual();
   const humedad = Number(document.getElementById('vision-humedad').value);
