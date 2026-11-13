@@ -22,6 +22,12 @@ Challenge 2026**.
 - Contraste de lluvia con Open-Meteo (ERA5) para detectar discrepancias de
   reanálisis, etiquetado como **no NASA**.
 - Capas de incendios y tormentas activas (EONET) y comparación satelital (GIBS).
+- Pestaña **Mi parcela**: parcelas registradas sobre mapa satelital real, con
+  humedad, temperatura, riego, ventilación de invernadero, techo, lluvia y plantas
+  georreferenciadas. Incluye **control por Telegram** (`/estado`, `/riego off`,
+  `/techo on`), **registro de una parcela nueva dibujándola** sobre el mapa (calcula
+  el área) y **análisis de una foto** del cultivo (mide color: verde, amarillo, marrón).
+  Todo simulado salvo el mapa: no hay hardware instalado.
 - Pestaña **Finca** · "Esta temporada": últimos 30 días de lluvia, temperatura y
   humedad superficial (0–7 cm) contra la banda normal P25–P75, más pronóstico de
   7 días. Fuente **Open-Meteo (no NASA)**, con fecha visible.
