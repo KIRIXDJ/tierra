@@ -38,7 +38,7 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | Rol | Persona | Tarea |
 |---|---|---|
 | A · Datos | Ruben · `myticalruben` (invitación pendiente) | 1 |
-| B · Temporada | `dnffa151` | 2 |
+| B · Temporada | Yoel · `dnffa151` | 2 |
 | C · Interfaz | Oscar · `lafortuna8501-sudo` | 3 y 7 (mismo archivo) |
 | D · Agronomía | Marlon · `MarlonRD` | 4 |
 | E · QA | Alison · `alisonrodriguez767-maker` | 5 |
