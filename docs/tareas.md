@@ -45,6 +45,21 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | F · Demo | sin asignar | 6 |
 | — | sin asignar | 8 |
 
+## Estado (2026-11-13 · cierre "como Hiroki")
+
+Referencia del producto: **Hiroki Tomiyasu**, agricultor de brócoli en Hokkaido que
+construyó con ChatGPT/Codex su invernadero automatizado sin saber programar
+(ventilación desde el móvil, satélite, detección por foto, GPS de la plantación).
+
+| Pieza de Hiroki | En TIERRA | Estado |
+|---|---|---|
+| Ventilación de invernadero | `CALOR_VENTILACION` en `web/vision.js` + lecturas en pantalla | simulado |
+| Monitorización por satélite | mapa Esri real + tendencias NASA POWER | real el mapa, real NASA |
+| Detección por foto | `analizarFoto` mide verde/amarillo/marrón sobre la imagen subida | análisis de color real |
+| Mapeo GPS de la plantación | `plantasDeParcela` dibuja la muestra sobre el mapa | simulado |
+| Control por Telegram | chat `interpretarComando`: `/estado`, `/riego off`, `/techo on`, `/auto` | simulado |
+| Registrar su parcela | dibujar esquinas en el mapa y calcula el área en ha | funcional |
+
 ## Estado (2026-11-13)
 
 | Tarea | Persona | Estado |
