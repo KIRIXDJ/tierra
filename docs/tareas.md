@@ -55,8 +55,17 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | 3 y 7 · Interfaz | Oscar | **hechas por el lead** (urgencia): Finca + Rotaciones |
 | 10 · Elio | — | **hecho por el lead** (`web/elio.js` + `tests/elio.mjs`) |
 | 6 · Demo | — | **hecha por el lead** (`docs/demo.md`) |
-| 5 · QA | Alison | pendiente: los casos ya existen en las ramas de 1/2/4 |
 | 8 · Cultivos | — | pendiente: necesita agrónomo para quitar `provisional` |
+| 5 · QA | Alison | cubierta en parte: 78 pruebas Python + 4 de navegador + `tests/elio.mjs` |
+
+Además, fuera de reparto y ya en `main`:
+
+- **Suelo** (`generar_suelo.py`, ISRIC SoilGrids): Constanza con dato real
+  (arcilla 45,7 %, arena 28,8 %, carbono 40,8 g/kg, pH 6,4, textura arcillosa);
+  Azua y San Francisco quedaron `null` porque el servidor de ISRIC no respondió.
+- **Escenario de sequía** en Rotaciones y **panel Método y límites**.
+- **Globo sin CDN**: three.js en `web/vendor/` y texturas locales. Se eliminó el
+  modo manos y con él MediaPipe: la app no carga ninguna librería externa.
 
 Integración: se mergearon las ramas con el admin (main protegida exige PR, pero
 el evento era al día siguiente). El CI pasó en verde en cada push.
@@ -87,9 +96,8 @@ QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 
 ## Pendiente
 
-- Elio (asistente): diseño listo, sin código. Responde solo con el contexto
-  estructurado que la app le entrega, cita fuente y no controla actuadores.
-- Tarea A completa: catálogo de cultivos con fuente citable y las pantallas de
-  comparación de las 3 rotaciones.
-- Localizar three.js y texturas (hecho); MediaPipe se eliminó con el modo manos. Sin red la app no arranca (no es
-  "modo offline", es no depender de un CDN para pintar).
+- **Tarea 8 (cultivos con fuente)**: sin agrónomo, todo sigue `provisional`; la
+  interfaz lo dice en cada tarjeta. Es lo que más mejoraría la validez.
+- **Suelo de Azua y San Francisco**: reintentar `python3 generar_suelo.py`
+  (conserva lo que ya tiene y solo pide lo que falta).
+- **Video de respaldo** de la demo: grabar 2 minutos del recorrido completo.
