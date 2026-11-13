@@ -3188,6 +3188,20 @@ function pintarRotacion() {
   const lista = (valores) => (valores && valores.length
     ? valores.map((v) => `<li>${v}</li>`).join('') : '<li>sin dato</li>');
   const beneficios = (Elio.beneficios ? Elio.beneficios(elegida) : []);
+  const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const mesesTexto = (lista) => (lista || [])
+    .map((mes) => MESES[Number(mes) - 1] || mes).join(', ');
+  const secuencia = elegida.secuencia || [];
+  const detalleCultivos = elegida.cultivos_detalle || [];
+  const esActual = elegida.id === 'actual';
+  const queRota = esActual
+    ? `<li><b>${secuencia.join(' → ') || 'sin identificar'}</b>: cultivo actual de la
+        parcela demo. No hay historial de rotación registrado; el índice solo cuenta
+        el cultivo de hoy.</li>`
+    : `<li><b>${secuencia.join(' → ')}</b>, y se repite cada ciclo.</li>`;
+  const mesesCultivos = detalleCultivos.map((c) => `<li>${c.nombre}: demanda
+    ${c.demanda_agua || 'sin dato'}; pide agua en
+    ${mesesTexto(c.meses_criticos) || 'sin dato'}.</li>`).join('');
   const evidencia = [];
   if ((finca.meses_secos || []).length) {
     evidencia.push(`Meses secos de la finca: ${finca.meses_secos.join(', ')} (NASA POWER).`);
@@ -3208,7 +3222,10 @@ function pintarRotacion() {
       + 'meses secos de la finca caen en meses críticos de esta rotación'
       + (coinciden.length ? ` (${coinciden.join(', ')}).` : '.'));
   }
-  detalle.innerHTML = `<h4>Por qué se sugiere</h4><ul>${lista(elegida.motivos)}</ul>
+  detalle.innerHTML = `<h4>Qué rota</h4><ul>${queRota}${mesesCultivos}</ul>
+    <h4>Qué propone</h4><p>Probar esta secuencia en la próxima temporada; no ordena
+    cambiar la siembra hoy.</p>
+    <h4>Por qué se sugiere</h4><ul>${lista(elegida.motivos)}</ul>
     <h4>Evidencia</h4><ul>${lista(evidencia)}</ul>
     <h4>Beneficios</h4><ul>${lista(beneficios)}</ul>
     <h4>Datos que faltan</h4><ul>${lista(elegida.datos_faltantes)}</ul>
@@ -3218,7 +3235,9 @@ function pintarRotacion() {
       todavía (SRTM/ECOSTRESS en la hoja de ruta).</li>
       <li>El calendario de campo desnudo entre cosechas no está registrado por
       parcela; por eso no se afirma.</li></ul>
-    <div class="fuente">Índice orientativo, no una recomendación agronómica.
+    <div class="fuente">Índice 0–100: suma la demanda de agua en los meses secos y la
+      diversidad de cultivos (más alto = menos riego en seco y más cultivos).
+      Orientativo, no una recomendación agronómica.
       Clima: ${(ROTACIONES && ROTACIONES.fuente_clima) || 'NASA POWER'} ·
       Suelo: ${(ROTACIONES && ROTACIONES.fuente_suelo) || 'ISRIC SoilGrids (no NASA)'}.</div>`;
   detalle.classList.add('visible');

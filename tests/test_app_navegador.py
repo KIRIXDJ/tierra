@@ -193,8 +193,13 @@ class TestApp(unittest.TestCase):
         pag.wait_for_selector("#vision.visible", timeout=15000)
         filas = pag.eval_on_selector_all(".rotacion-fila", "e => e.map(x => x.textContent)")
         self.assertEqual(len(filas), 3)
-        self.assertIn("50/100", filas[0])
+        self.assertIn("59/100", filas[0])
         self.assertIn("93/100", filas[2])
+        # "Qué rota" dice la secuencia y los meses de cada cultivo.
+        detalle = pag.inner_text("#rotacion-detalle")
+        self.assertIn("Qué rota", detalle)
+        self.assertIn("Yuca", detalle)
+        self.assertIn("Qué propone", detalle)
         ganadoras = pag.eval_on_selector_all(".rotacion-fila.gana", "e => e.length")
         self.assertEqual(ganadoras, 1)
         # Para cada estrategia: por qué, evidencia, beneficios, huecos y riesgos.
@@ -207,7 +212,7 @@ class TestApp(unittest.TestCase):
         pag.dispatch_event("#escenario-lluvia", "input")
         pag.wait_for_timeout(300)
         indices = pag.eval_on_selector_all("button.rotacion-fila b", "e => e.map(x => x.textContent)")
-        self.assertEqual(indices, ["50/100", "72/100", "89/100"])
+        self.assertEqual(indices, ["55/100", "72/100", "89/100"])
         self.assertIn("-40", pag.inner_text("#escenario-lluvia-valor"))
         # Elegir una estrategia cambia el detalle.
         pag.click("button.rotacion-fila[data-id='alternativa_1']")

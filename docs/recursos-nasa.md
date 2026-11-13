@@ -10,7 +10,7 @@ Leído el 2026-11-13.
 | Requisito del reto | Dónde se cumple |
 |---|---|
 | Herramienta de apoyo a la decisión con observaciones NASA + suelo local + cultivos + prioridades del agricultor | Panel **Mi parcela**: POWER/ERA5 (clima), ISRIC (suelo), rotaciones con cultivos, deslizadores de prioridad (agua/diversidad) |
-| Comparar **al menos 3 rotaciones, incluida la actual** | Bloque **Rotación: 3 estrategias**: Actual 50, Alternativa 1 76, Alternativa 2 93 (índice orientativo) |
+| Comparar **al menos 3 rotaciones, incluida la actual** | Bloque **Rotación: 3 estrategias**: Actual 59, Alternativa 1 76, Alternativa 2 93 (índice orientativo) |
 | Para cada una: **por qué, evidencia, beneficios, huecos, riesgos** | Tarjeta desplegada al pulsar cada estrategia; datos reales de `datos/rotaciones.json` |
 | Explicar incertidumbre | Método: Sen + Mann-Kendall con **FDR**, bootstrap, p ajustada por autocorrelación, bandas P25–P75 |
 | Diferencia **satélite frente a medición en tierra** | Método (plegable): reanálisis, píxel de SMAP/IMERG/MODIS/ECOSTRESS mayor que una parcela |

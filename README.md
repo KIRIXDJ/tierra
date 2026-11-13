@@ -103,7 +103,7 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
   [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
 - **Diapositivas** (13, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
-- **Video de respaldo** de 48 s con la vista actual (monitor, riesgos, satélite,
+- **Video de respaldo** de 46 s con la vista actual (monitor, riesgos, satélite,
   rotaciones, techo, fotos y vuelo del globo):
   [`docs/demo.mp4`](docs/demo.mp4). Se regenera con `tools/grabar_demo.py`.
 

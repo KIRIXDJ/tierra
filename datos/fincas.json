@@ -14,7 +14,7 @@
    "lat": 18.91,
    "lon": -70.74,
    "zona_horaria": "America/Santo_Domingo",
-   "cultivo_actual": "provisional",
+   "cultivo_actual": "yuca",
    "climatologia": {
     "periodo": [
      1991,
@@ -923,7 +923,8 @@
       ]
      }
     }
-   }
+   },
+   "cultivo_actual_nota": "Cultivo actual de la parcela demo La Esperanza (simulada); no es un historial de rotación."
   },
   {
    "id": "azua",

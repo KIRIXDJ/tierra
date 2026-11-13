@@ -137,9 +137,11 @@
     const c = (estrategia && estrategia.componentes) || {};
     const lista = [];
     if (typeof c.agua === 'number' && c.agua >= 8) {
-      lista.push('Riega poco en los meses secos de esta finca (climatología NASA POWER).');
+      lista.push('Su demanda de agua no cae en los meses secos de la finca: en esos'
+        + ' meses casi no haría falta regar extra (climatología NASA POWER).');
     } else if (typeof c.agua === 'number' && c.agua >= 5) {
-      lista.push('Riega en parte de los meses secos: margen intermedio.');
+      lista.push('Parte de su demanda de agua cae en meses secos: conviene planear'
+        + ' riego en esos meses.');
     } else if (typeof c.agua === 'number') {
       lista.push('Coincide con los meses secos: necesitaría apoyo de riego.');
     }

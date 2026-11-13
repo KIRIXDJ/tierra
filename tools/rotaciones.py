@@ -339,7 +339,23 @@ def evaluar_rotaciones(finca, contexto_reciente=None, clima=None, cultivos=None,
                 "riesgos": riesgos,
                 "provisional": provisional,
                 "fuentes": fuentes,
+                # Qué rota: orden propuesto y meses en que cada cultivo pide agua.
+                "secuencia": [cultivo.get("nombre") for cultivo in entrada],
+                "cultivos_detalle": [
+                    {
+                        "id": cultivo.get("id"),
+                        "nombre": cultivo.get("nombre"),
+                        "demanda_agua": cultivo.get("demanda_agua"),
+                        "meses_criticos": cultivo.get("meses_criticos") or [],
+                    }
+                    for cultivo in entrada
+                ],
             }
         )
 
-    return {"id": finca.get("id"), "meses_secos": secos, "estrategias": estrategias}
+    return {
+        "id": finca.get("id"),
+        "cultivo_actual": finca.get("cultivo_actual"),
+        "meses_secos": secos,
+        "estrategias": estrategias,
+    }
