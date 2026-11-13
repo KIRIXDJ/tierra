@@ -1965,6 +1965,7 @@ function pintarRotaciones() {
       + `${Math.abs(escenario)} %. No es un pronóstico; penaliza a las estrategias`
       + ' con peor componente de agua.' : '')
     + `<br>Meses secos en ${finca.id}: ${(finca.meses_secos || []).join(', ') || 'sin dato'}`
+    + (ROTACIONES.fuente_suelo ? `<br>Suelo: <b>${ROTACIONES.fuente_suelo}</b> (no NASA).` : '')
     + '<br>Índice orientativo. No reemplaza el juicio del agricultor ni de un agrónomo local.';
 }
 

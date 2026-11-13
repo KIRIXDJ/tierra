@@ -283,3 +283,32 @@ class TestGenerador(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestSuelo(unittest.TestCase):
+    """El suelo de ISRIC entra en el índice, marcado como heurística."""
+
+    def _finca(self):
+        return {"id": "constanza", "cultivo_actual": "maiz", "climatologia": {
+            "periodo": [1991, 2020],
+            "mensual": {str(anio): {"lluvia_mm_dia": [12, 9, 6, 8, 14, 20, 18, 17, 15, 13, 12, 11],
+                                    "t2m": [22] * 12} for anio in range(1991, 2021)},
+        }}
+
+    def test_suelo_arcilloso_sube_el_agua(self):
+        sin = evaluar_rotaciones(self._finca())
+        con = evaluar_rotaciones(self._finca(), suelo={"arcilla_pct": 45.7})
+        agua_sin = sin["estrategias"][0]["componentes"]["agua"]
+        agua_con = con["estrategias"][0]["componentes"]["agua"]
+        self.assertGreaterEqual(agua_con, agua_sin)
+        self.assertTrue(any("arcilloso" in motivo for motivo in con["estrategias"][0]["motivos"]))
+        self.assertTrue(any("drenaje" in riesgo for riesgo in con["estrategias"][0]["riesgos"]))
+
+    def test_suelo_arenoso_o_sin_dato_no_cambia(self):
+        base = evaluar_rotaciones(self._finca())
+        arenoso = evaluar_rotaciones(self._finca(), suelo={"arcilla_pct": 10})
+        self.assertEqual([e["indice"] for e in base["estrategias"]],
+                         [e["indice"] for e in arenoso["estrategias"]])
+        vacio = evaluar_rotaciones(self._finca(), suelo={"arcilla_pct": None})
+        self.assertEqual([e["indice"] for e in base["estrategias"]],
+                         [e["indice"] for e in vacio["estrategias"]])

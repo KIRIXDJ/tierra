@@ -30,6 +30,7 @@ DATOS = RAIZ / "datos"
 FINCAS = DATOS / "fincas.json"
 RECIENTE = DATOS / "reciente.json"
 CULTIVOS = DATOS / "cultivos.json"
+SUELO = DATOS / "suelo.json"
 SALIDA_JSON = DATOS / "rotaciones.json"
 SALIDA_JS = DATOS / "rotaciones.js"
 
@@ -64,10 +65,11 @@ def _tabla_cultivos(documento):
 
 
 def construir(fincas_documento, reciente_documento=None, cultivos_documento=None,
-              ahora=None):
+              suelo_documento=None, ahora=None):
     """Documento de rotaciones a partir de los snapshots del repo."""
     fincas = (fincas_documento or {}).get("fincas") or []
     recientes = _por_id(reciente_documento)
+    suelos = _por_id(suelo_documento)
     cultivos = _tabla_cultivos(cultivos_documento)
 
     momento = ahora or datetime.now().astimezone()
@@ -75,11 +77,13 @@ def construir(fincas_documento, reciente_documento=None, cultivos_documento=None
         "version": 1,
         "generado": momento.isoformat(timespec="seconds"),
         "fuente_clima": FUENTE_CLIMA,
+        "fuente_suelo": "ISRIC SoilGrids 2.0 (CC BY 4.0)" if suelos else None,
         "fincas": [
             evaluar_rotaciones(
                 finca,
                 contexto_reciente=recientes.get(finca.get("id")),
                 cultivos=cultivos,
+                suelo=suelos.get(finca.get("id")),
             )
             for finca in fincas
         ],
@@ -128,11 +132,13 @@ def main(argv=None):
     fincas_documento = _leer(FINCAS)
     reciente_documento = _leer(RECIENTE) if RECIENTE.exists() else None
     cultivos_documento = _leer(CULTIVOS) if CULTIVOS.exists() else None
+    suelo_documento = _leer(SUELO) if SUELO.exists() else None
 
     documento = construir(
         fincas_documento,
         reciente_documento=reciente_documento,
         cultivos_documento=cultivos_documento,
+        suelo_documento=suelo_documento,
     )
 
     if argumentos.verificar:

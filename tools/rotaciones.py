@@ -207,7 +207,7 @@ def _meses_criticos(cultivos):
     return sorted(meses)
 
 
-def evaluar_rotaciones(finca, contexto_reciente=None, clima=None, cultivos=None):
+def evaluar_rotaciones(finca, contexto_reciente=None, clima=None, cultivos=None, suelo=None):
     """Evalúa la rotación actual y dos alternativas para una finca.
 
     ``clima`` permite pasar la climatología directamente; si es ``None`` se usa
@@ -235,9 +235,23 @@ def evaluar_rotaciones(finca, contexto_reciente=None, clima=None, cultivos=None)
 
         agua = round(_acotar(10.0 - 2.5 * len(comunes), 0.0, 10.0), 1)
         diversidad = round(_acotar(10.0 * len(set(ids)) / 3.0, 0.0, 10.0), 1)
+
+        # Suelo: capa ISRIC. Un suelo arcilloso retiene más agua, así que el
+        # componente de agua pesa algo menos. Heurística de diseño, no agronomía.
+        aviso_suelo = None
+        arcilla = (suelo or {}).get("arcilla_pct")
+        if isinstance(arcilla, (int, float)) and arcilla >= 40:
+            agua = round(_acotar(agua + 1.0, 0.0, 10.0), 1)
+            aviso_suelo = (
+                f"Suelo arcilloso ({arcilla} % de arcilla, ISRIC SoilGrids): "
+                "retiene más agua y drena lento."
+            )
+
         indice = _entero(5.0 * agua + 5.0 * diversidad)
 
         motivos = []
+        if aviso_suelo:
+            motivos.append(aviso_suelo)
         if secos:
             motivos.append(
                 "Los meses críticos coinciden con "
@@ -293,6 +307,11 @@ def evaluar_rotaciones(finca, contexto_reciente=None, clima=None, cultivos=None)
         if provisional:
             riesgos.append(
                 "Los parámetros de cultivo son provisionales y pueden cambiar."
+            )
+        if aviso_suelo:
+            riesgos.append(
+                "Con suelo arcilloso, vigilar encharcamiento y drenaje: "
+                "confirmar la textura en campo."
             )
         if demanda == "alta" and secos:
             riesgos.append(
