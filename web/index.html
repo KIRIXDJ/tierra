@@ -126,6 +126,17 @@
   #finca-pronostico b { display: block; color: var(--texto); font-size: 11px; }
   #finca-pie, #rotaciones-pie { font-size: 10px; color: var(--secundario); margin-top: 10px; line-height: 1.5; }
   #finca-avisos { font-size: 11px; color: var(--ambar); margin-top: 6px; line-height: 1.4; }
+  #rotaciones-tabla table { width: 100%; border-collapse: collapse; font-size: 11px;
+    margin-bottom: 12px; }
+  #rotaciones-tabla th { text-align: left; color: var(--secundario); font-weight: 600;
+    font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+    border-bottom: 1px solid var(--borde); padding: 4px 3px; }
+  #rotaciones-tabla td { padding: 4px 3px; border-bottom: 1px solid rgba(120,200,255,.08); }
+  #rotaciones-tabla td.num { font-family: ui-monospace, Consolas, monospace; color: var(--cian); }
+  #rotaciones-tabla tr.actual td { color: var(--secundario); }
+  #rotaciones-tabla tr.gana td { color: var(--texto); }
+  #rotaciones-tabla .nota { font-size: 10px; color: var(--secundario); line-height: 1.4;
+    margin-bottom: 10px; display: block; }
   .tarjeta { border: 1px solid var(--borde); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
   .tarjeta h3 { font-size: 13px; color: var(--texto); }
   .indice { font-family: ui-monospace, Consolas, monospace; font-size: 22px; color: var(--cian); }
@@ -267,6 +278,7 @@
     <input type="range" id="escenario-lluvia" min="-40" max="40" value="0" step="5">
     <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.
       Comprueba cómo cambiaría el orden si la temporada fuera más seca o más húmeda.</span></div>
+  <div id="rotaciones-tabla"></div>
   <div id="rotaciones-tarjetas"></div>
   <div id="rotaciones-pie"></div>
 </aside>
@@ -1911,6 +1923,27 @@ function textoCultivos(estrategia) {
   return 'sin definir (validar con el agricultor)';
 }
 
+function tablaComparativa(lista, finca) {
+  const secos = (finca && finca.meses_secos) || [];
+  const filas = lista.map((e) => {
+    const criticos = e.meses_criticos || [];
+    const coincide = criticos.length && secos.length
+      ? `${criticos.filter((m) => secos.includes(m)).length}/${secos.length}`
+      : '—';
+    const nombre = e.id === 'actual' ? 'Actual' : (e.titulo || e.id).replace('Alternativa ', 'Alt. ');
+    const clases = [e.id === 'actual' ? 'actual' : '',
+                    e.calculado === lista[0].calculado ? 'gana' : ''].join(' ').trim();
+    return `<tr class="${clases}"><td>${nombre}</td>`
+      + `<td class="num">${e.calculado === null ? '—' : e.calculado}</td>`
+      + `<td>${e.demanda_agua || '—'}</td><td>${coincide}</td>`
+      + `<td>${e.provisional ? 'sí' : 'no'}</td></tr>`;
+  }).join('');
+  return `<table><thead><tr><th>Plan</th><th>Índice</th><th>Demanda</th>`
+    + `<th>Secos</th><th>Provisional</th></tr></thead><tbody>${filas}</tbody></table>`
+    + '<span class="nota">«Secos» = meses en que el plan necesita agua que caen dentro de '
+    + 'los meses secos de la finca (NASA POWER): menos es mejor.</span>';
+}
+
 function evidenciaNasa(estrategia) {
   const finca = (ROTACIONES.fincas || []).find((f) => f.id === fincaId);
   const secos = (finca && finca.meses_secos) || [];
@@ -1938,6 +1971,7 @@ function pintarRotaciones() {
   const lista = (finca.estrategias || [])
     .map((e) => ({ ...e, calculado: indicesRotaciones(e) }))
     .sort((a, b) => (b.calculado ?? -1) - (a.calculado ?? -1));
+  document.getElementById('rotaciones-tabla').innerHTML = tablaComparativa(lista, finca);
   caja.innerHTML = lista.map((e) => {
     const puntos = e.calculado === null ? 'sin dato' : e.calculado;
     return `<div class="tarjeta">

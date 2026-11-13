@@ -31,8 +31,11 @@ rotación conviene y por qué."
   Por eso va la fecha, y por eso no lo mezclamos con la tendencia de 40 años."
 
 **2:30–3:00 · Rotaciones y cierre**
-- Abrir **Rotaciones**: cada tarjeta muestra la **evidencia NASA** (los meses
-  secos de la finca) y la coincidencia con los meses en que el plan necesita agua.
+- Abrir **Rotaciones**: arriba hay una **tabla de comparación** de los tres
+  planes (índice, demanda, meses secos que toca, si es provisional). Es la
+  comparación que pide el desafío, en una mirada.
+- Cada tarjeta añade la **evidencia NASA** (los meses secos de la finca) y la
+  coincidencia con los meses en que el plan necesita agua.
 - Mover el deslizador "Ahorrar agua" y el **escenario de sequía** (-40 %): los
   índices bajan y se ve qué plan aguanta peor.
 - Mostrar que el orden cambia y que cada tarjeta dice **por qué**, **qué falta** y

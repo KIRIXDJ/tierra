@@ -91,6 +91,11 @@ class TestApp(unittest.TestCase):
         pag.wait_for_selector("#rotaciones.visible")
         tarjetas = pag.eval_on_selector_all(".tarjeta", "e => e.length")
         self.assertEqual(tarjetas, 3)
+        # La comparación de las tres estrategias, en una tabla.
+        cabeceras = pag.eval_on_selector_all("#rotaciones-tabla th",
+                                            "e => e.map(x => x.textContent)")
+        self.assertEqual(cabeceras, ["Plan", "Índice", "Demanda", "Secos", "Provisional"])
+        self.assertEqual(pag.eval_on_selector_all("#rotaciones-tabla tbody tr", "e => e.length"), 3)
         self.assertIn("NASA", pag.inner_text(".tarjeta"))
         rotulos = pag.eval_on_selector_all(".tarjeta:nth-child(1) .rotulo",
                                            "e => e.map(x => x.textContent)")
