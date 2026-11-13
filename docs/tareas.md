@@ -43,7 +43,23 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | D · Agronomía | Marlon · `MarlonRD` | 4 |
 | E · QA | Alison · `alisonrodriguez767-maker` | 5 |
 | F · Demo | sin asignar | 6 |
-| — | pendiente | 8 y 10 |
+| — | sin asignar | 8 |
+
+## Estado (2026-11-13)
+
+| Tarea | Persona | Estado |
+|---|---|---|
+| 1 · Datos | Ruben | **integrada** (26 pruebas) |
+| 2 · Temporada | dnffa | **integrada**, con climatología ERA5 |
+| 4 · Rotaciones | Marlon | **integrada**; `datos/rotaciones.json` generado |
+| 3 y 7 · Interfaz | Oscar | **hechas por el lead** (urgencia): Finca + Rotaciones |
+| 10 · Elio | — | **hecho por el lead** (`web/elio.js` + `tests/elio.mjs`) |
+| 6 · Demo | — | **hecha por el lead** (`docs/demo.md`) |
+| 5 · QA | Alison | pendiente: los casos ya existen en las ramas de 1/2/4 |
+| 8 · Cultivos | — | pendiente: necesita agrónomo para quitar `provisional` |
+
+Integración: se mergearon las ramas con el admin (main protegida exige PR, pero
+el evento era al día siguiente). El CI pasó en verde en cada push.
 
 QA (5) debe hacerlo alguien distinto de quien escribe la 2.
 
