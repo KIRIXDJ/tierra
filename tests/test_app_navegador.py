@@ -189,6 +189,31 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [], "errores de JS con la red caída")
         pag.close()
 
+    def test_granja_conectada_es_simulacion(self):
+        """La vista de producto debe decir que es simulada y reaccionar."""
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        aviso = pag.inner_text(".simulacion")
+        self.assertIn("Vista simulada", aviso)
+        self.assertIn("No hay hardware conectado", aviso)
+        # Con humedad baja riega; con lluvia cierra el techo y suspende el riego.
+        pag.fill("#vision-humedad", "8")
+        pag.dispatch_event("#vision-humedad", "input")
+        self.assertIn("3", pag.inner_text("#vision-resumen"))
+        pag.fill("#vision-lluvia", "4")
+        pag.dispatch_event("#vision-lluvia", "input")
+        resumen = pag.inner_text("#vision-resumen")
+        self.assertIn("techos cerrados", resumen)
+        pag.click("#vision-telegram")
+        self.assertIn("[", pag.inner_text("#vision-log"))
+        self.assertEqual(errores, [])
+        pag.close()
+
 
 if __name__ == "__main__":
     unittest.main()
