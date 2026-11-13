@@ -68,12 +68,16 @@ qué se riega solo, y qué avisa por Telegram."
       llegan. **Tener el video de respaldo listo.**
 - [ ] Zoom del navegador al 100 %, notificaciones silenciadas, pestañas limpias.
 - [ ] Ensayo completo una vez con la red del lugar o con hotspot.
+- [ ] Ensayo cronometrado de pantalla: `python3 tools/ensayo_demo.py` (deja
+      `docs/ensayo-tiempos.md`).
 - [ ] Llevar `docs/demo.mp4` copiado **fuera** del repo (USB o escritorio).
 - [ ] **Probarlo en un móvil**: mapa arriba y panel debajo, sin desbordes.
 - [ ] Cronómetro: el guion no pasa de 3:10.
 
 ## Plan B
 
+- **Demo en vivo**: https://kirixdj.github.io/tierra/web/ (si el wifi del lugar
+  aguanta; el bot va aparte en el portátil).
 - **Video ya grabado**: [`demo.mp4`](demo.mp4) — 46 s, 1280×720, con la vista
   actual (monitor, riesgos, satélite, rotaciones, techo y vuelo del globo).
   Se regenera con `python3 tools/grabar_demo.py` si la app cambia.

@@ -8,6 +8,9 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
 > Es una herramienta de apoyo: no reemplaza el juicio del agricultor ni de un
 > agrónomo local.
 
+**Demo en vivo:** https://kirixdj.github.io/tierra/web/
+(el bot de Telegram sigue corriendo en el portátil).
+
 ![Portada: globo con la malla de tendencias](docs/capturas/portada.png)
 
 ## Qué hace
@@ -104,13 +107,20 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
   rotaciones, techo, fotos y vuelo del globo):
   [`docs/demo.mp4`](docs/demo.mp4). Se regenera con `tools/grabar_demo.py`.
 
+**Publicar una URL viva** (GitHub Pages, Netlify o servidor local) paso a paso:
+[`docs/publicar.md`](docs/publicar.md). Ensayo cronometrado de la demo:
+[`docs/ensayo-tiempos.md`](docs/ensayo-tiempos.md) (generado con
+`python3 tools/ensayo_demo.py`).
+
 ```bash
 python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/
 ```
 
 ## Cómo abrirlo
 
-Sin instalar nada. Dos formas:
+En vivo (GitHub Pages): https://kirixdj.github.io/tierra/web/
+
+O en local, sin instalar nada. Dos formas:
 
 ```bash
 # opción 1: servidor local (recomendado)

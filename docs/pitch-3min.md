@@ -6,6 +6,8 @@ gancho → problema → solución → propuesta de valor → modelo de negocio �
 El Canvas completo está en [`canvas.md`](canvas.md) y la guía de demo en
 [`demo.md`](demo.md).
 
+Demo en vivo para el jurado: **https://kirixdj.github.io/tierra/web/**
+
 ## Antes de empezar (10 s, sin hablar)
 
 - App abierta en **Mi parcela** (abre sola), zoom del navegador al 100 %.
@@ -93,5 +95,7 @@ El Canvas completo está en [`canvas.md`](canvas.md) y la guía de demo en
 ## Ensayo
 
 - Cronómetro por bloque; si un bloque se pasa, recortar del 2 y del 6.
+- Tiempos medidos de las acciones de pantalla: [`ensayo-tiempos.md`](ensayo-tiempos.md)
+  (se regeneran con `python3 tools/ensayo_demo.py`).
 - Ensayar dos veces sin internet y una con el bot.
 - Plan B: si la app falla, `docs/demo.mp4` (46 s) y las capturas de `docs/capturas/`.
