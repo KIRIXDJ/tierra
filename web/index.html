@@ -582,7 +582,10 @@
           en tu parcela.</p>
         <p><b>Rotación:</b> el índice cruza los meses secos de la finca con la
           demanda de agua de cada cultivo. Es orientativo, no una recomendación
-          agronómica; los parámetros de cultivo están por validar con un agrónomo.</p>
+          agronómica; los parámetros de cultivo están por validar con un agrónomo.
+          Mercado local, ciclo de plagas, materia orgánica, erosión y el calendario
+          de campo desnudo <b>no</b> se miden todavía: son huecos declarados, no
+          supuestos.</p>
         <p><b>Sensores y techo:</b> simulados. La lluvia que mueve el techo viene de
           ERA5 (no se ajusta a mano). El bot de Telegram es real; los relés, no.</p>
         <p><b>Satélite frente a suelo:</b> el pixel de SMAP (~9 km), IMERG (~10 km),
@@ -3185,6 +3188,11 @@ function pintarRotacion() {
     <h4>Beneficios</h4><ul>${lista(beneficios)}</ul>
     <h4>Datos que faltan</h4><ul>${lista(elegida.datos_faltantes)}</ul>
     <h4>Riesgo a revisar con un agrónomo</h4><ul>${lista(elegida.riesgos)}</ul>
+    <h4>Lo que el reto pide y aún no cubrimos</h4>
+    <ul><li>Mercado local, ciclo de plagas, materia orgánica y erosión: sin dato
+      todavía (SRTM/ECOSTRESS en la hoja de ruta).</li>
+      <li>El calendario de campo desnudo entre cosechas no está registrado por
+      parcela; por eso no se afirma.</li></ul>
     <div class="fuente">Índice orientativo, no una recomendación agronómica.
       Clima: ${(ROTACIONES && ROTACIONES.fuente_clima) || 'NASA POWER'} ·
       Suelo: ${(ROTACIONES && ROTACIONES.fuente_suelo) || 'ISRIC SoilGrids (no NASA)'}.</div>`;

@@ -58,6 +58,12 @@ los actuadores *simulados* del panel; no hay hardware conectado.
 - **145 pruebas automáticas** (Python + navegador) y **3 comprobaciones de lógica en Node** (incluye móvil y
   el caso con la red caída).
 
+## Lo que el reto pide y aún no cubrimos
+
+Mercado local, ciclo de plagas, materia orgánica, erosión y el calendario de campo
+desnudo **no se miden todavía** (SRTM/ECOSTRESS y datos de mercado están en la hoja
+de ruta). Se declaran como huecos, no se rellenan con supuestos.
+
 ## Límites, dichos sin rodeos
 
 - POWER y ERA5 son **reanálisis**: modelos, no un pluviómetro en la parcela.
