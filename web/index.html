@@ -221,6 +221,16 @@
   #vision-telegram { width: 100%; margin-top: 10px; background: transparent; color: var(--cian);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
     font-size: 12px; cursor: pointer; }
+  #vision-registrar { width: 100%; margin-top: 8px; background: transparent; color: var(--verde);
+    border: 1px solid rgba(88, 227, 154, .5); border-radius: 7px; padding: 7px; font: inherit;
+    font-size: 12px; cursor: pointer; }
+  #vision-dibujo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    margin-top: 8px; font-size: 10px; color: var(--ambar); }
+  #vision-dibujo[hidden] { display: none; }
+  #vision-dibujo button { background: transparent; border: 1px solid var(--borde);
+    color: var(--texto); border-radius: 6px; padding: 4px 9px; font: inherit;
+    font-size: 11px; cursor: pointer; }
+  #vision-dibujo span { flex: 1 1 100%; }
   .campo.foto { border: 1px dashed var(--borde); border-radius: 8px; padding: 8px 10px;
     text-align: center; cursor: pointer; color: var(--cian); font-size: 11px;
     margin-top: 8px; }
@@ -347,8 +357,14 @@
   </label>
   <div id="parcela-lecturas"></div>
   <canvas id="vision-mapa"></canvas>
+  <div id="vision-dibujo" hidden>
+    <span id="vision-dibujo-info">Haz clic en el mapa para marcar las esquinas.</span>
+    <button id="vision-terminar">Terminar parcela</button>
+    <button id="vision-cancelar">Cancelar</button>
+  </div>
   <div id="vision-clima"></div>
   <div id="parcela-camara"></div>
+  <button id="vision-registrar">Registrar mi parcela</button>
   <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
     <input type="file" id="vision-archivo" accept="image/*" capture="environment">
   </label>
@@ -2199,6 +2215,7 @@ const MAPA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.mapa) || null;
 const FINCA_PARCELAS = (window.__PARCELAS__ && window.__PARCELAS__.finca) || null;
 let parcelaId = PARCELAS.length ? PARCELAS[0].id : null;
 let parcelaEstado = null;
+let dibujo = { activo: false, puntos: [] };
 let imagenMapa = null;
 let imagenLista = false;
 
@@ -2360,6 +2377,27 @@ function dibujarParcela(parcela, estado) {
     });
   }
 
+  // 2c. Polígono que se está registrando.
+  if (dibujo.activo && dibujo.puntos.length) {
+    ctx.beginPath();
+    dibujo.puntos.forEach(([x, y], i) => {
+      const [px, py] = aPantalla(x, y);
+      if (i === 0) { ctx.moveTo(px, py); } else { ctx.lineTo(px, py); }
+    });
+    ctx.strokeStyle = '#ffb454';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    dibujo.puntos.forEach(([x, y]) => {
+      const [px, py] = aPantalla(x, y);
+      ctx.fillStyle = '#ffb454';
+      ctx.beginPath();
+      ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
   // 3. Sensores de la parcela activa.
   const activa = parcelaActual();
   if (activa) {
@@ -2492,15 +2530,19 @@ function montarParcelas() {
     + `${p.nombre} · ${p.area_ha} ha · ${p.cultivo}</option>`).join('');
   selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
 
-  // Clic en el mapa: seleccionar la parcela que hay debajo.
+  // Clic en el mapa: seleccionar parcela, o añadir una esquina si se está dibujando.
   const canvas = document.getElementById('vision-mapa');
   canvas.addEventListener('click', (evento) => {
-    const caja = canvas.getBoundingClientRect();
-    const { ancho, alto, aPantalla } = transformacion(canvas);
-    const centro = centroParcelas();
-    const escala = ancho / VISTA_M;
-    const mx = (evento.clientX - caja.left - ancho / 2) / escala + centro.x;
-    const my = (evento.clientY - caja.top - alto / 2) / escala + centro.y;
+    const [mx, my] = pantallaAMetros(evento, canvas);
+    if (dibujo.activo) {
+      dibujo.puntos.push([Math.round(mx), Math.round(my)]);
+      const n = dibujo.puntos.length;
+      document.getElementById('vision-dibujo-info').textContent = n < 3
+        ? `${n} esquina(s). Marca al menos 3.`
+        : `${n} esquinas · ${areaHa(dibujo.puntos).toFixed(2)} ha. Pulsa Terminar.`;
+      dibujarParcela(parcelaActual(), parcelaEstado);
+      return;
+    }
     const tocada = PARCELAS.find((p) => dentroPoligono(mx, my, p.poligono_m || []));
     if (tocada) { elegirParcela(tocada.id); }
   });
@@ -2508,6 +2550,75 @@ function montarParcelas() {
   cargarMapa();
   elegirParcela(parcelaId);
 }
+
+function pantallaAMetros(evento, canvas) {
+  const caja = canvas.getBoundingClientRect();
+  const ancho = canvas.clientWidth || 366;
+  const alto = canvas.clientHeight || 210;
+  const escala = ancho / VISTA_M;
+  const centro = centroParcelas();
+  return [
+    (evento.clientX - caja.left - ancho / 2) / escala + centro.x,
+    (evento.clientY - caja.top - alto / 2) / escala + centro.y,
+  ];
+}
+
+function areaHa(puntos) {
+  let s = 0;
+  for (let i = 0; i < puntos.length; i += 1) {
+    const [x1, y1] = puntos[i];
+    const [x2, y2] = puntos[(i + 1) % puntos.length];
+    s += x1 * y2 - x2 * y1;
+  }
+  return Math.abs(s) / 2 / 10000;
+}
+
+document.getElementById('vision-registrar').addEventListener('click', () => {
+  dibujo = { activo: true, puntos: [] };
+  document.getElementById('vision-dibujo').hidden = false;
+  document.getElementById('vision-dibujo-info').textContent =
+    'Haz clic en el mapa para marcar las esquinas de tu parcela.';
+  pintarVision();
+});
+
+document.getElementById('vision-cancelar').addEventListener('click', () => {
+  dibujo = { activo: false, puntos: [] };
+  document.getElementById('vision-dibujo').hidden = true;
+  pintarVision();
+});
+
+document.getElementById('vision-terminar').addEventListener('click', () => {
+  if (dibujo.puntos.length < 3) {
+    document.getElementById('vision-dibujo-info').textContent =
+      'Necesito al menos 3 esquinas para cerrar la parcela.';
+    return;
+  }
+  const centro = centroParcelas();
+  const hectareas = areaHa(dibujo.puntos);
+  const nueva = {
+    id: `registrada-${PARCELAS.length + 1}`,
+    nombre: `Mi parcela ${PARCELAS.length + 1}`,
+    cultivo: 'por definir',
+    siembra: null,
+    humedad_inicial: 25,
+    temperatura: 24.0,
+    plantas_georreferenciadas: Math.round(hectareas * 2000),
+    poligono_m: dibujo.puntos.map(([x, y]) => [x - centro.x, y - centro.y]),
+    sensores: [{ id: 'ESP-N', x_m: dibujo.puntos[0][0] - centro.x, y_m: dibujo.puntos[0][1] - centro.y }],
+    camara: 'Parcela recién registrada: aún sin capturas de cámara.',
+    registrada: true,
+    area_ha: Math.round(hectareas * 100) / 100,
+  };
+  PARCELAS.push(nueva);
+  dibujo = { activo: false, puntos: [] };
+  document.getElementById('vision-dibujo').hidden = true;
+  const selector = document.getElementById('parcela-selector');
+  const op = document.createElement('option');
+  op.value = nueva.id;
+  op.textContent = `${nueva.nombre} · ${nueva.area_ha} ha · ${nueva.cultivo}`;
+  selector.appendChild(op);
+  elegirParcela(nueva.id);
+});
 
 document.getElementById('vision-boton').addEventListener('click', () => {
   panel('vision');
@@ -2599,6 +2710,8 @@ window.__tierra = {
   parcelas: PARCELAS,
   parcelaActual,
   plantasDeParcela,
+  areaHa,
+  registrarParcela: () => PARCELAS.filter((p) => p.registrada),
   elegirParcela,
   pintarVision,
   contextoElio,

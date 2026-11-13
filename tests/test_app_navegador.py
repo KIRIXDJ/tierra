@@ -389,6 +389,36 @@ class TestApp(unittest.TestCase):
         self.assertIn("Mide color", texto)
         pag.close()
 
+    def test_registrar_parcela_dibujando(self):
+        """El agricultor dibuja su parcela sobre el mapa y se calcula el área."""
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        errores = []
+        pag.on("pageerror", lambda e: errores.append(str(e)))
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        antes = pag.eval_on_selector_all("#parcela-selector option", "e => e.length")
+
+        pag.click("#vision-registrar")
+        caja = pag.locator("#vision-mapa").bounding_box()
+        for fx, fy in [(0.35, 0.30), (0.62, 0.28), (0.66, 0.62), (0.33, 0.64)]:
+            pag.mouse.click(caja["x"] + caja["width"] * fx, caja["y"] + caja["height"] * fy)
+            pag.wait_for_timeout(120)
+        self.assertIn("esquinas", pag.inner_text("#vision-dibujo-info"))
+
+        pag.click("#vision-terminar")
+        pag.wait_for_timeout(500)
+        despues = pag.eval_on_selector_all("#parcela-selector option", "e => e.length")
+        self.assertEqual(despues, antes + 1)
+        self.assertIn("Mi parcela", pag.inner_text("#parcela-selector"))
+        # El área calculada tiene que ser un número positivo y razonable.
+        area = pag.evaluate("window.__tierra.parcelaActual().area_ha")
+        self.assertGreater(area, 0.05)
+        self.assertLess(area, 50)
+        self.assertEqual(errores, [])
+        pag.close()
+
 
 if __name__ == "__main__":
     unittest.main()
