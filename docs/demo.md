@@ -43,6 +43,13 @@ rotación conviene y por qué."
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
   preguntas mejores para llevar al agrónomo."
 
+**Cierre opcional · Granja conectada (30 s)**
+- Abrir **Granja conectada**: bajar la humedad y ver cómo se activa el riego;
+  subir la lluvia y ver el techo cerrarse y el riego suspenderse.
+- Botón "Enviar aviso al móvil": sale el mensaje con hora, como llegaría por Telegram.
+- Decirlo en la misma frase: **"esto es una simulación, hoy no hay hardware instalado"**.
+  Es el plano del servicio que se vendería, no algo que ya esté en el campo.
+
 **Si sobra tiempo o el jurado pide más:**
 - **Abrir la app en el móvil** (misma wifi): los paneles se adaptan. El agricultor
   no lleva un portátil al campo.

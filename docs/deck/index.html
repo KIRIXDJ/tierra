@@ -68,6 +68,10 @@
     transition: width .3s ease; z-index: 9; }
   .fila-datos { display: flex; gap: 3vw; flex-wrap: wrap; }
   .nota-pie { font-size: 11px; color: var(--secundario); margin-top: 1.6vh; line-height: 1.4; }
+  .capturas { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4vw; margin-top: 2vh; }
+  .capturas img { width: 100%; border-radius: 10px; border: 1px solid var(--borde); display: block; }
+  .capturas.una { grid-template-columns: 1fr; }
+  .capturas.una img { max-height: 34vh; object-fit: cover; object-position: top; }
   .borrador { display: inline-block; font-size: 11px; color: var(--ambar);
     border: 1px solid rgba(255,180,84,.5); border-radius: 999px; padding: 2px 9px;
     margin-left: 8px; vertical-align: middle; }
@@ -116,7 +120,11 @@
       <div class="caja"><span class="titulo">3 · La rotación</span>
         <p>Tres estrategias comparadas: cuántos meses secos toca cada una, qué falta saber y qué revisar con un agrónomo.</p></div>
     </div>
-    <div class="aviso">Demo real, hoy: globo, fincas, rotaciones y un asistente que dice «no tengo ese dato» cuando falta.</div>
+    <div class="capturas">
+      <img src="../capturas/finca.png" alt="Pestaña Finca con la temporada de Constanza">
+      <img src="../capturas/rotaciones.png" alt="Comparación de las tres rotaciones">
+    </div>
+    <div class="aviso" style="margin-top:1.6vh">Demo real, hoy: globo, fincas, rotaciones y un asistente que dice «no tengo ese dato» cuando falta.</div>
     <div class="pie"><span>open source · funciona sin internet · sin librerías de terceros</span><span id="p3">3 / 11</span></div>
   </section>
 
@@ -135,7 +143,10 @@
       <div class="caja"><span class="titulo">Datos de la NASA</span>
         <p>La tendencia y la temporada deciden el contexto; los sensores confirman en el suelo.</p></div>
     </div>
-    <div class="aviso">La vista «Granja conectada» de la app es una <b>simulación</b>: hoy no hay hardware instalado.
+    <div class="capturas una">
+      <img src="../capturas/granja.png" alt="Vista simulada de la granja conectada">
+    </div>
+    <div class="aviso" style="margin-top:1.6vh">La vista «Granja conectada» de la app es una <b>simulación</b>: hoy no hay hardware instalado.
       Es el plano de lo que se vende, no una promesa de lo que ya está.</div>
     <div class="pie"><span>Visión de producto · no construido</span><span id="p4">4 / 11</span></div>
   </section>
