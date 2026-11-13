@@ -72,6 +72,8 @@ responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
 - [ ] Pestañas Finca y Rotaciones abiertas una vez (calienta la caché).
 - [ ] Zoom del navegador al 100 %, notificaciones silenciadas, pestañas limpias.
 - [ ] Ensayo completo una vez con la red del lugar o con hotspot.
+- [ ] Llevar `docs/demo.mp4` copiado **fuera** del repo (USB o escritorio): si el
+      portátil no abre el navegador, el video salva la presentación.
 - [ ] **Probarlo en un móvil** (o en el modo móvil del navegador): el panel debe
       entrar entero y los botones tocarse con el dedo.
 - [ ] Servir con `python3 -m http.server`: abrir el archivo con doble clic
@@ -80,10 +82,12 @@ responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
 
 ## Plan B
 
-- Video de 2 minutos pregrabado (globo + temporada + rotaciones).
-- Capturas fijas de cada pestaña, por si el navegador falla.
-- Si no hay red: mostrar el video y explicar el globo con las capturas. No fingir
-  que la app está corriendo.
+- **Video ya grabado**: [`demo.mp4`](demo.mp4) — 52 s, 1280×720, 810 KB. Recorre
+  globo, temporada, rotaciones, escenario, granja conectada, método y Elio.
+  Se regenera con `python3 tools/grabar_demo.py` si la app cambia.
+- Capturas fijas en [`capturas/`](capturas/) por si el navegador falla.
+- Si no hay red: reproducir el video y explicar con las capturas. No fingir que
+  la app está corriendo.
 
 ## Diapositiva de visión (texto para pegar)
 

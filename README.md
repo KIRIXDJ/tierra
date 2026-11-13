@@ -62,6 +62,8 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
   [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
 - **Diapositivas** (11, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
+- **Video de respaldo** de 52 s con el recorrido completo:
+  [`docs/demo.mp4`](docs/demo.mp4).
 
 ```bash
 python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/
