@@ -4,3 +4,4 @@ captura_*.png
 .malla_parcial.json
 .env
 datos/*.tmp
+graphify-out/
