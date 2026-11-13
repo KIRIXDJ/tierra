@@ -95,9 +95,9 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
   [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
 - **Diapositivas** (11, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
-- **Video de respaldo** de 52 s (versión anterior de la vista):
-  [`docs/demo.mp4`](docs/demo.mp4). Actualízalo con `tools/grabar_demo.py` si
-  cambias la app.
+- **Video de respaldo** de 46 s con la vista actual (monitor, riesgos, satélite,
+  rotaciones, techo, fotos y vuelo del globo):
+  [`docs/demo.mp4`](docs/demo.mp4). Se regenera con `tools/grabar_demo.py`.
 
 ```bash
 python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/

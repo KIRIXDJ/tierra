@@ -58,7 +58,7 @@
   .aviso { border: 1px solid rgba(255, 180, 84, .5); background: rgba(255, 180, 84, .08);
     border-radius: 12px; padding: 1.6vh 1.4vw; font-size: clamp(13px, 1.3vw, 17px);
     color: var(--ambar); margin-top: 2.4vh; }
-  .pie { position: absolute; left: 6vw; right: 6vw; bottom: 3.4vh; display: flex;
+  .pie { position: absolute; left: 6vw; right: 12vw; bottom: 3.4vh; display: flex;
     justify-content: space-between; font-size: 12px; color: var(--secundario); }
   .nav { position: fixed; bottom: 14px; right: 18px; display: flex; gap: 10px;
     align-items: center; font-size: 12px; color: var(--secundario); z-index: 9; }
@@ -156,6 +156,27 @@
   </section>
 
   <section class="slide">
+    <h3>Cumplimiento del reto</h3>
+    <h2>El reto, punto por punto</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">1 · Tres rotaciones</span>
+        <p>La actual y dos alternativas, con índice orientativo basado en los meses secos de la finca (NASA POWER).</p></div>
+      <div class="caja"><span class="titulo">2 · Porqué, evidencia, beneficios, huecos y riesgos</span>
+        <p>Cada estrategia se abre y muestra las cinco cosas; el riesgo queda para revisarlo con un agrónomo.</p></div>
+      <div class="caja"><span class="titulo">3 · Incertidumbre</span>
+        <p>FDR sobre 2.592 celdas, intervalo por bootstrap, p ajustada por autocorrelación y bandas P25–P75.</p></div>
+      <div class="caja"><span class="titulo">4 · Satélite frente a suelo</span>
+        <p>NDVI de MODIS (289 m), IMERG de GPM (2,3 km) y el sensor de la finca. Se explica por qué el satélite no ve una parcela de 1 ha.</p></div>
+      <div class="caja"><span class="titulo">5 · Prioridades del agricultor</span>
+        <p>Deslizadores de agua y diversidad; el escenario de lluvia es sensibilidad, no un pronóstico.</p></div>
+      <div class="caja"><span class="titulo">6 · Móvil y bot real</span>
+        <p>La vista entra en un teléfono y el bot de Telegram mueve los actuadores simulados.</p></div>
+    </div>
+    <div class="aviso" style="margin-top:1.6vh">Checklist completo, requisito por requisito, en <b>docs/recursos-nasa.md</b>.</div>
+    <div class="pie"><span>Field Shift: Adapting Farms with NASA Data · 2026</span><span id="p5">5 / 12</span></div>
+  </section>
+
+  <section class="slide">
     <h3>Por qué nosotros</h3>
     <h2>Lo que casi nadie hace: decir qué no sabe</h2>
     <ul>
@@ -206,7 +227,7 @@
     <div class="fila-datos">
       <div><div class="cifra chica">2.592</div><div class="etiqueta">celdas con tendencia<br>y significancia corregida</div></div>
       <div><div class="cifra chica">3</div><div class="etiqueta">fincas piloto con<br>climatología de 30 años</div></div>
-      <div><div class="cifra chica">82</div><div class="etiqueta">pruebas automáticas<br>+ 7 de navegador</div></div>
+      <div><div class="cifra chica">143</div><div class="etiqueta">pruebas automáticas<br>+ navegador y satélite</div></div>
       <div><div class="cifra chica">0</div><div class="etiqueta">librerías externas<br>en la demo</div></div>
     </div>
     <ul style="margin-top:3vh">
@@ -272,7 +293,7 @@
 
 <div class="nav">
   <button id="atras" aria-label="Anterior">←</button>
-  <span id="contador">1 / 11</span>
+  <span id="contador">1 / 12</span>
   <button id="siguiente" aria-label="Siguiente">→</button>
 </div>
 
@@ -296,6 +317,10 @@
     if (evento.key === 'ArrowLeft') { evento.preventDefault(); mostrar(actual - 1); }
     if (evento.key === 'Home') { mostrar(0); }
     if (evento.key === 'End') { mostrar(diapositivas.length - 1); }
+  });
+  diapositivas.forEach((diapositiva, i) => {
+    const pie = diapositiva.querySelectorAll('.pie span:last-child')[0];
+    if (pie) { pie.textContent = `${i + 1} / ${diapositivas.length}`; }
   });
   mostrar(0);
 </script>

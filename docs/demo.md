@@ -73,10 +73,9 @@ qué se riega solo, y qué avisa por Telegram."
 
 ## Plan B
 
-- **Video ya grabado**: [`demo.mp4`](demo.mp4) — 52 s, 1280×720.
+- **Video ya grabado**: [`demo.mp4`](demo.mp4) — 46 s, 1280×720, con la vista
+  actual (monitor, riesgos, satélite, rotaciones, techo y vuelo del globo).
   Se regenera con `python3 tools/grabar_demo.py` si la app cambia.
-  (Ojo: el video es de la versión anterior de la vista; actualízalo antes de la
-  feria o enseña capturas nuevas.)
 - Capturas fijas en [`capturas/`](capturas/) por si el navegador falla.
 - Si no hay red: reproducir el video y explicar con las capturas. No fingir que
   la app está corriendo.
