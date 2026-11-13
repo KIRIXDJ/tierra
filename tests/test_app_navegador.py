@@ -231,11 +231,12 @@ class TestApp(unittest.TestCase):
         pag.click("#vision-telegram")
         self.assertIn("[", pag.inner_text("#vision-log"))
 
-        # Ventilación (invernadero) y diagnóstico por foto simulado.
+        # Ventilación (invernadero) y plantas georreferenciadas.
         self.assertIn("VENTILA", pag.inner_text("#parcela-lecturas"))
-        pag.click("#vision-foto")
-        self.assertIn("Simulación de diagnóstico", pag.inner_text("#vision-diagnostico"))
-        self.assertIn("No es un diagnóstico real", pag.inner_text("#vision-diagnostico"))
+        self.assertIn("PLANTAS", pag.inner_text("#parcela-lecturas"))
+        plantas = pag.evaluate(
+            "window.__tierra.plantasDeParcela(window.__tierra.parcelaActual()).length")
+        self.assertGreater(plantas, 50)
         self.assertEqual(errores, [])
         pag.close()
 
@@ -361,6 +362,31 @@ class TestApp(unittest.TestCase):
         self.assertTrue(pag.inner_text("#elio-respuesta").strip())
 
         self.assertEqual(errores, [], "el guion dejó errores de JS")
+        pag.close()
+
+    def test_analiza_una_foto_real(self):
+        """Sube una imagen y calcula el color de verdad (no un texto fijo)."""
+        from PIL import Image
+        import tempfile
+        ruta = pathlib.Path(tempfile.gettempdir()) / "tierra_foto_test.jpg"
+        imagen = Image.new("RGB", (200, 150), (40, 140, 50))
+        for x in range(100, 200):
+            for y in range(150):
+                imagen.putpixel((x, y), (220, 210, 60))
+        imagen.save(ruta, quality=90)
+
+        pag = self.nav.new_page(viewport={"width": 1366, "height": 768})
+        pag.goto(f"{self.base}/web/index.html")
+        pag.wait_for_function("window.__tierra && window.__tierra.listo", timeout=90000)
+        pag.click("#vision-boton")
+        pag.wait_for_selector("#vision.visible")
+        pag.set_input_files("#vision-archivo", str(ruta))
+        pag.wait_for_function("document.getElementById('vision-diagnostico').textContent.includes('amarillo')",
+                              timeout=15000)
+        texto = pag.inner_text("#vision-diagnostico")
+        self.assertIn("clorosis", texto)
+        self.assertIn("amarillo", texto)
+        self.assertIn("Mide color", texto)
         pag.close()
 
 

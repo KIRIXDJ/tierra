@@ -98,8 +98,76 @@
              parcelas_secas: secas, total: parcelas.length };
   }
 
+
+  /* ---- Análisis de una foto de cultivo ----
+     Mide color, no "entiende" la hoja: clasifica píxeles en verde sano, amarillo
+     (clorosis) y marrón (necrosis). Es un indicador honesto, no un modelo de
+     visión validado. `datos` es un Uint8ClampedArray RGBA. */
+  function clasificarPixel(r, g, b) {
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const v = max / 255;
+    const s = max === 0 ? 0 : (max - min) / max;
+    let h = 0;
+    if (max !== min) {
+      if (max === r) { h = 60 * (((g - b) / (max - min)) % 6); }
+      else if (max === g) { h = 60 * ((b - r) / (max - min) + 2); }
+      else { h = 60 * ((r - g) / (max - min) + 4); }
+    }
+    if (h < 0) { h += 360; }
+    if (s < 0.15 || v < 0.12) { return 'suelo'; }        // gris, sombra, tierra clara
+    if (h >= 70 && h <= 165) { return 'verde'; }          // follaje
+    if (h >= 45 && h < 70 && v > 0.45) { return 'amarillo'; } // clorosis
+    if (h >= 10 && h < 45) { return 'marron'; }           // necrosis / tierra
+    return 'otro';
+  }
+
+  function analizarFoto(datos, ancho, alto, paso = 4) {
+    const total = { verde: 0, amarillo: 0, marron: 0, suelo: 0, otro: 0 };
+    let n = 0;
+    if (!datos || !ancho || !alto) { return null; }
+    for (let y = 0; y < alto; y += paso) {
+      for (let x = 0; x < ancho; x += paso) {
+        const i = (y * ancho + x) * 4;
+        if (i + 3 > datos.length) { continue; }
+        if (datos[i + 3] < 128) { continue; }            // transparente
+        total[clasificarPixel(datos[i], datos[i + 1], datos[i + 2])] += 1;
+        n += 1;
+      }
+    }
+    if (!n) { return null; }
+    const planta = total.verde + total.amarillo + total.marron;
+    const pct = (k) => Math.round((total[k] / n) * 1000) / 10;
+    const pctPlanta = (k) => (planta ? Math.round((total[k] / planta) * 1000) / 10 : null);
+
+    let hallazgo;
+    let confianza;
+    if (planta / n < 0.15) {
+      hallazgo = 'No se ve planta suficiente en la foto: acércate a una hoja o a una mata.';
+      confianza = 0.35;
+    } else if (pctPlanta('amarillo') > 25) {
+      hallazgo = 'Manchas amarillas extensas: compatible con clorosis o falta de nutrientes.';
+      confianza = 0.62;
+    } else if (pctPlanta('marron') > 20) {
+      hallazgo = 'Tejido marrón abundante: compatible con necrosis o daño por plaga.';
+      confianza = 0.6;
+    } else if (pctPlanta('amarillo') > 10) {
+      hallazgo = 'Algo de amarilleo en hoja: vigilar en los próximos días.';
+      confianza = 0.55;
+    } else {
+      hallazgo = 'Follaje mayormente verde y uniforme: sin signos claros de problema.';
+      confianza = 0.7;
+    }
+    return {
+      verde_pct: pct('verde'), amarillo_pct: pct('amarillo'), marron_pct: pct('marron'),
+      suelo_pct: pct('suelo'), planta_pct: Math.round((planta / n) * 1000) / 10,
+      hallazgo, confianza, pixeles: n,
+    };
+  }
+
   const Vision = {
     UMBRAL_RIEGO, HISTERESIS, LLUVIA_TECHO, CALOR_VENTILACION,
+    clasificarPixel, analizarFoto,
     parcela, parcelasIniciales, evaluar, mensajeTelegram, resumen,
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Vision; }

@@ -221,9 +221,10 @@
   #vision-telegram { width: 100%; margin-top: 10px; background: transparent; color: var(--cian);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
     font-size: 12px; cursor: pointer; }
-  #vision-foto { width: 100%; margin-top: 8px; background: transparent; color: var(--cian);
-    border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
-    font-size: 12px; cursor: pointer; }
+  .campo.foto { border: 1px dashed var(--borde); border-radius: 8px; padding: 8px 10px;
+    text-align: center; cursor: pointer; color: var(--cian); font-size: 11px;
+    margin-top: 8px; }
+  .campo.foto input { display: none; }
   #vision-diagnostico { display: none; margin-top: 8px; font-size: 11px; line-height: 1.45;
     border: 1px solid rgba(255, 180, 84, .45); background: rgba(255, 180, 84, .07);
     border-radius: 8px; padding: 8px 10px; color: var(--texto); }
@@ -348,7 +349,9 @@
   <canvas id="vision-mapa"></canvas>
   <div id="vision-clima"></div>
   <div id="parcela-camara"></div>
-  <button id="vision-foto">Analizar foto del cultivo</button>
+  <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
+    <input type="file" id="vision-archivo" accept="image/*" capture="environment">
+  </label>
   <div id="vision-diagnostico"></div>
   <div class="control"><label for="vision-humedad">Humedad del suelo:
     <b id="vision-humedad-valor">18 %</b></label>
@@ -2245,6 +2248,33 @@ function dentroPoligono(x, y, puntos) {
   return dentro;
 }
 
+/* Posiciones de plantas dentro del polígono: pseudoaleatorio con semilla, para
+   que salgan siempre igual. Se dibuja una muestra, no las 2.480. */
+function plantasDeParcela(parcela, maximo = 140) {
+  const puntos = parcela.poligono_m || [];
+  if (puntos.length < 3) { return []; }
+  let semilla = 0;
+  for (let i = 0; i < parcela.id.length; i += 1) { semilla = (semilla * 31 + parcela.id.charCodeAt(i)) % 100000; }
+  const azar = () => {
+    semilla = (semilla * 1103515245 + 12345) % 2147483648;
+    return semilla / 2147483648;
+  };
+  const xs = puntos.map((p) => p[0]);
+  const ys = puntos.map((p) => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs);
+  const y0 = Math.min(...ys), y1 = Math.max(...ys);
+  const lado = Math.ceil(Math.sqrt(maximo));
+  const salida = [];
+  for (let i = 0; i < lado && salida.length < maximo; i += 1) {
+    for (let j = 0; j < lado && salida.length < maximo; j += 1) {
+      const x = x0 + ((i + 0.5 + (azar() - 0.5) * 0.5) / lado) * (x1 - x0);
+      const y = y0 + ((j + 0.5 + (azar() - 0.5) * 0.5) / lado) * (y1 - y0);
+      if (dentroPoligono(x, y, puntos)) { salida.push([x, y]); }
+    }
+  }
+  return salida;
+}
+
 function colorParcela(humedad) {
   if (humedad === null || humedad === undefined) { return 'rgba(126, 151, 173, 0.20)'; }
   if (humedad < 25) { return 'rgba(255, 180, 84, 0.30)'; }
@@ -2318,6 +2348,17 @@ function dibujarParcela(parcela, estado) {
     ctx.fillStyle = activa ? '#35d6ff' : 'rgba(220, 233, 245, 0.85)';
     ctx.fillText(texto, ex + 2, ey - 5);
   });
+
+  // 2b. Plantas georreferenciadas de la parcela activa (muestra).
+  const activaP = parcelaActual();
+  if (activaP) {
+    const plantas = plantasDeParcela(activaP);
+    ctx.fillStyle = 'rgba(88, 227, 154, 0.6)';
+    plantas.forEach(([x, y]) => {
+      const [px, py] = aPantalla(x, y);
+      ctx.fillRect(px - 0.8, py - 0.8, 1.7, 1.7);
+    });
+  }
 
   // 3. Sensores de la parcela activa.
   const activa = parcelaActual();
@@ -2475,30 +2516,44 @@ document.getElementById('vision-boton').addEventListener('click', () => {
 ['vision-humedad', 'vision-lluvia'].forEach((id) => {
   document.getElementById(id).addEventListener('input', () => pintarVision());
 });
-/* Diagnóstico por foto: reglas fijas sobre el estado de la parcela.
-   No hay modelo de visión: es una simulación de la función, y así se dice. */
-document.getElementById('vision-foto').addEventListener('click', () => {
-  const parcela = parcelaActual();
+/* Diagnóstico por foto: procesa la imagen que elija el agricultor y mide color
+   real (verde/amarillo/marrón). No es un modelo de visión validado y se dice. */
+document.getElementById('vision-archivo').addEventListener('change', (evento) => {
+  const archivo = evento.target.files && evento.target.files[0];
   const caja = document.getElementById('vision-diagnostico');
-  if (!parcela || !parcelaEstado) { return; }
-  const humedad = parcelaEstado.humedad;
-  let hallazgo;
-  let confianza;
-  if (humedad < 20) {
-    hallazgo = 'Hojas enrolladas y pérdida de turgencia: compatible con estrés hídrico.';
-    confianza = 0.72;
-  } else if (humedad > 45) {
-    hallazgo = 'Manchas amarillas en hoja baja: compatible con exceso de humedad y hongo.';
-    confianza = 0.64;
-  } else {
-    hallazgo = 'Follaje uniforme, sin manchas ni enrollamiento visible.';
-    confianza = 0.81;
-  }
-  caja.className = 'visible';
-  caja.innerHTML = `<b>Simulación de diagnóstico</b><br>${hallazgo}<br>`
-    + `Confianza simulada: ${Math.round(confianza * 100)} %. `
-    + 'No es un diagnóstico real: en el servicio usaría un modelo de visión validado y '
-    + 'la confirmación de un agrónomo.';
+  if (!archivo) { return; }
+  const lector = new FileReader();
+  lector.onload = () => {
+    const imagen = new Image();
+    imagen.onload = () => {
+      const lienzo = document.createElement('canvas');
+      const ancho = 240;
+      const alto = Math.max(1, Math.round((imagen.height / imagen.width) * ancho));
+      lienzo.width = ancho;
+      lienzo.height = alto;
+      const ctx = lienzo.getContext('2d');
+      ctx.drawImage(imagen, 0, 0, ancho, alto);
+      const datos = ctx.getImageData(0, 0, ancho, alto).data;
+      const analisis = Vision.analizarFoto(datos, ancho, alto);
+      caja.className = 'visible';
+      if (!analisis) {
+        caja.innerHTML = '<b>No se pudo leer la foto.</b> Prueba con otra imagen.';
+        return;
+      }
+      caja.innerHTML = `<b>Análisis de la foto</b><br>${analisis.hallazgo}<br>`
+        + `Verde ${analisis.verde_pct} % · amarillo ${analisis.amarillo_pct} % · `
+        + `marrón ${analisis.marron_pct} % · planta ${analisis.planta_pct} % `
+        + `(${analisis.pixeles} píxeles, confianza ${Math.round(analisis.confianza * 100)} %).<br>`
+        + '<span style="color:#7e97ad">Mide color, no diagnostica enfermedades: '
+        + 'confírmalo con un agrónomo.</span>';
+    };
+    imagen.onerror = () => {
+      caja.className = 'visible';
+      caja.innerHTML = '<b>No se pudo abrir la imagen.</b>';
+    };
+    imagen.src = lector.result;
+  };
+  lector.readAsDataURL(archivo);
 });
 
 document.getElementById('vision-telegram').addEventListener('click', () => {
@@ -2543,6 +2598,7 @@ window.__tierra = {
   responderElio,
   parcelas: PARCELAS,
   parcelaActual,
+  plantasDeParcela,
   elegirParcela,
   pintarVision,
   contextoElio,

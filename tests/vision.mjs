@@ -45,4 +45,35 @@ assert.strictEqual(r.regando, 1);
 const sinDato = [Vision.parcela('X', 'Parcela X', 'sorgo', null, 1)];
 assert.strictEqual(Vision.evaluar(sinDato, { lluvia_mm_h: 0 }).parcelas[0].riego, false);
 
+// 8. Análisis de foto: píxeles sintéticos con resultado conocido.
+function imagen(color, w = 40, h = 40, mitad = null) {
+  const datos = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const i = (y * w + x) * 4;
+      const c = mitad && x >= w / 2 ? mitad : color;
+      datos[i] = c[0]; datos[i + 1] = c[1]; datos[i + 2] = c[2]; datos[i + 3] = 255;
+    }
+  }
+  return { datos, w, h };
+}
+const VERDE = [40, 140, 50];
+const AMARILLO = [220, 210, 60];
+
+let img = imagen(VERDE);
+let foto = Vision.analizarFoto(img.datos, img.w, img.h);
+assert.ok(foto.verde_pct > 95, `verde ${foto.verde_pct}`);
+assert.match(foto.hallazgo, /sin signos claros/);
+
+img = imagen(VERDE, 40, 40, AMARILLO);          // mitad verde, mitad amarilla
+foto = Vision.analizarFoto(img.datos, img.w, img.h);
+assert.ok(foto.amarillo_pct > 40, `amarillo ${foto.amarillo_pct}`);
+assert.match(foto.hallazgo, /clorosis/);
+
+img = imagen([128, 120, 110]);                   // todo suelo/gris
+foto = Vision.analizarFoto(img.datos, img.w, img.h);
+assert.match(foto.hallazgo, /No se ve planta/);
+
+assert.strictEqual(Vision.analizarFoto(null, 0, 0), null);
+
 console.log('OK');
