@@ -56,7 +56,7 @@ se cambia ese archivo y se avisa al grupo en el mismo PR.
 | 10 · Elio | — | **hecho por el lead** (`web/elio.js` + `tests/elio.mjs`) |
 | 6 · Demo | — | **hecha por el lead** (`docs/demo.md`) |
 | 8 · Cultivos | — | pendiente: necesita agrónomo para quitar `provisional` |
-| 5 · QA | Alison | cubierta en parte: 78 pruebas Python + 4 de navegador + `tests/elio.mjs` |
+| 5 · QA | Alison | cubierta en parte: 82 pruebas Python + 6 de navegador + `tests/elio.mjs` |
 
 Además, fuera de reparto y ya en `main`:
 

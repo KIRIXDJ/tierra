@@ -46,7 +46,8 @@ fuente de cada cifra y dice «no tengo ese dato» cuando falta. No controla nada
 - **Cada cifra dice de dónde viene** y cada recomendación dice qué le falta.
 - **La app no carga ninguna librería de terceros**: three.js y las texturas están
   en el repo. Solo se piden datos a las APIs.
-- **78 pruebas automáticas** (Python + Node) y 5 de navegador, incluido móvil.
+- **82 pruebas automáticas** (Python + Node) y **6 de navegador** (incluye móvil y
+  el caso con la red caída).
 
 ## Límites, dichos sin rodeos
 

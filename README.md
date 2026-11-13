@@ -104,8 +104,13 @@ tierra.py       app de escritorio (pygame) — histórico, no es la demo web
 python3 -m unittest discover -s tests -v
 ```
 
-21 pruebas. `tests/test_demo.py` necesita `playwright` y un Chrome; si no está,
-se salta sola. Las demás no necesitan internet.
+82 pruebas de Python y 6 de navegador. Las de navegador necesitan
+`playwright` y su Chromium (`python3 -m playwright install chromium`); si no están,
+se saltan solas. Ninguna prueba necesita internet.
+
+```bash
+node tests/elio.mjs    # Elio y los textos de la capa agrícola
+```
 
 ## Equipo
 
