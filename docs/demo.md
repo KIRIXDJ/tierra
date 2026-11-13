@@ -101,7 +101,7 @@ qué se riega solo, y qué avisa por Telegram."
 
 | Quién | Hace |
 |---|---|
-| 1 | Habla (0:00–3:00) |
+| 1 | Alison · habla (0:00–3:00) |
 | 2 | Maneja el ratón, las pestañas y el móvil del bot |
 | 3 | Responde preguntas técnicas (datos, FDR, fuentes) |
 | 4 | Vigila el reloj y el plan B (video listo) |

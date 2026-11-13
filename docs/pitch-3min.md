@@ -8,6 +8,8 @@ El Canvas completo está en [`canvas.md`](canvas.md) y la guía de demo en
 
 Demo en vivo para el jurado: **https://kirixdj.github.io/tierra/web/**
 
+**Presenta: Alison.** Otra persona del equipo lleva el ratón y el cronómetro.
+
 ## Antes de empezar (10 s, sin hablar)
 
 - App abierta en **Mi parcela** (abre sola), zoom del navegador al 100 %.
