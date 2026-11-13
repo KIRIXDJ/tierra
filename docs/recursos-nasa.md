@@ -28,6 +28,8 @@ Leído el 2026-11-13.
 | **ERA5** (Open-Meteo) | últimos 30 días, normal 1991–2020 de la misma fuente, humedad superficial 0–7 cm | ESA/ECMWF · **no NASA** |
 | **Esri World Imagery** | mapa satelital real de las parcelas | Esri · **no NASA** |
 | **ISRIC SoilGrids 2.0** | textura, arcilla, arena, carbono orgánico, pH (0–5 cm) | ISRIC · **no NASA** |
+| **MODIS/Terra NDVI 16 días** (GIBS) | imagen oficial recortada sobre la finca y valor aproximado decodificado del color (píxel ~289 m) | NASA |
+| **GPM IMERG** (GIBS) | lluvia de la pasada sobre la finca (píxel ~2,3 km); “sin lluvia” si el píxel es transparente | NASA |
 
 ## Datasets del reto que están en la hoja de ruta
 
@@ -36,7 +38,8 @@ Leído el 2026-11-13.
 | **SMAP** | ~9 km | el píxel es miles de veces la parcela demo; requiere Earthdata y armonización. La variable de humedad de suelo sí se cubre con POWER (GWETROOT), marcada como reanálisis |
 | **GPM / IMERG** | ~0,1° (10 km) | igual, y la app ya usa lluvia ERA5/POWER |
 | **Landsat** | 30 m | NDVI a escala de campo: siguiente paso natural |
-| **MODIS / VIIRS** | 250–1000 m | NDVI/estado de vegetación; se puede añadir vía GIBS |
+| **MODIS / VIIRS** | 250–1000 m | **NDVI ya integrado como imagen y valor aproximado vía GIBS**; VIIRS y series temporales, siguiente paso |
+| **GPM / IMERG** | ~0,1° (10 km) | **ya integrado como imagen y valor aproximado vía GIBS**; serie diaria completa, siguiente paso |
 | **ECOSTRESS** | ~70 m | ET y temperatura de superficie: requiere Earthdata |
 | **SRTM** | 30 m | pendiente/riesgo de erosión: falta descargar el tile de la zona |
 | **GRACE / GRACE‑FO** | ~300 km | tendencia de agua subterránea: escala regional, se explica como contexto |
@@ -53,8 +56,11 @@ Leído el 2026-11-13.
 
 ## Lo que la app dice en pantalla
 
-- Los sensores, el techo y la cámara son **simulados**; el mapa, el clima y el bot
-  son reales.
+- Los sensores, el techo y la cámara son **simulados**; el mapa, el clima, el
+  satélite NASA (NDVI/IMERG) y el bot son reales.
+- El NDVI/IMERG se muestran como **imagen oficial de GIBS y valor aproximado
+  decodificado del color**, no como medición calibrada en la parcela; la app lo
+  escribe en pantalla.
 - El índice de rotación es **orientativo**, no una recomendación agronómica.
 - Falta validación con **agrónomo y parcelas reales**; los parámetros de cultivo
   están marcados como provisionales.

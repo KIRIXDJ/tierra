@@ -35,6 +35,10 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
 - **Riesgos de la finca** (NASA POWER): días ≥ 35 °C, lluvia ≥ 20 mm, días
   secos, heladas, humedad de raíz y evapotranspiración, comparando 1991–2020 con
   2021–2025 y con un gráfico de los últimos 12 años.
+- **Satélite NASA real**: NDVI de MODIS/Terra (16 días) y lluvia de GPM IMERG,
+  recortados sobre la finca desde GIBS, con fecha, tamaño de píxel y un valor
+  aproximado decodificado del color oficial. La app avisa de que el píxel es
+  mayor que la parcela.
 - **Cómo se comporta solo**: el riego se dispara con la humedad simulada bajo el
   25 %, y el techo se cierra y el riego se suspende con la **lluvia real de ERA5**
   (no hay un control para "hacer llover").
@@ -63,6 +67,7 @@ python3 actualizar_reciente.py   # últimos 30 días (Open-Meteo)
 python3 generar_rotaciones.py    # motor de rotaciones
 python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
 python3 generar_riesgos.py      # riesgos: calor, lluvia intensa, secos, heladas, suelo y ET (POWER)
+python3 generar_satelite.py     # NDVI (MODIS) e IMERG (GPM) desde NASA GIBS
 ```
 
 El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las texturas
@@ -79,9 +84,9 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 |---|---|---|
 | ![Globo](docs/capturas/portada.png) | ![Techo](docs/capturas/monitor-techo.png) | ![Rotaciones](docs/capturas/monitor-rotacion.png) |
 
-| Riesgos NASA POWER |
-|---|
-| ![Riesgos](docs/capturas/monitor-riesgos.png) |
+| Riesgos NASA POWER | Satélite NASA (NDVI/IMERG) |
+|---|---|
+| ![Riesgos](docs/capturas/monitor-riesgos.png) | ![Satélite](docs/capturas/monitor-satelite.png) |
 
 ## Presentaciones
 
@@ -132,6 +137,7 @@ están mapeados en [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
 | Imágenes satelitales de la finca | Esri World Imagery | **no NASA** |
 | Textura, carbono y pH del suelo | ISRIC SoilGrids 2.0 | **no NASA** |
 | Imágenes satelitales globales | NASA GIBS (MODIS Terra) | observación |
+| NDVI (MODIS 16 días) e IMERG (GPM) | NASA GIBS · valor aproximado por color | observación |
 | Incendios y tormentas | NASA EONET | eventos |
 
 POWER es reanálisis: no es una medición en tu parcela. La lluvia y el viento de

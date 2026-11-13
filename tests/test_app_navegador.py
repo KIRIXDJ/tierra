@@ -237,6 +237,29 @@ class TestApp(unittest.TestCase):
         self.assertEqual(errores, [])
         pag.close()
 
+    def test_satelite_nasa_gibs(self):
+        """NDVI (MODIS) e IMERG (GPM) reales de GIBS, en el monitor."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        texto = pag.inner_text("#vision-satelite")
+        for esperado in ("NDVI MODIS", "Lluvia IMERG", "NASA GIBS", "sin lluvia"):
+            self.assertIn(esperado, texto)
+        medidas = pag.eval_on_selector_all(
+            "#vision-satelite img", "e => e.map(x => [x.naturalWidth, x.naturalHeight])")
+        self.assertEqual(len(medidas), 2)
+        for ancho, alto in medidas:
+            self.assertGreater(ancho, 0)
+            self.assertGreater(alto, 0)
+        pag.click("button[data-satelite='ndvi']")
+        pag.wait_for_selector("#vision-lightbox.visible")
+        pie = pag.inner_text("#vision-lightbox-pie")
+        self.assertIn("MODIS", pie)
+        self.assertIn("GIBS", pie)
+        self.assertIn("289", pie)          # resolución del píxel
+        pag.click("#vision-lightbox")
+        self.assertEqual(errores, [])
+        pag.close()
+
     def test_estado_del_bot_telegram(self):
         """Si el bot real escribe el estado, la vista lo refleja (sin red)."""
         ahora = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
@@ -337,6 +360,10 @@ class TestApp(unittest.TestCase):
             return n;
         }""")
         self.assertGreater(pixeles, 100)
+        # El satélite NASA también es local: sin wifi se sigue viendo.
+        satelite = pag.eval_on_selector_all(
+            "#vision-satelite img", "e => e.map(x => x.naturalWidth)")
+        self.assertEqual(satelite, [256, 288])
         self.assertEqual(errores, [], "errores de JS con la red caída")
         self.assertGreaterEqual(len(externas), 0)
         pag.close()

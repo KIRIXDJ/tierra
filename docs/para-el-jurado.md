@@ -18,7 +18,10 @@ Una herramienta de apoyo a la decisión con dos lentes y una recomendación:
 2. **Lente de la temporada (30 días).** Lluvia, temperatura y humedad superficial
    frente a la banda normal P25–P75 calculada con la **misma fuente**
    (Open-Meteo/ERA5, rotulada como no NASA), más pronóstico de 7 días.
-3. **Riesgos.** Días de calor extremo, lluvia intensa, días secos, heladas,
+3. **Satélite NASA.** NDVI de MODIS/Terra (16 días) e IMERG de GPM sobre la finca,
+   con su fecha y su píxel (289 m y ~2,3 km): se ve la diferencia entre satélite y
+   suelo que pide el reto.
+4. **Riesgos.** Días de calor extremo, lluvia intensa, días secos, heladas,
    humedad de raíz y evapotranspiración con NASA POWER (MERRA-2), comparados
    contra la base 1991–2020.
 4. **Rotaciones.** Tres estrategias —incluida la actual— con índice orientativo,
