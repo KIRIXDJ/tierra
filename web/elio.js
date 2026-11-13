@@ -120,9 +120,21 @@
     return SIN_DATO;
   }
 
+/* Escenario de lluvia: simulación de sensibilidad, no un pronóstico.
+     Con sequía (pct<0) las estrategias con peor componente de agua pierden más,
+     así se ve en pantalla cuáles aguantan. Peso de diseño, no agronómico. */
+  function indiceEscenario(estrategia, pesoAgua, pesoDiversidad, escenarioPct) {
+    const base = indicesRotaciones(estrategia, pesoAgua, pesoDiversidad);
+    if (base === null || !escenarioPct || escenarioPct >= 0) { return base; }
+    const agua = Number((estrategia.componentes || {}).agua ?? 0);
+    const deficit = Math.max(0, Math.min(1, (10 - agua) / 10));
+    const severidad = Math.min(1, Math.abs(escenarioPct) / 40);
+    return Math.round(Math.max(0, base - 30 * severidad * deficit));
+  }
+
   const Elio = {
     numero, diasDesde, textoLluvia, textoTemperatura, textoHumedad,
-    indicesRotaciones, responderElio,
+    indicesRotaciones, responderElio, indiceEscenario,
   };
   if (typeof module !== 'undefined' && module.exports) { module.exports = Elio; }
   if (typeof window !== 'undefined') { window.Elio = Elio; }

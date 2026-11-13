@@ -154,6 +154,17 @@
   #elio button { margin-top: 6px; width: 100%; background: transparent; color: var(--cian);
     border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit; font-size: 12px; cursor: pointer; }
   #elio-respuesta { margin-top: 10px; font-size: 12px; line-height: 1.55; color: var(--texto); }
+  .escenario { border-top: 1px solid var(--borde); padding-top: 8px; }
+  .nota-escenario { display: block; font-size: 10px; color: var(--secundario);
+    line-height: 1.4; margin-top: 2px; }
+  #finca-globo { margin-top: 10px; width: 100%; background: transparent; color: var(--cian);
+    border: 1px solid var(--borde); border-radius: 7px; padding: 7px; font: inherit;
+    font-size: 12px; cursor: pointer; }
+  #glosario { margin-top: 10px; font-size: 11px; color: var(--secundario); }
+  #glosario summary { cursor: pointer; color: var(--cian); font-size: 11px; }
+  #glosario dl { margin: 6px 0 0 0; line-height: 1.45; }
+  #glosario dt { color: var(--texto); font-size: 11px; margin-top: 5px; }
+  #glosario dd { margin: 0; }
   #elio-nota { font-size: 10px; color: var(--secundario); margin-top: 10px; line-height: 1.5; }
 </style>
 </head>
@@ -222,6 +233,24 @@
   <canvas id="finca-banda"></canvas>
   <div id="finca-pronostico"></div>
   <div id="finca-avisos"></div>
+  <button id="finca-globo">Ver esta celda en el globo</button>
+  <details id="glosario">
+    <summary>Qué significa cada término</summary>
+    <dl>
+      <dt>Anomalía</dt><dd>Cuánto se aparta un periodo de lo normal para esas mismas fechas.</dd>
+      <dt>Banda normal (P25–P75)</dt><dd>Rango donde cae el 50 % de los años parecidos.
+        Dentro de la banda = dentro de lo esperado.</dd>
+      <dt>Reanálisis</dt><dd>Modelo que reconstruye el clima pasado con observaciones.
+        No es un termómetro en tu finca.</dd>
+      <dt>FDR</dt><dd>Corrección que evita llamar «tendencia» a lo que es azar cuando se
+        prueban 2.592 celdas a la vez.</dd>
+      <dt>Humedad superficial (0–7 cm)</dt><dd>Agua en la capa más superficial del suelo,
+        no en toda la zona de raíces.</dd>
+      <dt>ET₀ (evapotranspiración)</dt><dd>Agua que se pierde por evaporación del suelo y
+        por las plantas. Esta herramienta no la calcula.</dd>
+      <dt>NDVI</dt><dd>Índice de verde de la vegetación visto por satélite. No se usa aquí.</dd>
+    </dl>
+  </details>
   <div id="finca-pie"></div>
 </aside>
 <aside id="rotaciones">
@@ -231,6 +260,11 @@
     <input type="range" id="peso-agua" min="0" max="10" value="5"></div>
   <div class="control"><label for="peso-diversidad">Diversificar</label>
     <input type="range" id="peso-diversidad" min="0" max="10" value="5"></div>
+  <div class="control escenario"><label for="escenario-lluvia">Escenario de lluvia:
+    <b id="escenario-valor">como la normal</b></label>
+    <input type="range" id="escenario-lluvia" min="-40" max="40" value="0" step="5">
+    <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.
+      Comprueba cómo cambiaría el orden si la temporada fuera más seca o más húmeda.</span></div>
   <div id="rotaciones-tarjetas"></div>
   <div id="rotaciones-pie"></div>
 </aside>
@@ -1960,7 +1994,8 @@ function pintarFinca() {
 function indicesRotaciones(estrategia) {
   const agua = Number(document.getElementById('peso-agua').value) || 0;
   const div = Number(document.getElementById('peso-diversidad').value) || 0;
-  return Elio.indicesRotaciones(estrategia, agua, div);
+  const escenario = Number(document.getElementById('escenario-lluvia').value) || 0;
+  return Elio.indiceEscenario(estrategia, agua, div, escenario);
 }
 
 function pintarRotaciones() {
@@ -1992,7 +2027,13 @@ function pintarRotaciones() {
       <ul>${(e.riesgos || []).map((m) => `<li>${m}</li>`).join('') || '<li>sin dato</li>'}</ul>
     </div>`;
   }).join('');
+  const escenario = Number(document.getElementById('escenario-lluvia').value) || 0;
+  document.getElementById('escenario-valor').textContent = escenario === 0
+    ? 'como la normal' : `${escenario > 0 ? '+' : ''}${escenario} % de lluvia`;
   pie.innerHTML = `Clima: <b>${ROTACIONES.fuente_clima || 'NASA POWER'}</b> · generado ${ROTACIONES.generado || ''}`
+    + (escenario < 0 ? '<br><b>Escenario simulado</b>: sequía del '
+      + `${Math.abs(escenario)} %. No es un pronóstico; penaliza a las estrategias`
+      + ' con peor componente de agua.' : '')
     + `<br>Meses secos en ${finca.id}: ${(finca.meses_secos || []).join(', ') || 'sin dato'}`
     + '<br>Índice orientativo. No reemplaza el juicio del agricultor ni de un agrónomo local.';
 }
@@ -2039,8 +2080,16 @@ document.getElementById('finca-selector').addEventListener('change', (evento) =>
   if (finca) { volarA(finca.lat, finca.lon); }
   pintarFinca();
 });
-['peso-agua', 'peso-diversidad'].forEach((id) => {
+['peso-agua', 'peso-diversidad', 'escenario-lluvia'].forEach((id) => {
   document.getElementById(id).addEventListener('input', pintarRotaciones);
+});
+
+document.getElementById('finca-globo').addEventListener('click', () => {
+  const finca = FINCAS.find((f) => f.id === fincaId);
+  if (!finca) { return; }
+  cerrarPaneles();
+  volarA(finca.lat, finca.lon);
+  seleccionar(finca.lat, finca.lon);
 });
 document.getElementById('elio-enviar').addEventListener('click', () => {
   const pregunta = document.getElementById('elio-pregunta').value;

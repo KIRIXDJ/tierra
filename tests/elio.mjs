@@ -64,4 +64,12 @@ assert.strictEqual(Elio.diasDesde(null), null);
 assert.match(Elio.textoHumedad({ valor: 0.28, cambio_7d: -0.02 }), /0–7 cm/);
 assert.match(Elio.textoLluvia({ '30d_mm': null }), /sin dato/);
 
+// 9. Escenario de sequía: la de peor componente de agua pierde más; la de agua 10 no pierde.
+const seco = { componentes: { agua: 5, diversidad: 5 } };
+const bueno = { componentes: { agua: 10, diversidad: 0 } };
+assert.strictEqual(Elio.indiceEscenario(bueno, 5, 5, -40), Elio.indicesRotaciones(bueno, 5, 5));
+assert.ok(Elio.indiceEscenario(seco, 5, 5, -40) < Elio.indicesRotaciones(seco, 5, 5));
+assert.strictEqual(Elio.indiceEscenario(seco, 5, 5, 0), Elio.indicesRotaciones(seco, 5, 5));
+assert.strictEqual(Elio.indiceEscenario(seco, 5, 5, 20), Elio.indicesRotaciones(seco, 5, 5));
+
 console.log('OK');
