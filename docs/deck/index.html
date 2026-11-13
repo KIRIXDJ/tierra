@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TIERRA · presentación</title>
+<style>
+  :root {
+    --fondo: #04070d;
+    --panel: #0b1420;
+    --texto: #dce9f5;
+    --secundario: #7e97ad;
+    --cian: #35d6ff;
+    --verde: #58e39a;
+    --ambar: #ffb454;
+    --borde: rgba(120, 200, 255, 0.18);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; background: var(--fondo); color: var(--texto);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; overflow: hidden; }
+  .deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+  @media (min-width: 769px) {
+    .deck { max-width: calc(100vh * 16 / 9); max-height: calc(100vw * 9 / 16);
+      margin: auto; position: absolute; inset: 0; }
+  }
+  .slide { position: absolute; inset: 0; padding: 5vh 6vw; display: flex;
+    flex-direction: column; justify-content: center; opacity: 0; visibility: hidden;
+    transition: opacity .35s ease; overflow: hidden; }
+  .slide.active { opacity: 1; visibility: visible; }
+  h1 { font-size: clamp(34px, 6vw, 76px); line-height: 1.05; letter-spacing: -.01em; }
+  h2 { font-size: clamp(24px, 3.4vw, 44px); line-height: 1.15; margin-bottom: 3vh; }
+  h3 { font-size: clamp(14px, 1.4vw, 19px); color: var(--cian); letter-spacing: .16em;
+    text-transform: uppercase; margin-bottom: 1.6vh; font-weight: 600; }
+  p { font-size: clamp(15px, 1.55vw, 21px); line-height: 1.5; color: var(--texto); }
+  .sub { color: var(--secundario); }
+  .centro { text-align: center; align-items: center; }
+  .marca { font-size: clamp(13px, 1.2vw, 16px); letter-spacing: .38em; color: var(--cian);
+    text-transform: uppercase; margin-bottom: 2vh; }
+  .grad { background: linear-gradient(100deg, var(--cian), var(--verde));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .rejilla { display: grid; gap: 1.6vw; grid-template-columns: 1fr 1fr; }
+  .rejilla.tres { grid-template-columns: repeat(3, 1fr); }
+  .caja { border: 1px solid var(--borde); border-radius: 14px; padding: 2.2vh 1.6vw;
+    background: var(--panel); }
+  .caja b { color: var(--cian); }
+  .caja .titulo { color: var(--texto); font-size: clamp(14px, 1.5vw, 20px); font-weight: 600;
+    margin-bottom: .8vh; display: block; }
+  .caja p { font-size: clamp(13px, 1.25vw, 17px); color: var(--secundario); }
+  ul { margin-left: 1.2vw; }
+  li { font-size: clamp(14px, 1.45vw, 20px); line-height: 1.6; margin-bottom: .8vh; }
+  li b { color: var(--cian); }
+  .cifra { font-size: clamp(38px, 6.5vw, 84px); font-family: ui-monospace, Consolas, monospace;
+    color: var(--cian); line-height: 1; }
+  .cifra.chica { font-size: clamp(26px, 3.4vw, 46px); }
+  .etiqueta { font-size: clamp(12px, 1.15vw, 15px); color: var(--secundario); margin-top: .6vh; }
+  .amarillo { color: var(--ambar); }
+  .verde { color: var(--verde); }
+  .aviso { border: 1px solid rgba(255, 180, 84, .5); background: rgba(255, 180, 84, .08);
+    border-radius: 12px; padding: 1.6vh 1.4vw; font-size: clamp(13px, 1.3vw, 17px);
+    color: var(--ambar); margin-top: 2.4vh; }
+  .pie { position: absolute; left: 6vw; right: 6vw; bottom: 3.4vh; display: flex;
+    justify-content: space-between; font-size: 12px; color: var(--secundario); }
+  .nav { position: fixed; bottom: 14px; right: 18px; display: flex; gap: 10px;
+    align-items: center; font-size: 12px; color: var(--secundario); z-index: 9; }
+  .nav button { background: transparent; border: 1px solid var(--borde); color: var(--texto);
+    border-radius: 7px; padding: 5px 11px; font: inherit; cursor: pointer; }
+  .barra { position: fixed; top: 0; left: 0; height: 2px; background: var(--cian);
+    transition: width .3s ease; z-index: 9; }
+  .fila-datos { display: flex; gap: 3vw; flex-wrap: wrap; }
+  .nota-pie { font-size: 11px; color: var(--secundario); margin-top: 1.6vh; line-height: 1.4; }
+  .borrador { display: inline-block; font-size: 11px; color: var(--ambar);
+    border: 1px solid rgba(255,180,84,.5); border-radius: 999px; padding: 2px 9px;
+    margin-left: 8px; vertical-align: middle; }
+</style>
+</head>
+<body>
+<div class="barra" id="barra"></div>
+<div class="deck" id="deck">
+
+  <section class="slide centro active">
+    <div class="marca">Tierra</div>
+    <h1>Datos de la NASA<br><span class="grad">para decidir la próxima siembra</span></h1>
+    <p class="sub" style="margin-top:2.6vh; max-width:60ch">
+      Tendencias de 42 años, la temporada en curso y la rotación que conviene.
+      Con la incertidumbre a la vista, no escondida.
+    </p>
+    <div class="nota-pie">NASA Space Apps 2026 · República Dominicana</div>
+    <div class="pie"><span>TIERRA</span><span id="p1">1 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>El problema</h3>
+    <h2>El agricultor decide con el clima del año pasado</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Su clima no es el del promedio</span>
+        <p>Dos fincas del mismo país, la misma semana:</p></div>
+      <div class="caja"><span class="titulo">Y los datos no llegan a su mano</span>
+        <p>Los satélites producen capas globales; él necesita una respuesta para su parcela.</p></div>
+    </div>
+    <div class="fila-datos" style="margin-top:3vh">
+      <div><div class="cifra">+103 %</div><div class="etiqueta">Azua, lluvia de 30 días sobre su normal<br>(178 mm vs 88 mm · 13 nov 2026)</div></div>
+      <div><div class="cifra">+3 %</div><div class="etiqueta">Constanza, misma ventana<br>(127 mm vs 124 mm)</div></div>
+    </div>
+    <div class="aviso">Un promedio nacional habría ocultado las dos realidades.</div>
+    <div class="pie"><span>Fuente: Open-Meteo / ERA5 (no NASA), comparado con su propia normal 1991–2020</span><span id="p2">2 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Lo que ya funciona</h3>
+    <h2>Tres lentes, una decisión</h2>
+    <div class="rejilla tres">
+      <div class="caja"><span class="titulo">1 · 42 años de tendencia</span>
+        <p>Globo con 2.592 celdas: Sen y Mann-Kendall por variable, corregido por pruebas múltiples (FDR) e intervalo de confianza.</p></div>
+      <div class="caja"><span class="titulo">2 · La temporada</span>
+        <p>30 días de lluvia, temperatura y humedad frente a la banda normal de <b>la misma fuente</b>, más pronóstico de 7 días.</p></div>
+      <div class="caja"><span class="titulo">3 · La rotación</span>
+        <p>Tres estrategias comparadas: cuántos meses secos toca cada una, qué falta saber y qué revisar con un agrónomo.</p></div>
+    </div>
+    <div class="aviso">Demo real, hoy: globo, fincas, rotaciones y un asistente que dice «no tengo ese dato» cuando falta.</div>
+    <div class="pie"><span>open source · funciona sin internet · sin librerías de terceros</span><span id="p3">3 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>El producto completo</h3>
+    <h2>De la estimación a la finca conectada</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Instalación</span>
+        <p>Sensores ESP32 de humedad por parcela, electroválvulas de riego y techo motorizado.
+           Registro de parcelas con imagen aérea.</p></div>
+      <div class="caja"><span class="titulo">Automático</span>
+        <p>Si la humedad baja del umbral, riega. Si llueve, cierra el techo y suspende el riego.
+           Sin que el agricultor mire el móvil.</p></div>
+      <div class="caja"><span class="titulo">Aviso</span>
+        <p>Telegram al teléfono: qué parcela, qué pasó y a qué hora. Con la opción de intervenir.</p></div>
+      <div class="caja"><span class="titulo">Datos de la NASA</span>
+        <p>La tendencia y la temporada deciden el contexto; los sensores confirman en el suelo.</p></div>
+    </div>
+    <div class="aviso">La vista «Granja conectada» de la app es una <b>simulación</b>: hoy no hay hardware instalado.
+      Es el plano de lo que se vende, no una promesa de lo que ya está.</div>
+    <div class="pie"><span>Visión de producto · no construido</span><span id="p4">4 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Por qué nosotros</h3>
+    <h2>Lo que casi nadie hace: decir qué no sabe</h2>
+    <ul>
+      <li><b>No mezclamos fuentes.</b> Comparar una normal de un modelo con un dato de otro mide el desajuste entre modelos, no el clima: vimos cocientes de 0,36 a 4,78 en una misma finca.</li>
+      <li><b>Corrección por pruebas múltiples.</b> Con 2.592 celdas, sin FDR saldrían ~130 «tendencias» falsas por variable.</li>
+      <li><b>Incertidumbre visible:</b> banda normal, intervalo de confianza, p ajustada.</li>
+      <li><b>El asistente no inventa:</b> responde solo con lo que hay en pantalla y cita la fuente.</li>
+      <li><b>Funciona sin internet:</b> 0 librerías externas, 3 MB, 0,6 s de carga.</li>
+    </ul>
+    <div class="aviso">Esto es lo que un agrónomo o un inversor puede auditar. La confianza se gana así.</div>
+    <div class="pie"><span>82 pruebas automáticas + 7 de navegador</span><span id="p5">5 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Modelo de negocio</h3>
+    <h2>Suscripción por finca, hardware incluido</h2>
+    <div class="rejilla tres">
+      <div class="caja"><span class="titulo">Hardware</span>
+        <p>Kit por parcela: ESP32 + sensores + válvula + techo. Venta o arrendamiento.</p></div>
+      <div class="caja"><span class="titulo">Suscripción</span>
+        <p>Panel, avisos y recomendaciones por finca y mes. Escala con hectáreas.</p></div>
+      <div class="caja"><span class="titulo">Servicio</span>
+        <p>Instalación, calibración y acompañamiento con un agrónomo local.</p></div>
+    </div>
+    <div class="aviso">Precios, coste del kit y margen: <b>por validar</b> con 3–5 fincas piloto.
+      No presentamos cifras que no hayamos medido.</div>
+    <div class="pie"><span>Pendiente: coste real de hardware y disposición a pagar</span><span id="p6">6 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Mercado</h3>
+    <h2>A quién le duele esto</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Primero</span>
+        <p>Pequeña y mediana finca de clima tropical con estación seca marcada:
+           hortalizas, granos y raíces. Deciden sin datos y pierden agua y cosecha.</p></div>
+      <div class="caja"><span class="titulo">Después</span>
+        <p>Cooperativas y agroindustria que necesitan trazabilidad climática de sus proveedores.</p></div>
+    </div>
+    <div class="aviso">Tamaño de mercado, número de fincas y competidores locales: <b>por validar</b>.
+      Es el primer trabajo de la siguiente fase, no un dato que podamos afirmar hoy.<span class="borrador">borrador</span></div>
+    <div class="pie"><span>Sin cifras de mercado hasta tener fuente</span><span id="p7">7 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Estado</h3>
+    <h2>Qué hay hecho, de verdad</h2>
+    <div class="fila-datos">
+      <div><div class="cifra chica">2.592</div><div class="etiqueta">celdas con tendencia<br>y significancia corregida</div></div>
+      <div><div class="cifra chica">3</div><div class="etiqueta">fincas piloto con<br>climatología de 30 años</div></div>
+      <div><div class="cifra chica">82</div><div class="etiqueta">pruebas automáticas<br>+ 7 de navegador</div></div>
+      <div><div class="cifra chica">0</div><div class="etiqueta">librerías externas<br>en la demo</div></div>
+    </div>
+    <ul style="margin-top:3vh">
+      <li>Demo funcional y verificada desde un clon limpio, sin internet.</li>
+      <li>Repositorio público, con el método y los límites escritos.</li>
+    </ul>
+    <div class="pie"><span>Sin clientes todavía: la validación empieza con los pilotos</span><span id="p8">8 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Hoja de ruta</h3>
+    <h2>Los siguientes 12 meses</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">1 · Validación agronómica</span>
+        <p>Parámetros de cultivo revisados por agrónomos y 3–5 fincas piloto con datos de suelo medidos en campo.</p></div>
+      <div class="caja"><span class="titulo">2 · Hardware</span>
+        <p>Kit ESP32 con riego y techo, probado en una parcela durante una temporada completa.</p></div>
+      <div class="caja"><span class="titulo">3 · Producto</span>
+        <p>Panel para el agricultor, avisos por Telegram y registro de parcelas con dron.</p></div>
+      <div class="caja"><span class="titulo">4 · Comercial</span>
+        <p>Precio validado, primeras cooperativas y métricas de ahorro de agua y de cosecha.</p></div>
+    </div>
+    <div class="pie"><span>El orden importa: primero medir, después prometer</span><span id="p9">9 / 11</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>Equipo</h3>
+    <h2>Quién lo está construyendo</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Producto y datos</span>
+        <p>Desarrollo de la app, la malla de tendencias, el motor de rotaciones y la validación estadística.</p></div>
+      <div class="caja"><span class="titulo">Lo que se suma</span>
+        <p>Un agrónomo asesor, un especialista en hardware ESP32 y un comercial con red en cooperativas.</p></div>
+    </div>
+    <div class="aviso">Equipo del NASA Space Apps 2026. Los perfiles que faltan son parte de lo que buscamos.<span class="borrador">completar</span></div>
+    <div class="pie"><span>Nombres y roles del equipo: completar antes de la conferencia</span><span id="p10">10 / 11</span></div>
+  </section>
+
+  <section class="slide centro">
+    <div class="marca">Qué buscamos</div>
+    <h1>Un piloto, no un cheque en blanco</h1>
+    <p class="sub" style="margin-top:2.4vh; max-width:62ch">
+      Tres a cinco fincas y un agrónomo para validar los parámetros.
+      Con eso medimos el ahorro de agua y la mejora de decisión, y ahí sí
+      podemos hablar de inversión con números propios.
+    </p>
+    <div class="aviso" style="text-align:left">
+      <b>Lo que no vamos a decir:</b> cifras de mercado sin fuente, ahorros que no hemos medido
+      ni hardware que todavía no hemos instalado.
+    </div>
+    <div class="pie"><span>Gracias · preguntas</span><span id="p11">11 / 11</span></div>
+  </section>
+
+</div>
+
+<div class="nav">
+  <button id="atras" aria-label="Anterior">←</button>
+  <span id="contador">1 / 11</span>
+  <button id="siguiente" aria-label="Siguiente">→</button>
+</div>
+
+<script>
+  const diapositivas = [...document.querySelectorAll('.slide')];
+  let actual = 0;
+
+  function mostrar(n) {
+    actual = Math.max(0, Math.min(diapositivas.length - 1, n));
+    diapositivas.forEach((d, i) => d.classList.toggle('active', i === actual));
+    document.getElementById('contador').textContent = `${actual + 1} / ${diapositivas.length}`;
+    document.getElementById('barra').style.width = `${((actual + 1) / diapositivas.length) * 100}%`;
+    const pie = document.querySelectorAll('.slide.active .pie span:last-child')[0];
+    if (pie) { pie.textContent = `${actual + 1} / ${diapositivas.length}`; }
+  }
+
+  document.getElementById('siguiente').addEventListener('click', () => mostrar(actual + 1));
+  document.getElementById('atras').addEventListener('click', () => mostrar(actual - 1));
+  document.addEventListener('keydown', (evento) => {
+    if (evento.key === 'ArrowRight' || evento.key === ' ') { evento.preventDefault(); mostrar(actual + 1); }
+    if (evento.key === 'ArrowLeft') { evento.preventDefault(); mostrar(actual - 1); }
+    if (evento.key === 'Home') { mostrar(0); }
+    if (evento.key === 'End') { mostrar(diapositivas.length - 1); }
+  });
+  mostrar(0);
+</script>
+</body>
+</html>

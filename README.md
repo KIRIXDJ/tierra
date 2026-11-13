@@ -55,9 +55,17 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 |---|---|---|
 | ![Finca](docs/capturas/finca.png) | ![Rotaciones](docs/capturas/rotaciones.png) | ![Método](docs/capturas/metodo.png) |
 
-## Para el jurado
+## Presentaciones
 
-Resumen de una página: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
+- **Para el jurado / técnico**, una página: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
+- **Para inversores**, guion de 5 minutos y preguntas difíciles:
+  [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
+- **Diapositivas** (11, sin dependencias, teclas ← →):
+  [`docs/deck/index.html`](docs/deck/index.html).
+
+```bash
+python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/
+```
 
 ## Cómo abrirlo
 
