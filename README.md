@@ -44,8 +44,8 @@ python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
 ```
 
 El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las texturas
-son locales. Solo el modo manos (MediaPipe, opcional) usa internet, y si falta
-avisa sin romper nada.
+son locales. La app no carga ninguna librería de terceros: las únicas llamadas
+externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 
 ## Cómo abrirlo
 
@@ -79,7 +79,7 @@ Open-Meteo se acredita en `NOTICE` (CC BY 4.0).
 ## Estructura
 
 ```
-web/            app de un solo archivo (index.html) + visor de manos
+web/            app de un solo archivo (index.html) + vendor/ (three.js local)
 tools/          malla global, tendencia, cliente de POWER, eventos
 tests/          pruebas de la lógica y del demo
 textures/       texturas del globo
@@ -101,8 +101,8 @@ Reparto de tareas y contratos de datos en [`docs/tareas.md`](docs/tareas.md).
 
 ## Límites conocidos
 
-- Todavía hay dependencias por CDN (three.js, MediaPipe, texturas): falta
-  localizarlas para que un fallo de red no impida abrir la app.
+- Abrir el HTML con doble clic (`file://`) no funciona: el navegador bloquea los
+  módulos. Hay que servirlo con `python3 -m http.server` (la app lo avisa).
 - La capa agrícola y el asistente Elio están en diseño.
 - Los puntajes de rotación serán orientativos y se marcarán como provisionales
   cuando falte una fuente citable.

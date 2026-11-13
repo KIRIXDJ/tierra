@@ -91,5 +91,5 @@ QA (5) debe hacerlo alguien distinto de quien escribe la 2.
   estructurado que la app le entrega, cita fuente y no controla actuadores.
 - Tarea A completa: catálogo de cultivos con fuente citable y las pantallas de
   comparación de las 3 rotaciones.
-- Localizar three.js, texturas y MediaPipe: sin red la app no arranca (no es
+- Localizar three.js y texturas (hecho); MediaPipe se eliminó con el modo manos. Sin red la app no arranca (no es
   "modo offline", es no depender de un CDN para pintar).

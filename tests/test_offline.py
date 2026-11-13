@@ -11,8 +11,7 @@ HTML = (RAIZ / "web" / "index.html").read_text(encoding="utf-8")
 
 class TestSinCdn(unittest.TestCase):
     def test_three_es_local(self):
-        """three.js pinta el globo: tiene que ser local. MediaPipe (modo manos,
-        opcional) puede seguir en CDN: si falla, se avisa y la app sigue."""
+        """three.js pinta el globo: tiene que ser local, sin CDN."""
         importmap = re.search(r'<script type="importmap">(.*?)</script>', HTML, re.S).group(1)
         self.assertIn("./vendor/three.module.js", importmap)
         entrada = re.search(r'"three":\s*"([^"]+)"', importmap).group(1)
@@ -36,8 +35,8 @@ class TestSinCdn(unittest.TestCase):
                       "eonet.gsfc.nasa.gov", "archive-api.open-meteo.com",
                       "storage.googleapis.com", "cdn.jsdelivr.net"}
         self.assertTrue(externas <= permitidas, f"dominios nuevos: {externas - permitidas}")
-        # jsdelivr solo puede quedar para el modo manos (MediaPipe), que es opcional.
-        self.assertNotIn("three@0.180.0", HTML)
+        self.assertNotIn("cdn.jsdelivr.net", HTML)
+        self.assertNotIn("mediapipe", HTML.lower())
 
 
 if __name__ == "__main__":
