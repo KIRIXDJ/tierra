@@ -24,12 +24,28 @@ Challenge 2026**.
   humedad superficial (0–7 cm) contra la banda normal P25–P75, más pronóstico de
   7 días. Fuente **Open-Meteo (no NASA)**, con fecha visible.
 - Pestaña **Rotaciones**: 3 estrategias (incluida la actual) con índice
-  orientativo, motivos, datos faltantes y riesgos; deslizadores de prioridades.
+  orientativo, **evidencia NASA** (meses secos de la finca), motivos, beneficios,
+  datos faltantes y riesgos. Deslizadores de prioridades (agua/diversidad) y un
+  **escenario de sequía** que muestra cuánto aguanta cada plan.
+- Panel **Método y límites**: qué es reanálisis, diferencia entre satélite, modelo
+  y medición en terreno, y dónde hace falta un agrónomo.
+- **Glosario** de términos (anomalía, banda P25–P75, FDR, humedad superficial, ET₀, NDVI).
 - **Elio**: asistente que responde solo con los datos de la app, cita la fuente y
   dice "no tengo ese dato" cuando falta. No controla dispositivos.
 
 Los datos de las pestañas nuevas están precalculados en `datos/` y se regeneran
-con `python3 actualizar_reciente.py` y `python3 generar_rotaciones.py`.
+con:
+
+```bash
+python3 generar_fincas.py        # climatología POWER 1991-2020
+python3 actualizar_reciente.py   # últimos 30 días (Open-Meteo)
+python3 generar_rotaciones.py    # motor de rotaciones
+python3 generar_suelo.py         # suelo (ISRIC SoilGrids)
+```
+
+El globo **no depende de ningún CDN**: `web/vendor/` trae three.js y las texturas
+son locales. Solo el modo manos (MediaPipe, opcional) usa internet, y si falta
+avisa sin romper nada.
 
 ## Cómo abrirlo
 

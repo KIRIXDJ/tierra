@@ -21,12 +21,20 @@ rotación conviene y por qué."
 **1:30–2:30 · Esta temporada (30 días)**
 - Abrir **Finca**, elegir Constanza.
 - Leer la lluvia de 30 días contra la banda normal P25–P75 y la temperatura.
+- **Cambiar a Azua** (dato del 13-nov: 178 mm en 30 días frente a una normal de
+  88 mm, +103 %). Ese contraste entre dos fincas del mismo país es lo que un
+  agricultor necesita ver y la prensa entiende en un segundo.
+- Mostrar el suelo (ISRIC SoilGrids) y el enlace "Ver esta celda en el globo":
+  conecta la finca con 42 años de tendencia NASA.
 - Señalar el pie: fuente **Open-Meteo, no NASA**, con fecha y hora.
 - Decir: "esto es una estimación de celda de modelo, no un sensor en tu parcela.
   Por eso va la fecha, y por eso no lo mezclamos con la tendencia de 40 años."
 
 **2:30–3:00 · Rotaciones y cierre**
-- Abrir **Rotaciones**, mover el deslizador "Ahorrar agua".
+- Abrir **Rotaciones**: cada tarjeta muestra la **evidencia NASA** (los meses
+  secos de la finca) y la coincidencia con los meses en que el plan necesita agua.
+- Mover el deslizador "Ahorrar agua" y el **escenario de sequía** (-40 %): los
+  índices bajan y se ve qué plan aguanta peor.
 - Mostrar que el orden cambia y que cada tarjeta dice **por qué**, **qué falta** y
   **qué revisar con un agrónomo**.
 - Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
