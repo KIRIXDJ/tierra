@@ -1,0 +1,81 @@
+# Demo · NASA Space Apps 2026
+
+Guion de 3 minutos, checklist de feria y diapositiva de visión.
+**Antes de ensayar**, confirma que la app en `main` hace todo lo que dice aquí.
+
+## Guion (3 minutos)
+
+**0:00–0:30 · El problema**
+"Casi la mitad de una finca se decide con el clima del año pasado. Los datos
+satelitales existen, pero llegan como capas que el agricultor no puede usar.
+Nosotros los convertimos en tres decisiones: cómo viene la temporada, qué
+rotación conviene y por qué."
+
+**0:30–1:30 · El globo: 42 años de tendencia**
+- Girar el globo, abrir "Caribe", clic en República Dominicana.
+- Leer: pendiente en °C/década, p-valor y el filtro de significativas.
+- Decir: "esto es NASA POWER, que es **reanálisis**, no una medición en la finca."
+- Señalar el FDR: "con 2.592 celdas, sin corrección, ~130 por variable saldrían
+  significativas por azar; por eso corregimos."
+
+**1:30–2:30 · Esta temporada (30 días)**
+- Abrir **Finca**, elegir Constanza.
+- Leer la lluvia de 30 días contra la banda normal P25–P75 y la temperatura.
+- Señalar el pie: fuente **Open-Meteo, no NASA**, con fecha y hora.
+- Decir: "esto es una estimación de celda de modelo, no un sensor en tu parcela.
+  Por eso va la fecha, y por eso no lo mezclamos con la tendencia de 40 años."
+
+**2:30–3:00 · Rotaciones y cierre**
+- Abrir **Rotaciones**, mover el deslizador "Ahorrar agua".
+- Mostrar que el orden cambia y que cada tarjeta dice **por qué**, **qué falta** y
+  **qué revisar con un agrónomo**.
+- Cerrar: "El índice es orientativo. El sistema no reemplaza al agricultor: le da
+  preguntas mejores para llevar al agrónomo."
+
+Si sobra tiempo y Elio está integrado: preguntar "¿está seco?" y mostrar que
+responde con la cifra y su fuente, y que dice "no tengo ese dato" cuando falta.
+
+## Checklist de feria (10 minutos antes)
+
+- [ ] `python3 actualizar_reciente.py` corrido **el mismo día** (si el snapshot
+      tiene más de 3 días, la app avisa "datos de hace N días").
+- [ ] `python3 generar_rotaciones.py` corrido después.
+- [ ] Servidor local arriba: `python3 -m http.server 8000` → `localhost:8000/web/`.
+- [ ] Globo cargado: si el wifi del lugar falla, three.js y las texturas no
+      llegan y no hay globo. **Tener el video de respaldo listo.**
+- [ ] Pestañas Finca y Rotaciones abiertas una vez (calienta la caché).
+- [ ] Zoom del navegador al 100 %, notificaciones silenciadas, pestañas limpias.
+- [ ] Ensayo completo una vez con la red del lugar o con hotspot.
+- [ ] Cronómetro: el guion no pasa de 3:10.
+
+## Plan B
+
+- Video de 2 minutos pregrabado (globo + temporada + rotaciones).
+- Capturas fijas de cada pestaña, por si el navegador falla.
+- Si no hay red: mostrar el video y explicar el globo con las capturas. No fingir
+  que la app está corriendo.
+
+## Diapositiva de visión (texto para pegar)
+
+> **De la estimación al campo**
+> Hoy: datos NASA + modelo abierto = decisiones con incertidumbre declarada.
+> Mañana: sensores de bajo costo (ESP32) en la finca, riego y techo automáticos,
+> y Elio por Telegram respondiendo con datos de la propia parcela.
+> **Estado: visión, no construido.** Lo que sí existe hoy es la capa de datos,
+> la temporada y las rotaciones.
+
+## Reparto del día
+
+| Quién | Hace |
+|---|---|
+| 1 | Habla (0:00–3:00) |
+| 2 | Maneja el ratón y las pestañas |
+| 3 | Responde preguntas técnicas (datos, FDR, fuentes) |
+| 4 | Vigila el reloj y el plan B (video listo) |
+
+## Lo que no se promete
+
+- No se dice "tiempo real" ni "monitoreo de tu parcela".
+- No se presenta la diapositiva de visión como si existiera.
+- No se dan cifras que no estén en la app.
+- No se menciona Elio si no está en `main` ese día.

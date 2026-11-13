@@ -20,8 +20,16 @@ Challenge 2026**.
 - Contraste de lluvia con Open-Meteo (ERA5) para detectar discrepancias de
   reanálisis, etiquetado como **no NASA**.
 - Capas de incendios y tormentas activas (EONET) y comparación satelital (GIBS).
-- En desarrollo: capa agrícola (fincas, rotaciones) y tarjeta "Esta temporada"
-  con los últimos 30 días y el pronóstico de 7.
+- Pestaña **Finca** · "Esta temporada": últimos 30 días de lluvia, temperatura y
+  humedad superficial (0–7 cm) contra la banda normal P25–P75, más pronóstico de
+  7 días. Fuente **Open-Meteo (no NASA)**, con fecha visible.
+- Pestaña **Rotaciones**: 3 estrategias (incluida la actual) con índice
+  orientativo, motivos, datos faltantes y riesgos; deslizadores de prioridades.
+- **Elio**: asistente que responde solo con los datos de la app, cita la fuente y
+  dice "no tengo ese dato" cuando falta. No controla dispositivos.
+
+Los datos de las pestañas nuevas están precalculados en `datos/` y se regeneran
+con `python3 actualizar_reciente.py` y `python3 generar_rotaciones.py`.
 
 ## Cómo abrirlo
 
