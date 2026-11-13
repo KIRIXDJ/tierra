@@ -1,6 +1,6 @@
 {
  "version": 1,
- "actualizado": "2026-11-08T18:44:52-04:00",
+ "actualizado": "2026-11-13T13:07:41-04:00",
  "fuente": {
   "nombre": "Open-Meteo (ECMWF / ERA5-Land)",
   "url": "https://api.open-meteo.com/v1/forecast",
@@ -8,8 +8,8 @@
   "nota": "No es NASA ni un sensor en la parcela: es modelo."
  },
  "ventana": {
-  "inicio": "2026-10-09",
-  "fin": "2026-11-07",
+  "inicio": "2026-10-14",
+  "fin": "2026-11-12",
   "dias": 30
  },
  "avisos": [],
@@ -18,68 +18,33 @@
    "id": "constanza",
    "nombre": "Constanza",
    "lluvia": {
-    "30d_mm": 119.8,
-    "normal_mm": 130.9,
-    "pct": -8,
+    "30d_mm": 126.8,
+    "normal_mm": 123.6,
+    "pct": 3,
     "banda": [
-     87.9,
-     167.7
+     89.5,
+     156.9
     ],
     "estado": "normal"
    },
    "temperatura": {
-    "media": 20.7,
-    "normal": 21.3,
+    "media": 20.6,
+    "normal": 21.2,
     "delta": -0.6,
     "banda": [
-     21.2,
-     21.6
+     21.0,
+     21.5
     ],
     "estado": "por_debajo"
    },
    "humedad_superficial": {
-    "valor": 0.387,
+    "valor": 0.377,
     "unidad": "m³/m³",
-    "cambio_7d": -0.006,
+    "cambio_7d": -0.009,
     "banda": null,
     "nota": "capa 0–7 cm; sin climatología comparable"
    },
    "serie_30d": [
-    {
-     "fecha": "2026-10-09",
-     "lluvia_mm": 1.4,
-     "tmax": 26.9,
-     "tmin": 15.8,
-     "humedad": 0.384
-    },
-    {
-     "fecha": "2026-10-10",
-     "lluvia_mm": 1.4,
-     "tmax": 25.9,
-     "tmin": 15.7,
-     "humedad": 0.374
-    },
-    {
-     "fecha": "2026-10-11",
-     "lluvia_mm": 2.3,
-     "tmax": 26.4,
-     "tmin": 15.2,
-     "humedad": 0.373
-    },
-    {
-     "fecha": "2026-10-12",
-     "lluvia_mm": 1.4,
-     "tmax": 27.1,
-     "tmin": 13.5,
-     "humedad": 0.366
-    },
-    {
-     "fecha": "2026-10-13",
-     "lluvia_mm": 4.8,
-     "tmax": 27.1,
-     "tmin": 14.4,
-     "humedad": 0.372
-    },
     {
      "fecha": "2026-10-14",
      "lluvia_mm": 0.6,
@@ -254,50 +219,85 @@
      "tmax": 26.1,
      "tmin": 13.9,
      "humedad": 0.382
+    },
+    {
+     "fecha": "2026-11-08",
+     "lluvia_mm": 1.2,
+     "tmax": 26.2,
+     "tmin": 14.0,
+     "humedad": 0.375
+    },
+    {
+     "fecha": "2026-11-09",
+     "lluvia_mm": 7.4,
+     "tmax": 26.3,
+     "tmin": 15.8,
+     "humedad": 0.376
+    },
+    {
+     "fecha": "2026-11-10",
+     "lluvia_mm": 2.8,
+     "tmax": 27.1,
+     "tmin": 16.0,
+     "humedad": 0.373
+    },
+    {
+     "fecha": "2026-11-11",
+     "lluvia_mm": 0.8,
+     "tmax": 26.4,
+     "tmin": 14.7,
+     "humedad": 0.367
+    },
+    {
+     "fecha": "2026-11-12",
+     "lluvia_mm": 6.1,
+     "tmax": 25.8,
+     "tmin": 14.2,
+     "humedad": 0.373
     }
    ],
    "pronostico": [
     {
-     "fecha": "2026-11-09",
-     "lluvia_mm": 4.3,
-     "tmax": 27.1,
-     "tmin": 15.7
-    },
-    {
-     "fecha": "2026-11-10",
-     "lluvia_mm": 5.1,
-     "tmax": 26.2,
-     "tmin": 15.2
-    },
-    {
-     "fecha": "2026-11-11",
-     "lluvia_mm": 2.4,
-     "tmax": 26.4,
-     "tmin": 15.5
-    },
-    {
-     "fecha": "2026-11-12",
-     "lluvia_mm": 5.4,
-     "tmax": 25.9,
-     "tmin": 13.6
-    },
-    {
-     "fecha": "2026-11-13",
-     "lluvia_mm": 1.5,
-     "tmax": 25.3,
-     "tmin": 16.0
-    },
-    {
      "fecha": "2026-11-14",
-     "lluvia_mm": 0.0,
-     "tmax": 27.0,
-     "tmin": 15.9
+     "lluvia_mm": 2.4,
+     "tmax": 26.3,
+     "tmin": 16.1
     },
     {
      "fecha": "2026-11-15",
+     "lluvia_mm": 6.0,
+     "tmax": 26.7,
+     "tmin": 15.8
+    },
+    {
+     "fecha": "2026-11-16",
+     "lluvia_mm": 0.1,
+     "tmax": 27.6,
+     "tmin": 15.0
+    },
+    {
+     "fecha": "2026-11-17",
+     "lluvia_mm": 4.2,
+     "tmax": 25.8,
+     "tmin": 14.7
+    },
+    {
+     "fecha": "2026-11-18",
+     "lluvia_mm": 0.9,
+     "tmax": 26.2,
+     "tmin": 14.2
+    },
+    {
+     "fecha": "2026-11-19",
+     "lluvia_mm": 1.2,
+     "tmax": 26.3,
+     "tmin": 14.9
+    },
+    {
+     "fecha": "2026-11-20",
      "lluvia_mm": 3.0,
-     "tmax": 27.1,
-     "tmin": 15.4
+     "tmax": 25.4,
+     "tmin": 15.5
     }
    ]
   },
@@ -305,68 +305,33 @@
    "id": "azua",
    "nombre": "Azua",
    "lluvia": {
-    "30d_mm": 166.8,
-    "normal_mm": 96.0,
-    "pct": 74,
+    "30d_mm": 178.1,
+    "normal_mm": 87.8,
+    "pct": 103,
     "banda": [
-     58.0,
-     102.4
+     53.2,
+     98.6
     ],
     "estado": "por_encima"
    },
    "temperatura": {
-    "media": 26.5,
+    "media": 26.3,
     "normal": 26.3,
-    "delta": 0.2,
+    "delta": -0.0,
     "banda": [
-     26.1,
-     26.5
+     26.0,
+     26.4
     ],
     "estado": "normal"
    },
    "humedad_superficial": {
-    "valor": 0.409,
+    "valor": 0.391,
     "unidad": "m³/m³",
-    "cambio_7d": -0.083,
+    "cambio_7d": -0.033,
     "banda": null,
     "nota": "capa 0–7 cm; sin climatología comparable"
    },
    "serie_30d": [
-    {
-     "fecha": "2026-10-09",
-     "lluvia_mm": 2.6,
-     "tmax": 32.1,
-     "tmin": 22.7,
-     "humedad": 0.418
-    },
-    {
-     "fecha": "2026-10-10",
-     "lluvia_mm": 0.6,
-     "tmax": 33.4,
-     "tmin": 22.3,
-     "humedad": 0.395
-    },
-    {
-     "fecha": "2026-10-11",
-     "lluvia_mm": 2.9,
-     "tmax": 31.9,
-     "tmin": 23.1,
-     "humedad": 0.38
-    },
-    {
-     "fecha": "2026-10-12",
-     "lluvia_mm": 2.7,
-     "tmax": 32.4,
-     "tmin": 21.7,
-     "humedad": 0.362
-    },
-    {
-     "fecha": "2026-10-13",
-     "lluvia_mm": 1.4,
-     "tmax": 31.9,
-     "tmin": 21.9,
-     "humedad": 0.33
-    },
     {
      "fecha": "2026-10-14",
      "lluvia_mm": 0.3,
@@ -541,50 +506,85 @@
      "tmax": 29.9,
      "tmin": 21.9,
      "humedad": 0.417
+    },
+    {
+     "fecha": "2026-11-08",
+     "lluvia_mm": 6.1,
+     "tmax": 29.5,
+     "tmin": 22.1,
+     "humedad": 0.404
+    },
+    {
+     "fecha": "2026-11-09",
+     "lluvia_mm": 1.4,
+     "tmax": 30.0,
+     "tmin": 22.1,
+     "humedad": 0.391
+    },
+    {
+     "fecha": "2026-11-10",
+     "lluvia_mm": 1.9,
+     "tmax": 30.7,
+     "tmin": 22.0,
+     "humedad": 0.375
+    },
+    {
+     "fecha": "2026-11-11",
+     "lluvia_mm": 0.0,
+     "tmax": 31.0,
+     "tmin": 21.4,
+     "humedad": 0.35
+    },
+    {
+     "fecha": "2026-11-12",
+     "lluvia_mm": 12.1,
+     "tmax": 29.8,
+     "tmin": 22.3,
+     "humedad": 0.373
     }
    ],
    "pronostico": [
     {
-     "fecha": "2026-11-09",
-     "lluvia_mm": 5.0,
-     "tmax": 29.7,
-     "tmin": 22.4
-    },
-    {
-     "fecha": "2026-11-10",
-     "lluvia_mm": 0.5,
-     "tmax": 29.4,
-     "tmin": 21.8
-    },
-    {
-     "fecha": "2026-11-11",
-     "lluvia_mm": 1.2,
-     "tmax": 29.6,
-     "tmin": 21.9
-    },
-    {
-     "fecha": "2026-11-12",
-     "lluvia_mm": 6.3,
-     "tmax": 30.5,
-     "tmin": 21.7
-    },
-    {
-     "fecha": "2026-11-13",
-     "lluvia_mm": 3.0,
-     "tmax": 29.7,
-     "tmin": 23.0
-    },
-    {
      "fecha": "2026-11-14",
-     "lluvia_mm": 1.8,
-     "tmax": 30.3,
-     "tmin": 23.0
+     "lluvia_mm": 3.7,
+     "tmax": 29.4,
+     "tmin": 23.4
     },
     {
      "fecha": "2026-11-15",
+     "lluvia_mm": 7.5,
+     "tmax": 29.0,
+     "tmin": 22.9
+    },
+    {
+     "fecha": "2026-11-16",
+     "lluvia_mm": 0.0,
+     "tmax": 30.2,
+     "tmin": 21.0
+    },
+    {
+     "fecha": "2026-11-17",
+     "lluvia_mm": 0.3,
+     "tmax": 30.0,
+     "tmin": 21.9
+    },
+    {
+     "fecha": "2026-11-18",
+     "lluvia_mm": 0.0,
+     "tmax": 30.0,
+     "tmin": 21.2
+    },
+    {
+     "fecha": "2026-11-19",
      "lluvia_mm": 6.6,
-     "tmax": 29.9,
-     "tmin": 22.8
+     "tmax": 29.3,
+     "tmin": 21.1
+    },
+    {
+     "fecha": "2026-11-20",
+     "lluvia_mm": 0.6,
+     "tmax": 29.0,
+     "tmin": 20.9
     }
    ]
   },
@@ -592,68 +592,33 @@
    "id": "san_francisco_de_macoris",
    "nombre": "San Francisco de Macorís",
    "lluvia": {
-    "30d_mm": 108.9,
-    "normal_mm": 70.1,
-    "pct": 55,
+    "30d_mm": 102.2,
+    "normal_mm": 69.8,
+    "pct": 46,
     "banda": [
-     47.2,
-     89.0
+     46.8,
+     89.5
     ],
     "estado": "por_encima"
    },
    "temperatura": {
     "media": 26.6,
-    "normal": 25.7,
-    "delta": 0.9,
+    "normal": 25.5,
+    "delta": 1.1,
     "banda": [
-     25.4,
-     26.0
+     25.1,
+     25.7
     ],
     "estado": "por_encima"
    },
    "humedad_superficial": {
-    "valor": 0.295,
+    "valor": 0.315,
     "unidad": "m³/m³",
-    "cambio_7d": 0.032,
+    "cambio_7d": 0.029,
     "banda": null,
     "nota": "capa 0–7 cm; sin climatología comparable"
    },
    "serie_30d": [
-    {
-     "fecha": "2026-10-09",
-     "lluvia_mm": 0.6,
-     "tmax": 32.1,
-     "tmin": 23.4,
-     "humedad": 0.287
-    },
-    {
-     "fecha": "2026-10-10",
-     "lluvia_mm": 1.9,
-     "tmax": 30.9,
-     "tmin": 23.1,
-     "humedad": 0.285
-    },
-    {
-     "fecha": "2026-10-11",
-     "lluvia_mm": 5.0,
-     "tmax": 31.0,
-     "tmin": 22.7,
-     "humedad": 0.305
-    },
-    {
-     "fecha": "2026-10-12",
-     "lluvia_mm": 2.0,
-     "tmax": 30.9,
-     "tmin": 22.1,
-     "humedad": 0.316
-    },
-    {
-     "fecha": "2026-10-13",
-     "lluvia_mm": 18.2,
-     "tmax": 30.9,
-     "tmin": 22.5,
-     "humedad": 0.334
-    },
     {
      "fecha": "2026-10-14",
      "lluvia_mm": 0.7,
@@ -828,50 +793,85 @@
      "tmax": 31.1,
      "tmin": 21.5,
      "humedad": 0.312
+    },
+    {
+     "fecha": "2026-11-08",
+     "lluvia_mm": 7.6,
+     "tmax": 31.3,
+     "tmin": 22.5,
+     "humedad": 0.319
+    },
+    {
+     "fecha": "2026-11-09",
+     "lluvia_mm": 8.3,
+     "tmax": 30.9,
+     "tmin": 22.6,
+     "humedad": 0.312
+    },
+    {
+     "fecha": "2026-11-10",
+     "lluvia_mm": 5.1,
+     "tmax": 30.7,
+     "tmin": 22.5,
+     "humedad": 0.33
+    },
+    {
+     "fecha": "2026-11-11",
+     "lluvia_mm": 0.0,
+     "tmax": 30.7,
+     "tmin": 22.6,
+     "humedad": 0.325
+    },
+    {
+     "fecha": "2026-11-12",
+     "lluvia_mm": 0.0,
+     "tmax": 31.1,
+     "tmin": 23.0,
+     "humedad": 0.29
     }
    ],
    "pronostico": [
     {
-     "fecha": "2026-11-09",
-     "lluvia_mm": 8.6,
-     "tmax": 30.4,
-     "tmin": 22.8
-    },
-    {
-     "fecha": "2026-11-10",
-     "lluvia_mm": 4.1,
-     "tmax": 30.2,
-     "tmin": 22.4
-    },
-    {
-     "fecha": "2026-11-11",
-     "lluvia_mm": 0.4,
-     "tmax": 30.8,
-     "tmin": 22.8
-    },
-    {
-     "fecha": "2026-11-12",
-     "lluvia_mm": 0.3,
-     "tmax": 31.0,
-     "tmin": 23.1
-    },
-    {
-     "fecha": "2026-11-13",
-     "lluvia_mm": 0.6,
-     "tmax": 30.8,
-     "tmin": 23.5
-    },
-    {
      "fecha": "2026-11-14",
-     "lluvia_mm": 2.4,
-     "tmax": 30.8,
+     "lluvia_mm": 1.4,
+     "tmax": 30.6,
      "tmin": 22.9
     },
     {
      "fecha": "2026-11-15",
-     "lluvia_mm": 6.9,
-     "tmax": 30.5,
-     "tmin": 21.9
+     "lluvia_mm": 15.9,
+     "tmax": 30.4,
+     "tmin": 22.4
+    },
+    {
+     "fecha": "2026-11-16",
+     "lluvia_mm": 0.0,
+     "tmax": 30.2,
+     "tmin": 21.7
+    },
+    {
+     "fecha": "2026-11-17",
+     "lluvia_mm": 3.3,
+     "tmax": 29.4,
+     "tmin": 22.2
+    },
+    {
+     "fecha": "2026-11-18",
+     "lluvia_mm": 9.3,
+     "tmax": 29.2,
+     "tmin": 21.3
+    },
+    {
+     "fecha": "2026-11-19",
+     "lluvia_mm": 3.6,
+     "tmax": 29.0,
+     "tmin": 20.3
+    },
+    {
+     "fecha": "2026-11-20",
+     "lluvia_mm": 4.8,
+     "tmax": 29.7,
+     "tmin": 20.4
     }
    ]
   }
