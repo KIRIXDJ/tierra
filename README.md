@@ -51,7 +51,7 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
   modos: **comandos** (`/estado`, `/clima`, `/riego off`, `/techo on`, `/foto`) y
   **API**, donde Elio responde en lenguaje natural con el contexto de los datos.
   El bot escribe el estado en `datos/estado_finca.json` y el panel lo refleja en
-  segundos. Ver [`docs/bot-telegram.md`](docs/bot-telegram.md).
+  segundos.
 - **Globo 3D** (mapa global): la cara NASA de la herramienta. Al abrir una celda
   se ve la pendiente por década, el p-valor con corrección FDR y la serie
   1984–2025; desde ahí se vuelve al monitoreo de la finca en un clic.
@@ -94,26 +94,17 @@ externas son las APIs de datos (NASA POWER, GIBS, EONET, Open-Meteo).
 |---|---|---|
 | ![Riesgos](docs/capturas/monitor-riesgos.png) | ![Terreno](docs/capturas/monitor-terreno.png) | ![Satélite](docs/capturas/monitor-satelite.png) |
 
-## Presentaciones
+## Material para el jurado
 
-- **Para el jurado / técnico**, una página: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
-- **Para la expo de 3 minutos**, guion con la estructura de elevator pitch de la
-  profesora Liddy Kiaty (gancho → problema → solución → valor → modelo → impacto →
-  cierre): [`docs/pitch-3min.md`](docs/pitch-3min.md).
-- **Modelo Canvas del negocio** (9 bloques, precios y mercado por validar):
-  [`docs/canvas.md`](docs/canvas.md).
-- **Para inversores**, guion de 5 minutos y preguntas difíciles:
-  [`docs/pitch-inversores.md`](docs/pitch-inversores.md).
-- **Diapositivas** (13, sin dependencias, teclas ← →):
+- **Resumen técnico de una página**: [`docs/para-el-jurado.md`](docs/para-el-jurado.md).
+- **Reto oficial, requisito por requisito**: [`docs/recursos-nasa.md`](docs/recursos-nasa.md).
+- **Cómo se calculan las rotaciones** (fuentes y fórmulas):
+  [`docs/rotaciones.md`](docs/rotaciones.md).
+- **Diapositivas de la presentación** (13, sin dependencias, teclas ← →):
   [`docs/deck/index.html`](docs/deck/index.html).
 - **Video de respaldo** de 46 s con la vista actual (monitor, riesgos, satélite,
   rotaciones, techo, fotos y vuelo del globo):
   [`docs/demo.mp4`](docs/demo.mp4). Se regenera con `tools/grabar_demo.py`.
-
-**Publicar una URL viva** (GitHub Pages, Netlify o servidor local) paso a paso:
-[`docs/publicar.md`](docs/publicar.md). Ensayo cronometrado de la demo:
-[`docs/ensayo-tiempos.md`](docs/ensayo-tiempos.md) (generado con
-`python3 tools/ensayo_demo.py`).
 
 ```bash
 python3 -m http.server 8000   # y abrir http://localhost:8000/docs/deck/
@@ -134,8 +125,9 @@ python3 -m http.server 8000
 ```
 
 Necesita un navegador con WebGL 2 (Chrome, Edge o Firefox recientes).
-Necesita internet: three.js, las texturas y las capas en vivo (POWER, GIBS,
-EONET) se descargan al abrir. Los datos de tendencia van incrustados en el HTML.
+Funciona **sin internet**: three.js está vendorizado en `web/vendor/`, las
+texturas van en `textures/` y los datos en `datos/`. Solo las capas en vivo
+(POWER, GIBS, EONET) y el bot piden red; sin ella la demo arranca igual.
 
 ## Reto oficial
 
@@ -192,7 +184,9 @@ node tests/monitor.mjs  # sensores simulados y estado del bot
 
 ## Equipo
 
-Reparto de tareas y contratos de datos en [`docs/tareas.md`](docs/tareas.md).
+Proyecto del NASA Space Apps Challenge 2026 (República Dominicana), construido
+por estudiantes de UNIROMANA con roles de datos, temporada, interfaz, agronomía
+y calidad. El reparto es interno y no se publica.
 
 ## Límites conocidos
 

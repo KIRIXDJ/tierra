@@ -1,7 +1,7 @@
 """Seguimiento de la temporada con Open-Meteo: lógica pura, sin red ni I/O.
 
 Este módulo arma el bloque "Esta temporada" de `datos/reciente.json`
-(contrato en `tareas/00-contratos.md`). No pide datos ni escribe archivos:
+(contrato en `interno/tareas/00-contratos.md`). No pide datos ni escribe archivos:
 `actualizar_reciente.py` se encarga de la red y de los archivos.
 
 Reglas que este código no puede romper:

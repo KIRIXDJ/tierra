@@ -1,11 +1,11 @@
 """Ensayo cronometrado de la demo de 3 minutos.
 
-Recorre las acciones de pantalla del guion (`docs/pitch-3min.md`) y mide cuánto
+Recorre las acciones de pantalla del guion (`interno/pitch-3min.md`) y mide cuánto
 tardan, para saber cuánto tiempo queda para hablar en cada bloque. No mide la
 voz: eso es del presentador.
 
 Uso:
-    python3 tools/ensayo_demo.py            # imprime la tabla y escribe docs/ensayo-tiempos.md
+    python3 tools/ensayo_demo.py            # imprime la tabla y escribe interno/ensayo-tiempos.md
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ import threading
 from playwright.sync_api import sync_playwright
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
-SALIDA = RAIZ / "docs" / "ensayo-tiempos.md"
+SALIDA = RAIZ / "interno" / "ensayo-tiempos.md"   # material interno, fuera de git
 
 # (bloque, segundos objetivo del pitch, acción)
 BLOQUES = [
@@ -138,6 +138,7 @@ def main():
         "",
         "Si un bloque se pasa, recortar del 2 (problema) y del 6 (impacto), nunca del cierre.",
     ]
+    SALIDA.parent.mkdir(parents=True, exist_ok=True)
     SALIDA.write_text("\n".join(lineas) + "\n", encoding="utf-8")
     print("\n".join(lineas[:20]))
     print(f"\nEscrito {SALIDA.relative_to(RAIZ)} · errores: {len(errores)}")

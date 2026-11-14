@@ -4,30 +4,17 @@ Este repo es la copia canónica de TIERRA. Antes de tocar código, respeta:
 
 ## Si eres un agente y te asignaron una tarea
 
-Lee [`tareas/README.md`](tareas/README.md) y **solo** el archivo de tu tarea.
-No necesitas el contexto de la conversación que la originó.
+Las tareas del equipo viven en `interno/tareas/` (fuera de git, ver más abajo).
+Lee **solo** el archivo de tu tarea. No necesitas el contexto de la conversación
+que la originó.
 
 1. Rama `tarea/N-slug` desde `main` actualizado. Nunca trabajes en `main`.
-2. Toca **solo** los archivos de "Permitido tocar" de tu archivo. Si necesitas
-   otro, para y abre un issue; no lo toques "de paso".
+2. Toca **solo** los archivos de "Permitido tocar" de tu archivo.
 3. Corre los "Criterios de aceptación" de tu archivo y pega la salida en el PR.
 4. Un commit, en español, con el prefijo que indica tu archivo.
 5. No reformatees, no renombres archivos, no actualices dependencias, no
    "arregles" otra tarea.
-6. Si el contrato no alcanza, abre un issue `Tarea N · duda` y no inventes.
-   Si eres QA, reporta el bug; no lo arregles.
-
-| Si te tocó | Lee | Rama | No toques |
-|---|---|---|---|
-| 1 · Datos | `tareas/01-datos.md` | `tarea/1-datos` | `web/`, `tools/tendencia.py` |
-| 2 · Temporada | `tareas/02-temporada.md` | `tarea/2-temporada` | `web/`, `datos/fincas.json` |
-| 3 · Interfaz | `tareas/03-ui.md` | `tarea/3-ui` | `tools/`, `datos/`, `tests/` |
-| 4 · Rotaciones | `tareas/04-rotaciones.md` | `tarea/4-rotaciones` | `web/`, `datos/` |
-| 5 · QA | `tareas/05-qa.md` | `tarea/5-qa` | código de las otras tareas |
-| 6 · Demo | `tareas/06-demo.md` | `tarea/6-demo` | todo lo demás |
-| 7 · Rotaciones UI | `tareas/07-rotaciones-ui.md` | `tarea/7-rotaciones-ui` | `tools/`, `datos/`, `tests/` |
-| 8 · Cultivos | `tareas/08-cultivos.md` | `tarea/8-cultivos` | `web/`, `tools/` |
-| 10 · Elio local | `tareas/10-elio.md` | `tarea/10-elio` | el módulo del globo, `tools/`, `datos/` |
+6. Si el contrato no alcanza, pregunta y no inventes.
 
 ## Reglas del proyecto
 
@@ -37,10 +24,10 @@ No necesitas el contexto de la conversación que la originó.
 2. Los puntajes de rotación son **orientativos**, nunca verdades agronómicas.
 3. **No inventar endpoints** ni nombres de parámetros de API. Verificar en la
    documentación y dejar el código tolerante a fallos.
-4. La app es de **monitoreo en línea**: globo y capas usan internet. Los datos
-   de tendencia van precalculados en el repo para arrancar rápido y para tener
-   respaldo si una API falla. No prometas funcionamiento sin internet: hoy
-   three.js y las texturas salen de un CDN y sin red la app no arranca.
+4. La demo **funciona sin internet**: three.js está en `web/vendor/`, las
+   texturas en `textures/` y los datos en `datos/`. Solo las capas en vivo
+   (POWER, GIBS, EONET) y el bot piden red. No la conviertas en dependiente de
+   un CDN.
 5. **Nunca** leer, imprimir ni subir `.env`. Claves solo en variables de
    entorno; jamás dentro del HTML ni del JS del navegador.
 6. Marcar siempre lo que **no es NASA** (por ejemplo Open-Meteo/ERA5).
@@ -49,21 +36,7 @@ No necesitas el contexto de la conversación que la originó.
 8. Cambios mínimos; no reformatear código ajeno. Un commit por tarea.
 9. No presentar esto como monitoreo de parcela: son estimaciones de celda de
    modelos y reanálisis.
-10. **Respaldos temporales fuera del repo.** Los bundles, zips o dumps de
-    migración se guardan fuera del proyecto y se borran en cuanto el cambio
-    queda confirmado. Nunca se commitean ni se dejan crecer en `/tmp`.
-
-## Respaldo pendiente de borrar
-
-- `/tmp/laboratorio-tierra-20261102.bundle` — **127 MB**. Respaldo de la rama
-  privada `feat/tierra-trend-detective`, que se borró el 2026-11-02 al pasar el
-  proyecto al repo público. Ya no hace falta ahora que el repo público está
-  verificado (32 commits, pruebas en verde, CI en verde):
-
-  ```bash
-  rm -f /tmp/laboratorio-tierra-20261102.bundle
-  ```
-
-  Si se vuelve a necesitar un respaldo así, que sea temporal y con fecha de
-  borrado anotada aquí mismo.
-
+10. **Material interno fuera de git.** `interno/` (guion de la demo, Canvas,
+    guiones de pitch, reparto de tareas, procesos) está en `.gitignore`: no se
+    commitea ni se enlaza desde `README.md` ni desde `docs/`. Lo que se publica
+    es el producto, el método y los límites, no la estrategia de presentación.

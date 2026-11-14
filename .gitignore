@@ -7,3 +7,4 @@ datos/*.tmp
 graphify-out/
 datos/estado_finca.json
 .offset_bot.json
+interno/

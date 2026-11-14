@@ -88,5 +88,3 @@ La app abre en **Mi parcela**: mapa, sensores, clima, fotos, techo y la
 comparación de las tres rotaciones (con evidencia, huecos y riesgos). Escribir al
 bot **@climaxeliobot** (`/estado`, `/techo on`, o una pregunta libre). **×** para
 volver al globo → Caribe → celda → "Abrir el monitoreo".
-
-El guion completo, con cifras del día, está en [`demo.md`](demo.md).
