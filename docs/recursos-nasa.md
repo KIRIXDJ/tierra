@@ -3,7 +3,15 @@
 Reto: **Field Shift: Adapting Farms with NASA Data**
 ([detalles](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=details),
 [recursos](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources)).
-Leído el 2026-11-13.
+Leído el 2026-11-13 y releído el 2026-11-14.
+
+## Alcance
+
+El reto pide una herramienta de apoyo con observaciones de la Tierra de la NASA y
+permite complementar con datos externos. **Los recursos de la lista son una ayuda,
+no una obligación**: aquí se usan los que aplican a República Dominicana (POWER,
+SRTM, MODIS, IMERG) y, donde la NASA no llega, fuentes externas declaradas
+(Open-Meteo/ERA5, Esri, ISRIC).
 
 ## Lo que el reto exige y dónde está en TIERRA
 

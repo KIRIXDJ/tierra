@@ -16,6 +16,12 @@ que la originó.
    "arregles" otra tarea.
 6. Si el contrato no alcanza, pregunta y no inventes.
 
+## Antes de tocar datos o textos
+
+Lee `interno/reto-y-recursos.md` (fuera de git): tiene lo que pide el reto, qué
+recursos oficiales usamos, cuáles faltan y qué está declarado como hueco. Si
+cambias una cifra o un texto que aparece allí, actualiza esa tabla.
+
 ## Reglas del proyecto
 
 1. **Nada agronómico inventado.** Todo parámetro de cultivo necesita fuente
