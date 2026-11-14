@@ -2713,12 +2713,12 @@ function pintarClima() {
     <div>TEMPERATURA MEDIA<b>${Lenguaje.temperatura(temp.media)}</b>
       <span>${delta === null || delta === undefined ? 'sin normal'
         : `${delta > 0 ? '+' : ''}${delta} °C sobre su normal`}</span></div>
-    <div>AGUA EN EL SUELO (ARRIBA)<b>${Lenguaje.aguaEnSuelo(humedad.valor)}</b>
+    <div>AGUA EN EL SUELO (0–7 CM)<b>${Lenguaje.aguaSuelo(humedad.valor)}</b>
       <span>los primeros 7 cm</span></div>
     <div>MAÑANA<b>${Lenguaje.lluvia(manana.lluvia_mm)}</b>
       <span>${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C</span></div>
-    <div>SUELO HOY<b>${ultimaHumedad === null ? 'sin dato' : Lenguaje.aguaEnSuelo(ultimaHumedad)}</b>
-      <span>${mediaHumedad === null ? '' : `media de ${serie.length} días: ${Lenguaje.aguaEnSuelo(mediaHumedad)}`}</span></div>
+    <div>SUELO HOY<b>${ultimaHumedad === null ? 'sin dato' : Lenguaje.aguaSuelo(ultimaHumedad)}</b>
+      <span>${mediaHumedad === null ? '' : `media de ${serie.length} días: ${Lenguaje.aguaSuelo(mediaHumedad)}`}</span></div>
     <div>DÍAS DE LLUVIA<b>llovió ${diasLluvia} de ${serie.length}</b>
       <span>${extremos} día(s) con lluvia fuerte (≥ 20 L/m²)</span></div>
     <div>HELADAS<b>${heladasFinca && heladasFinca.reciente !== null
@@ -2763,7 +2763,7 @@ function pintarRiesgos(parcela) {
       <span>${cambio(anual.secos)}</span></div>
     <div>HELADAS<b>${valor(anual.heladas)}<span style="font-size:8px"> al año</span></b>
       <span>${cambio(anual.heladas)}</span></div>
-    <div>AGUA BAJO LA RAÍZ<b>${Lenguaje.aguaEnSuelo(valor(mensual.GWETROOT))}</b>
+    <div>AGUA BAJO LA RAÍZ<b>${Lenguaje.aguaSuelo(valor(mensual.GWETROOT))}</b>
       <span>${cambio(mensual.GWETROOT)}</span></div>
     <div>AGUA QUE GASTA EL CULTIVO
       <b>${valor(mensual.EVLAND)}<span style="font-size:8px"> L/m² al día</span></b>

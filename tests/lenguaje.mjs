@@ -44,6 +44,7 @@ assert.equal(L.pendiente(9), 'algo inclinado (9,0°)');
 assert.equal(L.pendiente(20), 'inclinado (20,0°)');
 
 // Agua del suelo en fracción (POWER) y en porcentaje (sensor).
+assert.equal(L.aguaSuelo(0.61), '61 de 100');
 assert.equal(L.aguaEnSuelo(0.61), 'agua en el suelo: 61 de 100');
 assert.equal(L.aguaEnSuelo(61, false), 'agua en el suelo: 61 de 100');
 

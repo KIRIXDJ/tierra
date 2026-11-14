@@ -83,11 +83,16 @@ export function pendiente(grados) {
 }
 
 /* Humedad del suelo en fracción 0–1 (POWER) o porcentaje 0–100. */
-export function aguaEnSuelo(valor, enFraccion = true) {
+export function aguaSuelo(valor, enFraccion = true) {
   const numero = Number(valor);
   if (!Number.isFinite(numero)) { return 'sin dato'; }
   const puntos = enFraccion ? Math.round(numero * 100) : Math.round(numero);
-  return `agua en el suelo: ${puntos} de 100`;
+  return `${puntos} de 100`;
+}
+
+export function aguaEnSuelo(valor, enFraccion = true) {
+  const corto = aguaSuelo(valor, enFraccion);
+  return corto === 'sin dato' ? corto : `agua en el suelo: ${corto}`;
 }
 
 export function temperatura(grados) {
