@@ -58,7 +58,9 @@ Leído el 2026-11-13.
 ## Lo que la app dice en pantalla
 
 - Los sensores, el techo y la cámara son **simulados**; el mapa, el clima, el
-  satélite NASA (NDVI/IMERG) y el bot son reales.
+  satélite NASA (NDVI/IMERG), la foto de campo con licencia y el bot son reales.
+  La foto de la tarjeta es de referencia: se dice en pantalla que no es la
+  parcela del agricultor.
 - El NDVI/IMERG se muestran como **imagen oficial de GIBS y valor aproximado
   decodificado del color**, no como medición calibrada en la parcela; la app lo
   escribe en pantalla.

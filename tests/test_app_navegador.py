@@ -116,22 +116,31 @@ class TestApp(unittest.TestCase):
         self.assertGreater(ancho, 600, f"mapa demasiado estrecho: {ancho}")
         self.assertGreater(alto, 240, f"mapa demasiado bajo: {alto}")
         self.assertEqual(pag.eval_on_selector_all(".tarjeta-parcela", "e => e.length"), 3)
-        for selector in ("#foto-satelite", "#foto-cultivo"):
-            pixeles = pag.evaluate("""(sel) => {
-                const c = document.querySelector(sel);
-                const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
-                let n = 0;
-                for (let i = 0; i < d.length; i += 4000) {
-                    if (d[i] + d[i + 1] + d[i + 2] > 60) { n += 1; }
-                }
-                return n;
-            }""", selector)
-            self.assertGreater(pixeles, 100, f"{selector} salió vacío")
+        pixeles = pag.evaluate("""() => {
+            const c = document.querySelector('#foto-satelite');
+            const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+            let n = 0;
+            for (let i = 0; i < d.length; i += 4000) {
+                if (d[i] + d[i + 1] + d[i + 2] > 60) { n += 1; }
+            }
+            return n;
+        }""")
+        self.assertGreater(pixeles, 100, "#foto-satelite salió vacío")
+        # La tarjeta del cultivo es una foto de campo real con su licencia.
+        pag.wait_for_selector("#foto-cultivo", timeout=15000)
+        pag.wait_for_function(
+            "() => { const i = document.querySelector('#foto-cultivo');"
+            " return i && i.naturalWidth > 0; }", timeout=15000)
+        rotulo = pag.inner_text("#vision-fotos").lower()
+        self.assertIn("foto de campo", rotulo)
+        self.assertIn("referencia", rotulo)
+        self.assertIn("cc by", rotulo)
         pag.click(".foto-mini[data-foto='cultivo']")
         pag.wait_for_selector("#vision-lightbox.visible")
         pie = pag.inner_text("#vision-lightbox-pie").lower()
-        self.assertIn("simulada", pie)
-        self.assertIn("no es una foto real", pie)
+        self.assertIn("referencia", pie)
+        self.assertIn("no es tu parcela", pie)
+        self.assertIn("cc by", pie)
         pag.click("#vision-lightbox")
         pag.wait_for_timeout(200)
         self.assertFalse(pag.is_visible("#vision-lightbox"))
@@ -226,8 +235,8 @@ class TestApp(unittest.TestCase):
         pag, errores = self.abrir()
         pag.wait_for_selector("#vision.visible", timeout=15000)
         texto = pag.inner_text("#vision-riesgos")
-        for campo in ("CALOR", "LLUVIA ≥ 20 MM", "DÍAS SECOS", "HELADAS",
-                      "SUELO DE RAÍZ", "EVAPOTRANSP."):
+        for campo in ("CALOR FUERTE", "LLUVIA FUERTE", "DÍAS SIN LLUVIA", "HELADAS",
+                      "AGUA BAJO LA RAÍZ", "AGUA QUE GASTA EL CULTIVO"):
             self.assertIn(campo, texto)
         self.assertIn("NASA POWER", texto)
         self.assertIn("Reanálisis", texto)
@@ -247,10 +256,12 @@ class TestApp(unittest.TestCase):
         pag, errores = self.abrir()
         pag.wait_for_selector("#vision.visible", timeout=15000)
         texto = pag.inner_text("#vision-terreno")
-        for campo in ("ELEVACIÓN", "PENDIENTE", "SRTM", "proxy de riesgo de erosión"):
+        for campo in ("ALTURA SOBRE EL MAR", "CÓMO ES EL TERRENO", "PARTE INCLINADA",
+                      "SRTM", "pista de erosión"):
             self.assertIn(campo, texto)
         self.assertIn("1185", texto)          # elevación media del área de la finca
-        self.assertIn("3.5", texto)           # pendiente media en grados
+        self.assertIn("casi plano", texto)    # pendiente media en palabras
+        self.assertIn("3,5", texto)           # pendiente media en grados
         self.assertEqual(errores, [])
         pag.close()
 
@@ -259,7 +270,8 @@ class TestApp(unittest.TestCase):
         pag, errores = self.abrir()
         pag.wait_for_selector("#vision.visible", timeout=15000)
         texto = pag.inner_text("#vision-satelite")
-        for esperado in ("NDVI MODIS", "Lluvia IMERG", "NASA GIBS", "sin lluvia"):
+        for esperado in ("NDVI MODIS", "Lluvia IMERG", "NASA GIBS", "no está lloviendo",
+                         "cada punto mide 289 m", "verde"):
             self.assertIn(esperado, texto)
         medidas = pag.eval_on_selector_all(
             "#vision-satelite img", "e => e.map(x => [x.naturalWidth, x.naturalHeight])")
@@ -333,10 +345,16 @@ class TestApp(unittest.TestCase):
         # Método y límites, plegado en el propio monitor.
         pag.click("#vision-metodo summary")
         self.assertIn("reanálisis", pag.inner_text("#vision-metodo").lower())
-        # Fotos ampliables (la cámara simulada lo dice).
+        # Fotos ampliables: foto de campo real, con su licencia y aviso.
+        pag.wait_for_selector("#foto-cultivo", timeout=15000)
+        pag.wait_for_function(
+            "() => { const i = document.querySelector('#foto-cultivo');"
+            " return i && i.naturalWidth > 0; }", timeout=15000)
         pag.click(".foto-mini[data-foto='cultivo']")
         pag.wait_for_selector("#vision-lightbox.visible")
-        self.assertIn("simulada", pag.inner_text("#vision-lightbox-pie").lower())
+        pie_foto = pag.inner_text("#vision-lightbox-pie").lower()
+        self.assertIn("referencia", pie_foto)
+        self.assertIn("no es tu parcela", pie_foto)
         pag.click("#vision-lightbox")
         pag.wait_for_timeout(200)
         # 2. Volver al globo: la cara NASA de la herramienta.
@@ -436,6 +454,10 @@ class TestApp(unittest.TestCase):
             pag.mouse.click(caja["x"] + caja["width"] * fx, caja["y"] + caja["height"] * fy)
             pag.wait_for_timeout(120)
         self.assertIn("esquinas", pag.inner_text("#vision-dibujo-info"))
+        boton = pag.get_attribute("#vision-terminar", "disabled")
+        self.assertIsNone(boton, "el botón de terminar debe activarse con 4 esquinas")
+        self.assertIn("ha", pag.inner_text("#vision-terminar"))
+        self.assertIn("m²", pag.inner_text("#vision-terminar"))
         pag.click("#vision-terminar")
         pag.wait_for_timeout(600)
         despues = pag.eval_on_selector_all("#parcela-selector option", "e => e.length")
@@ -450,6 +472,94 @@ class TestApp(unittest.TestCase):
         self.assertIn("registrada", pag.evaluate("window.__tierra.parcelaActual().id"))
         self.assertEqual(errores, [])
         pag.close()
+
+
+    def test_lenguaje_de_campo(self):
+        """La interfaz explica las unidades: litros por m², verde, glosario."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        clima = pag.inner_text("#vision-clima")
+        self.assertIn("L por m²", clima)                 # mm traducido a litros
+        self.assertIn("sobre su normal", clima)
+        self.assertIn("agua en el suelo", clima.lower())
+        lecturas = pag.inner_text("#parcela-lecturas")
+        self.assertIn("m²", lecturas)                     # área también en metros
+        self.assertTrue(
+            any(palabra in lecturas.lower() for palabra in ("seco", "con agua", "regular")),
+            "la humedad debe decir su estado en palabras")
+        riesgos = pag.inner_text("#vision-riesgos").lower()
+        self.assertIn("días sin lluvia", riesgos)
+        satelite = pag.inner_text("#vision-satelite").lower()
+        self.assertIn("verde", satelite)
+        # Glosario de campo: 8 términos explicados en el propio panel.
+        pag.click("#vision-glosario summary")
+        terminos = pag.eval_on_selector_all("#glosario-lista dt", "e => e.length")
+        self.assertGreaterEqual(terminos, 8)
+        self.assertIn("litro", pag.inner_text("#glosario-lista").lower())
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_comandos_rapidos_del_bot(self):
+        """Los chips del chat mandan el comando sin teclear."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        pag.click(".chat-rapidos button[data-comando='/estado']")
+        pag.wait_for_timeout(400)
+        self.assertIn("Humedad", pag.inner_text("#chat-mensajes"))
+        pag.click(".chat-rapidos button[data-comando='/techo on']")
+        pag.wait_for_timeout(400)
+        self.assertIn("cerr.", pag.inner_text("#parcela-lecturas"))
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_pellizco_en_el_mapa_del_movil(self):
+        """Dos dedos acercan el mapa del teléfono (antes solo se arrastraba)."""
+        pag, errores = self.abrir(viewport={"width": 390, "height": 844})
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        antes = pag.evaluate("window.__tierra.vista.escala")
+        pag.evaluate("""() => {
+            const canvas = document.getElementById('vision-mapa');
+            const r = canvas.getBoundingClientRect();
+            const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
+            const mk = (tipo, id, x, y) => new PointerEvent(tipo, {
+                pointerId: id, pointerType: 'touch', clientX: x, clientY: y,
+                bubbles: true, cancelable: true, isPrimary: id === 1,
+            });
+            canvas.dispatchEvent(mk('pointerdown', 1, cx - 40, cy));
+            canvas.dispatchEvent(mk('pointerdown', 2, cx + 40, cy));
+            canvas.dispatchEvent(mk('pointermove', 1, cx - 90, cy));
+            canvas.dispatchEvent(mk('pointermove', 2, cx + 90, cy));
+            canvas.dispatchEvent(mk('pointerup', 1, cx - 90, cy));
+            canvas.dispatchEvent(mk('pointerup', 2, cx + 90, cy));
+        }""")
+        pag.wait_for_timeout(200)
+        despues = pag.evaluate("window.__tierra.vista.escala")
+        self.assertGreater(despues, antes * 1.2,
+                           f"el pellizco no acercó: {antes} -> {despues}")
+        self.assertEqual(errores, [])
+        pag.close()
+
+    def test_terminar_parcela_se_activa_con_tres_esquinas(self):
+        """El botón grande dice cuántas esquinas faltan y se habilita al llegar a 3."""
+        pag, errores = self.abrir()
+        pag.wait_for_selector("#vision.visible", timeout=15000)
+        pag.click("#vision-registrar")
+        self.assertIsNotNone(pag.get_attribute("#vision-terminar", "disabled"))
+        caja = pag.locator("#vision-mapa").bounding_box()
+        for fx, fy in ((0.10, 0.64), (0.26, 0.64)):
+            pag.mouse.click(caja["x"] + caja["width"] * fx, caja["y"] + caja["height"] * fy)
+            pag.wait_for_timeout(120)
+        self.assertIsNotNone(pag.get_attribute("#vision-terminar", "disabled"),
+                             "con 2 esquinas todavía no se puede terminar")
+        self.assertIn("Faltan 1", pag.inner_text("#vision-terminar"))
+        pag.mouse.click(caja["x"] + caja["width"] * 0.26,
+                        caja["y"] + caja["height"] * 0.84)
+        pag.wait_for_timeout(150)
+        self.assertIsNone(pag.get_attribute("#vision-terminar", "disabled"))
+        self.assertIn("Terminar parcela", pag.inner_text("#vision-terminar"))
+        self.assertEqual(errores, [])
+        pag.close()
+
 
 
 if __name__ == "__main__":

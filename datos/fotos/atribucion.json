@@ -1,0 +1,32 @@
+{
+  "yuca": {
+    "cultivo": "yuca / cassava (Manihot esculenta)",
+    "archivo": "datos/fotos/yuca.jpg",
+    "autor": "PJeganathan",
+    "licencia": "CC BY-SA 4.0",
+    "url_origen": "https://commons.wikimedia.org/wiki/File:Manihot_esculenta_Cassava_plantation_in_Kalvarayan_hills_JEG3597.jpg",
+    "url_licencia": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "fecha_descarga": "2026-11-14",
+    "nota": "Plantación de yuca (Manihot esculenta) en Kalvarayan hills, Tamil Nadu (India), 2016-11-26. Se descartaron alternativas con marca de agua («File:Cassava fields.jpg») o poco legibles. Versión redimensionada, distribuida bajo la misma licencia CC BY-SA 4.0."
+  },
+  "frijol": {
+    "cultivo": "frijol / common bean (Phaseolus vulgaris)",
+    "archivo": "datos/fotos/frijol.jpg",
+    "autor": "Tiago Firmino Boaventura de Oliveira",
+    "licencia": "CC BY 3.0",
+    "url_origen": "https://commons.wikimedia.org/wiki/File:Lavoura_de_feij%C3%A3o_(Phaseolus_vulgaris)_irrigado_na_Fazenda_PCPER_Lote_80_Propriet%C3%A1rio_Ezimar._-_panoramio.jpg",
+    "url_licencia": "https://creativecommons.org/licenses/by/3.0/",
+    "fecha_descarga": "2026-11-14",
+    "nota": "Lavoura de feijão irrigada na Fazenda PCPER (Paracatu, Minas Gerais, Brasil). En Commons el nombre del autor aparece truncado como «Tiago Firmino Boaven…»; el nombre completo se verificó en la página original de Panoramio enlazada desde el archivo. Redimensionada a 1280 px de ancho."
+  },
+  "maiz": {
+    "cultivo": "maíz / maize (Zea mays)",
+    "archivo": "datos/fotos/maiz.jpg",
+    "autor": "Tournasol7",
+    "licencia": "CC BY 4.0",
+    "url_origen": "https://commons.wikimedia.org/wiki/File:Zea_mays_in_Aveyron_(2).jpg",
+    "url_licencia": "https://creativecommons.org/licenses/by/4.0/",
+    "fecha_descarga": "2026-11-14",
+    "nota": "Campo de maíz en Druelle-Balsac, Aveyron (Francia), 2023-08-09. Redimensionada a 1280 px de ancho."
+  }
+}

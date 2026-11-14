@@ -331,6 +331,87 @@ class TestIA(Base):
         self.assertIn("No pude consultar la IA", respuesta)
         self.assertNotIn("Traceback", respuesta)
 
+    def test_sin_clave_menciona_las_dos_variables(self):
+        respuesta = bot_elio.responder_api("¿va a llover?", self.contexto, clave=None)
+        self.assertIn("IA_API_KEY", respuesta)
+        self.assertIn("DEEPSEEK_API_KEY", respuesta)
+        self.assertIn("comandos", respuesta)
+        self.assertNotIn("http", respuesta)
+
+
+class TestConfigIA(Base):
+    def test_valores_por_defecto(self):
+        ia = bot_elio.config_ia({})
+        self.assertEqual(ia["url"], bot_elio.API_IA)
+        self.assertEqual(ia["modelo"], "deepseek-chat")
+        self.assertIsNone(ia["clave"])
+
+    def test_url_y_modelo_por_entorno(self):
+        ia = bot_elio.config_ia({"IA_URL": "https://ia.local/chat",
+                                 "IA_MODELO": "modelo-local"})
+        self.assertEqual(ia["url"], "https://ia.local/chat")
+        self.assertEqual(ia["modelo"], "modelo-local")
+
+    def test_env_fichero_configura_la_ia(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = pathlib.Path(carpeta) / ".env"
+            ruta.write_text("IA_URL=https://ia.local/chat\nIA_MODELO=modelo-local\n"
+                            "IA_API_KEY=clave-nueva\nDEEPSEEK_API_KEY=clave-vieja\n",
+                            encoding="utf-8")
+            with patch.dict(os.environ, {"IA_URL": "", "IA_MODELO": "",
+                                         "IA_API_KEY": "", "DEEPSEEK_API_KEY": ""}):
+                ia = bot_elio.config_ia(bot_elio.leer_env(ruta))
+        self.assertEqual(ia["url"], "https://ia.local/chat")
+        self.assertEqual(ia["modelo"], "modelo-local")
+        self.assertEqual(ia["clave"], "clave-nueva")
+
+    def test_entorno_gana_al_fichero(self):
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = pathlib.Path(carpeta) / ".env"
+            ruta.write_text("IA_URL=https://ia.local/fichero\n", encoding="utf-8")
+            with patch.dict(os.environ, {"IA_URL": "https://ia.local/entorno"}):
+                ia = bot_elio.config_ia(bot_elio.leer_env(ruta))
+        self.assertEqual(ia["url"], "https://ia.local/entorno")
+
+    def test_clave_respalda_en_deepseek(self):
+        self.assertEqual(bot_elio.config_ia({"DEEPSEEK_API_KEY": "vieja"})["clave"],
+                         "vieja")
+        self.assertEqual(
+            bot_elio.config_ia({"IA_API_KEY": "nueva",
+                                "DEEPSEEK_API_KEY": "vieja"})["clave"], "nueva")
+
+    def test_responder_api_usa_url_y_modelo(self):
+        cliente = ClienteIA()
+        bot_elio.responder_api("¿cómo va?", self.contexto, clave="clave-falsa",
+                               cliente=cliente, url="https://ia.local/chat",
+                               modelo="modelo-local")
+        llamada = cliente.llamadas[0]
+        self.assertEqual(llamada["url"], "https://ia.local/chat")
+        self.assertEqual(llamada["cuerpo"]["model"], "modelo-local")
+
+    def test_atender_pasa_la_configuracion_de_ia(self):
+        estado = bot_elio.estado_vacio(self.contexto)
+        actualizacion = {"update_id": 1,
+                         "message": {"chat": {"id": 42}, "text": "¿va a llover?"}}
+        capturado = {}
+
+        def falso(pregunta, contexto, clave=None, cliente=None, timeout=30,
+                  url=None, modelo=None):
+            capturado.update({"clave": clave, "url": url, "modelo": modelo})
+            return "No tengo ese dato."
+
+        with tempfile.TemporaryDirectory() as carpeta:
+            ruta = pathlib.Path(carpeta) / "estado_finca.json"
+            with patch.object(bot_elio, "ESTADO", ruta), \
+                    patch.object(bot_elio, "responder_api", falso):
+                bot_elio.atender(actualizacion, estado, self.contexto, TOKEN_FALSO,
+                                 clave="clave-falsa", cliente=ClienteTelegram(),
+                                 ia={"url": "https://ia.local/chat",
+                                     "modelo": "modelo-local"})
+        self.assertEqual(capturado, {"clave": "clave-falsa",
+                                     "url": "https://ia.local/chat",
+                                     "modelo": "modelo-local"})
+
 
 class TestToken(Base):
     def test_token_no_aparece_en_las_respuestas(self):
@@ -351,6 +432,17 @@ class TestToken(Base):
     def test_env_prioriza_variables_de_entorno(self):
         with patch.dict(os.environ, {"TELEGRAM_TOKEN": TOKEN_FALSO}):
             self.assertEqual(bot_elio.leer_env()["TELEGRAM_TOKEN"], TOKEN_FALSO)
+
+    def test_clave_de_ia_no_aparece_en_las_salidas(self):
+        with patch.dict(os.environ, {"IA_API_KEY": "clave-ia-secreta"}):
+            salidas = [
+                bot_elio.responder_api("¿va a llover?", self.contexto, clave=None),
+                bot_elio.responder_api("¿va a llover?", self.contexto,
+                                       clave="clave-ia-secreta",
+                                       cliente=ClienteIA(falla=True)),
+            ]
+        for salida in salidas:
+            self.assertNotIn("clave-ia-secreta", salida)
 
 
 class TestProceso(Base):

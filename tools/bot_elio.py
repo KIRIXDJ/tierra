@@ -8,7 +8,8 @@
   contexto, cita fuente, "No tengo ese dato.", nada inventado).
 
 El token vive en ``.env`` (gitignored) y **nunca** se imprime. Sin token no hay
-bot; sin DEEPSEEK_API_KEY el bot sigue en modo comandos.
+bot. La IA se configura con ``IA_URL``, ``IA_MODELO`` e ``IA_API_KEY`` (con
+respaldo en ``DEEPSEEK_API_KEY``); sin clave, el bot sigue en modo comandos.
 
 Uso:
     python3 tools/bot_elio.py                     # long polling real
@@ -137,10 +138,21 @@ def leer_env(ruta=None):
             valores[clave.strip()] = valor.strip().strip('"').strip("'")
     except OSError:
         pass
-    for clave in ("TELEGRAM_TOKEN", "DEEPSEEK_API_KEY"):
+    for clave in ("TELEGRAM_TOKEN", "DEEPSEEK_API_KEY",
+                  "IA_URL", "IA_MODELO", "IA_API_KEY"):
         if os.environ.get(clave):
             valores[clave] = os.environ[clave]
     return valores
+
+
+def config_ia(entorno=None):
+    """URL, modelo y clave de la IA: entorno/.env, con los valores por defecto."""
+    entorno = entorno if entorno is not None else leer_env()
+    return {
+        "url": entorno.get("IA_URL") or API_IA,
+        "modelo": entorno.get("IA_MODELO") or MODELO_IA,
+        "clave": entorno.get("IA_API_KEY") or entorno.get("DEEPSEEK_API_KEY"),
+    }
 
 
 # ---------------------------------------------------------------- contexto
@@ -577,13 +589,14 @@ def interpretar_comando(texto, estado, contexto):
 
 # ---------------------------------------------------------------- IA
 
-def responder_api(pregunta, contexto, clave=None, cliente=None, timeout=30):
-    """Pregunta libre a DeepSeek con el contrato de Elio. Nunca lanza."""
+def responder_api(pregunta, contexto, clave=None, cliente=None, timeout=30,
+                  url=None, modelo=None):
+    """Pregunta libre a la IA configurada (``url``/``modelo``). Nunca lanza."""
     if not clave:
-        return ("No tengo configurada la clave de la IA (DEEPSEEK_API_KEY); "
-                "sigo funcionando con comandos. Prueba /ayuda.")
+        return ("No tengo configurada la clave de la IA (IA_API_KEY o "
+                "DEEPSEEK_API_KEY); sigo funcionando con comandos. Prueba /ayuda.")
     cuerpo = {
-        "model": MODELO_IA,
+        "model": modelo or MODELO_IA,
         "temperature": 0.2,
         "max_tokens": 300,
         "messages": [
@@ -595,7 +608,7 @@ def responder_api(pregunta, contexto, clave=None, cliente=None, timeout=30):
     }
     try:
         respuesta = (cliente or requests).post(
-            API_IA,
+            url or API_IA,
             headers={"Authorization": f"Bearer {clave}",
                      "Content-Type": "application/json"},
             json=cuerpo,
@@ -717,7 +730,7 @@ def _parcela_por_id(pid, contexto):
     return next((p for p in contexto.get("parcelas") or [] if p.get("id") == pid), None)
 
 
-def atender(actualizacion, estado, contexto, token, clave=None, cliente=None):
+def atender(actualizacion, estado, contexto, token, clave=None, cliente=None, ia=None):
     """Procesa un update de Telegram: responde, anota y guarda el estado."""
     mensaje = actualizacion.get("message") or {}
     chat_id = (mensaje.get("chat") or {}).get("id")
@@ -727,7 +740,9 @@ def atender(actualizacion, estado, contexto, token, clave=None, cliente=None):
 
     orden = interpretar_comando(texto, estado, contexto)
     if orden.get("api") is not None:
-        respuesta = responder_api(orden["api"], contexto, clave=clave)
+        respuesta = responder_api(
+            orden["api"], contexto, clave=clave,
+            url=(ia or {}).get("url"), modelo=(ia or {}).get("modelo"))
         modo = "api"
         enviar_mensaje(chat_id, respuesta, token, cliente)
     else:
@@ -754,10 +769,14 @@ def arrancar(entorno=None, cliente=None):
         return 1
     contexto = construir_contexto(cargar_datos())
     estado = cargar_estado(contexto)
-    clave = entorno.get("DEEPSEEK_API_KEY")
+    ia = config_ia(entorno)
+    clave = ia["clave"]
     offset = leer_offset()
     espera = REPOSO_INICIAL
     ultimo_latido = time.monotonic()
+    if not clave:
+        print("Sin clave de IA (IA_API_KEY o DEEPSEEK_API_KEY): solo comandos.",
+              flush=True)
     print(f"Elio escuchando ({'comandos + IA' if clave else 'solo comandos'}). "
           "Ctrl+C para parar.", flush=True)
     try:
@@ -774,7 +793,7 @@ def arrancar(entorno=None, cliente=None):
                 offset = int(actualizacion.get("update_id", offset - 1)) + 1
                 guardar_offset(offset)
                 try:
-                    atender(actualizacion, estado, contexto, token, clave, cliente)
+                    atender(actualizacion, estado, contexto, token, clave, cliente, ia)
                 except Exception:  # un update raro no tumba el polling
                     print("No pude procesar un mensaje; sigo escuchando.", flush=True)
             # Latido: la app da el bot por conectado solo si "actualizado" es reciente.
@@ -816,6 +835,10 @@ def autoprueba():
     assert "Open-Meteo" in clima and "http" not in clima, "el clima no cita fuente"
 
     assert "No tengo ese dato." in PROMPT_SISTEMA, "falta el contrato de la IA en el prompt"
+    assert config_ia({})["url"] == API_IA and config_ia({})["modelo"] == MODELO_IA, \
+        "la IA no cae en los valores por defecto"
+    assert "IA_API_KEY" in responder_api("x", contexto, clave=None), \
+        "sin clave no avisa en una frase humana"
 
     with tempfile.TemporaryDirectory() as carpeta:
         ruta = pathlib.Path(carpeta) / "estado_finca.json"

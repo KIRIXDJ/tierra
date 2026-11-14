@@ -28,13 +28,13 @@ de tendencia como mapa global. Proyecto para **NASA Space Apps Challenge 2026**.
 - **Mi parcela** (la vista principal, a pantalla completa): mapa satelital real
   con las tres parcelas encima, sus sensores ESP32, la cámara y el techo. Al lado,
   **lecturas de sensores** (humedad de suelo, temperatura, batería), **clima real**
-  de la finca (NASA POWER/ERA5), **fotos** (satélite real recortado + foto de
-  cultivo simulada dibujada en el navegador), **control de actuadores** (riego,
-  techo y ventilación) y la **comparación de las tres rotaciones**. Incluye
-  **registro de una parcela nueva dibujándola** sobre el mapa (calcula el área y
-  queda donde la dibujaste) y **análisis de una foto** del cultivo (mide color:
-  verde, amarillo, marrón). Todo simulado salvo el mapa, el clima y el bot: no hay
-  hardware instalado y la app lo dice en pantalla.
+  de la finca (NASA POWER/ERA5), **fotos** (satélite real recortado + foto de campo
+  de referencia con su autor y licencia, no de tu parcela), **control de
+  actuadores** (riego, techo y ventilación) y la **comparación de las tres
+  rotaciones**. Incluye **registro de una parcela nueva dibujándola** sobre el
+  mapa (calcula el área y queda donde la dibujaste) y **análisis de una foto** del
+  cultivo (mide color: verde, amarillo, marrón). Los sensores, el techo y la
+  cámara siguen siendo simulados: no hay hardware instalado y la app lo dice.
 - **Riesgos de la finca** (NASA POWER): días ≥ 35 °C, lluvia ≥ 20 mm, días
   secos, heladas, humedad de raíz y evapotranspiración, comparando 1991–2020 con
   2021–2025 y con un gráfico de los últimos 12 años. **Terreno (SRTM)**:
@@ -193,6 +193,9 @@ y calidad. El reparto es interno y no se publica.
 - Abrir el HTML con doble clic (`file://`) no funciona: el navegador bloquea los
   módulos. Hay que servirlo con `python3 -m http.server` (la app lo avisa).
 - Los sensores, el techo y la cámara son simulados: no hay hardware instalado.
+- La "foto de campo" de la tarjeta es una foto real con licencia libre (autor y
+  licencia en la propia tarjeta y en `datos/fotos/atribucion.json`), no una foto
+  de la parcela del agricultor.
 - Los índices de rotación son orientativos y sus parámetros de cultivo están
   marcados como provisionales hasta validarlos con un agrónomo.
 - SMAP, GPM/IMERG, Landsat/MODIS, ECOSTRESS, SRTM y GEDI no están integrados

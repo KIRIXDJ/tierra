@@ -244,7 +244,7 @@
     gap: 14px; padding: 14px 18px 18px; min-height: 0; }
   #vision-izq { display: grid; grid-template-rows: minmax(0, 1fr) auto auto;
     gap: 10px; min-height: 0; }
-  #vision-pie { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  #vision-pie { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
     gap: 10px; }
   #vision-pie .bloque { display: flex; flex-direction: column; }
   #vision-mapa-caja { position: relative; flex: 1; min-height: 240px;
@@ -284,6 +284,9 @@
     font-family: ui-monospace, Consolas, monospace; }
   #parcela-lecturas .alerta b { color: var(--ambar); }
   #parcela-lecturas .bien b { color: var(--verde); }
+  #parcela-lecturas span { display: block; font-size: 7px; line-height: 1.3;
+    color: var(--secundario); letter-spacing: 0; text-transform: none; }
+  #parcela-lecturas div { padding: 4px 3px; }
   #vision-historial { width: 100%; height: 54px; display: block; margin-top: 6px; }
   #vision-sensores { display: flex; flex-direction: column; gap: 6px; }
   .sensor-fila { display: grid; grid-template-columns: 52px repeat(3, 1fr); gap: 4px;
@@ -332,7 +335,8 @@
   .foto-mini { padding: 0; border: 1px solid var(--borde); border-radius: 9px;
     background: #071019; overflow: hidden; cursor: zoom-in; color: var(--secundario);
     font: inherit; text-align: left; }
-  .foto-mini canvas { width: 100%; height: 98px; display: block; }
+  .foto-mini canvas, .foto-mini img { width: 100%; height: 98px; display: block; }
+  .foto-mini img { object-fit: cover; }
   .foto-mini span { display: block; font-size: 8px; padding: 4px 6px; line-height: 1.35; }
   .foto-mini b { color: var(--texto); font-size: 9px; display: block; }
   #vision-actuadores { display: flex; flex-direction: column; gap: 6px; }
@@ -353,7 +357,7 @@
   .chat-cabecera { font-size: 9px; letter-spacing: .1em; text-transform: uppercase;
     color: var(--secundario); padding: 6px 10px; background: rgba(53, 214, 255, .06);
     border-bottom: 1px solid var(--borde); display: flex; justify-content: space-between; }
-  #chat-mensajes { flex: 1; min-height: 56px; max-height: 92px; overflow-y: auto;
+  #chat-mensajes { flex: 1; min-height: 96px; max-height: 176px; overflow-y: auto;
     padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
   .burbuja { max-width: 90%; font-size: 11px; line-height: 1.4; padding: 6px 9px;
     border-radius: 10px; white-space: pre-wrap; }
@@ -431,6 +435,46 @@
     #vision-fotos { grid-template-columns: 1fr 1fr; }
     .foto-mini canvas { height: 84px; }
     #vision-aviso-campo { display: none; }
+  }
+
+  /* ---------- Lenguaje de campo: botones grandes y claros ---------- */
+  button:not(:disabled) { transition: border-color .15s ease, background .15s ease,
+    color .15s ease, transform .08s ease; }
+  button:hover:not(:disabled) { border-color: var(--cian); color: var(--cian);
+    background: rgba(53, 214, 255, .10); }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:focus-visible, summary:focus-visible, input:focus-visible,
+  select:focus-visible { outline: 2px solid var(--cian); outline-offset: 2px; }
+  .actuador button:hover:not(:disabled) { background: rgba(53, 214, 255, .12); }
+  #vision-terminar { width: 100%; min-height: 46px; border-radius: 10px;
+    background: rgba(88, 227, 154, .14); border: 1px solid rgba(88, 227, 154, .7);
+    color: var(--verde); font: inherit; font-size: 14px; font-weight: 600;
+    cursor: pointer; padding: 10px 12px; }
+  #vision-terminar:hover:not(:disabled) { background: rgba(88, 227, 154, .22);
+    border-color: var(--verde); color: var(--verde); }
+  #vision-terminar:disabled { opacity: .45; cursor: not-allowed; }
+  #vision-cancelar { min-height: 40px; padding: 8px 14px; font-size: 12px; }
+  #vision-registrar { min-height: 42px; font-size: 13px; }
+  .chat-rapidos { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px;
+    border-bottom: 1px solid var(--borde); }
+  .chat-rapidos button { background: rgba(53, 214, 255, .08); border: 1px solid var(--borde);
+    color: var(--texto); border-radius: 999px; padding: 5px 10px; font: inherit;
+    font-size: 10px; cursor: pointer; }
+  .chat-rapidos button:hover:not(:disabled) { border-color: var(--cian); color: var(--cian); }
+  #chat-forma button { padding: 0 16px; min-height: 40px; font-size: 17px; }
+  #chat-texto { min-height: 40px; font-size: 13px; }
+  #vision-glosario { font-size: 10px; color: var(--secundario); line-height: 1.55;
+    border: 1px solid var(--borde); border-radius: 10px; padding: 8px 10px;
+    background: rgba(11, 20, 32, .55); }
+  #vision-glosario summary { cursor: pointer; color: var(--cian); font-size: 11px; }
+  #vision-glosario dl { margin: 8px 0 0; }
+  #vision-glosario dt { color: var(--texto); font-weight: 600; margin-top: 6px; }
+  #vision-glosario dd { margin: 1px 0 0; }
+  #vision-clima div, #vision-riesgos div, #vision-terreno div { font-size: 9px; }
+  #vision-clima b, #vision-riesgos b, #vision-terreno b { font-size: 14px; }
+  @media (max-width: 900px) {
+    #chat-mensajes { max-height: 220px; min-height: 120px; }
+    .actuador button, #vision-mapa-hud button, #vision-dibujo button { min-height: 40px; }
   }
 
 </style>
@@ -512,13 +556,19 @@
       <div id="vision-tira"></div>
       <div id="vision-pie">
         <div class="bloque">
-          <h3>Fotos <span>satélite real · cámara simulada</span></h3>
+          <h3>Fotos <span>satélite real · foto de campo de referencia</span></h3>
           <div id="vision-fotos"></div>
         </div>
         <div class="bloque">
           <h3>Bot de Telegram <span>@climaxeliobot</span></h3>
           <div id="vision-chat">
             <div class="chat-cabecera"><span>Bot de la finca</span><span>/estado · /techo on</span></div>
+            <div class="chat-rapidos" aria-label="Comandos rápidos">
+              <button type="button" data-comando="/estado">/estado</button>
+              <button type="button" data-comando="/clima">/clima</button>
+              <button type="button" data-comando="/riego off">/riego off</button>
+              <button type="button" data-comando="/techo on">/techo on</button>
+            </div>
             <div id="chat-mensajes" aria-live="polite"></div>
             <form id="chat-forma">
               <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
@@ -563,7 +613,7 @@
           techo con lluvia. La lluvia viene de ERA5; el tiempo no se cambia desde aquí.</p>
       </div>
       <div class="bloque">
-        <h3>Rotación: 3 estrategias <span>NASA POWER</span></h3>
+        <h3>Rotación: 3 estrategias <span>puntaje de 100 · más alto = mejor</span></h3>
         <div id="rotacion-filas"></div>
         <div id="rotacion-detalle"></div>
         <div class="control"><label for="peso-agua">Tu prioridad: ahorrar agua
@@ -581,7 +631,7 @@
         <h3>Registrar otra parcela</h3>
         <div id="vision-dibujo" hidden>
           <span id="vision-dibujo-info">Haz clic en el mapa para marcar las esquinas.</span>
-          <button id="vision-terminar">Terminar parcela</button>
+          <button id="vision-terminar" disabled>Terminar parcela (marca 3 esquinas)</button>
           <button id="vision-cancelar">Cancelar</button>
         </div>
         <button id="vision-registrar">Registrar mi parcela</button>
@@ -610,6 +660,10 @@
           Por eso aquí no se finge medir en la parcela: se usan POWER/ERA5 a escala de
           celda y el sensor de la finca dice "simulado". NDVI, evapotranspiración y
           biomasa (GEDI) son la siguiente integración, no un dato que hoy mostremos.</p>
+      </details>
+      <details id="vision-glosario">
+        <summary>¿Qué significa esto? (glosario de campo)</summary>
+        <dl id="glosario-lista"></dl>
       </details>
     </aside>
   </div>
@@ -693,6 +747,7 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as Lenguaje from './lenguaje.js';
 
 const EQUIPO = '';
 const TEXTURAS = '../textures/';
@@ -2261,7 +2316,7 @@ function cajaMapa() {
 function ajustarVista() {
   const { ancho, alto } = cajaMapa();
   const puntos = PARCELAS.flatMap((p) => p.poligono_m || []);
-  if (!puntos.length) { vista = { escala: 1, cx: 0, cy: 0 }; return; }
+  if (!puntos.length) { vista.escala = 1; vista.cx = 0; vista.cy = 0; return; }
   const xs = puntos.map((p) => p[0]);
   const ys = puntos.map((p) => p[1]);
   const x0 = Math.min(...xs), x1 = Math.max(...xs);
@@ -2271,7 +2326,9 @@ function ajustarVista() {
     (ancho - 2 * margen) / Math.max(1, x1 - x0),
     (alto - 2 * margen) / Math.max(1, y1 - y0),
   ));
-  vista = { escala, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+  vista.escala = escala;
+  vista.cx = (x0 + x1) / 2;
+  vista.cy = (y0 + y1) / 2;
   limitarVista();
 }
 
@@ -2651,25 +2708,25 @@ function pintarClima() {
   const minimaMensual = riesgoFinca && (riesgoFinca.mensual || {}).T2M
     ? riesgoFinca.mensual.T2M.minima : null;
   caja.innerHTML = `
-    <div>LLUVIA 30 D<b>${lluvia['30d_mm'] ?? '–'} mm</b>
-      <span>${pct === null || pct === undefined ? 'sin normal' : `${pct > 0 ? '+' : ''}${Math.round(pct)} % vs normal`}</span></div>
-    <div>TEMPERATURA MEDIA<b>${temp.media ?? '–'} °C</b>
-      <span>${delta === null || delta === undefined ? 'sin normal' : `${delta > 0 ? '+' : ''}${delta} °C vs normal`}</span></div>
-    <div>HUMEDAD SUPERFICIAL<b>${humedad.valor ?? '–'} m³/m³</b>
-      <span>capa 0–7 cm</span></div>
-    <div>MAÑANA<b>${manana.lluvia_mm ?? '–'} mm</b>
+    <div>LLUVIA DE 30 DÍAS<b>${Lenguaje.lluvia(lluvia['30d_mm'])}</b>
+      <span>${Lenguaje.comparacionLluvia(pct)}</span></div>
+    <div>TEMPERATURA MEDIA<b>${Lenguaje.temperatura(temp.media)}</b>
+      <span>${delta === null || delta === undefined ? 'sin normal'
+        : `${delta > 0 ? '+' : ''}${delta} °C sobre su normal`}</span></div>
+    <div>AGUA EN EL SUELO (ARRIBA)<b>${Lenguaje.aguaEnSuelo(humedad.valor)}</b>
+      <span>los primeros 7 cm</span></div>
+    <div>MAÑANA<b>${Lenguaje.lluvia(manana.lluvia_mm)}</b>
       <span>${manana.tmax ?? '–'} / ${manana.tmin ?? '–'} °C</span></div>
-    <div>SUELO VS SU MEDIA<b>${ultimaHumedad === null ? '–' : ultimaHumedad.toFixed(3)}
-      ${mediaHumedad === null ? '' : `/ ${mediaHumedad.toFixed(3)}`}</b>
-      <span>m³/m³ · media de los últimos ${serie.length} días</span></div>
-    <div>DÍAS DE LLUVIA<b>${diasLluvia}/${serie.length}</b>
-      <span>${extremos} día(s) sobre 20 mm</span></div>
+    <div>SUELO HOY<b>${ultimaHumedad === null ? 'sin dato' : Lenguaje.aguaEnSuelo(ultimaHumedad)}</b>
+      <span>${mediaHumedad === null ? '' : `media de ${serie.length} días: ${Lenguaje.aguaEnSuelo(mediaHumedad)}`}</span></div>
+    <div>DÍAS DE LLUVIA<b>llovió ${diasLluvia} de ${serie.length}</b>
+      <span>${extremos} día(s) con lluvia fuerte (≥ 20 L/m²)</span></div>
     <div>HELADAS<b>${heladasFinca && heladasFinca.reciente !== null
       && heladasFinca.reciente !== undefined
-      ? (heladasFinca.reciente === 0 ? 'sin riesgo' : `${heladasFinca.reciente}/año`)
+      ? (heladasFinca.reciente === 0 ? 'sin riesgo' : `${heladasFinca.reciente} al año`)
       : 'sin dato'}</b>
-      <span>${minimaMensual === null ? 'POWER' : `mínima media ${minimaMensual} °C`}</span></div>
-    <div class="fuente">Fuente: Open-Meteo / ERA5-Land (no NASA) para la temporada;
+      <span>${minimaMensual === null ? 'NASA POWER' : `la más fría: ${minimaMensual} °C`}</span></div>
+    <div class="fuente">Lluvia y temperatura: Open-Meteo / ERA5-Land (no NASA);
       heladas y clima histórico: NASA POWER. La humedad de los sensores es simulada.</div>`;
 }
 
@@ -2696,18 +2753,20 @@ function pintarRiesgos(parcela) {
     return `${delta >= 0 ? '+' : ''}${delta.toFixed(1)} vs 1991–2020`;
   };
   caja.innerHTML = `
-    <div>CALOR ${finca.umbrales ? `≥ ${finca.umbrales.calor_c} °C` : '≥ 35 °C'}
-      <b>${valor(anual.calor_35)}<span style="font-size:8px"> d/año</span></b>
+    <div>CALOR FUERTE (≥ ${finca.umbrales ? finca.umbrales.calor_c : 35} °C)
+      <b>${valor(anual.calor_35)}<span style="font-size:8px"> al año</span></b>
       <span>${cambio(anual.calor_35)}</span></div>
-    <div>LLUVIA ≥ 20 MM<b>${valor(anual.lluvia_20)}<span style="font-size:8px"> d/año</span></b>
+    <div>LLUVIA FUERTE (≥ 20 L/m²)
+      <b>${valor(anual.lluvia_20)}<span style="font-size:8px"> al año</span></b>
       <span>${cambio(anual.lluvia_20)}</span></div>
-    <div>DÍAS SECOS<b>${valor(anual.secos)}<span style="font-size:8px"> d/año</span></b>
+    <div>DÍAS SIN LLUVIA<b>${valor(anual.secos)}<span style="font-size:8px"> al año</span></b>
       <span>${cambio(anual.secos)}</span></div>
-    <div>HELADAS<b>${valor(anual.heladas)}<span style="font-size:8px"> d/año</span></b>
+    <div>HELADAS<b>${valor(anual.heladas)}<span style="font-size:8px"> al año</span></b>
       <span>${cambio(anual.heladas)}</span></div>
-    <div>SUELO DE RAÍZ<b>${valor(mensual.GWETROOT)}</b>
-      <span>${cambio(mensual.GWETROOT)} · 0–1</span></div>
-    <div>EVAPOTRANSP.<b>${valor(mensual.EVLAND)}<span style="font-size:8px"> mm/día</span></b>
+    <div>AGUA BAJO LA RAÍZ<b>${Lenguaje.aguaEnSuelo(valor(mensual.GWETROOT))}</b>
+      <span>${cambio(mensual.GWETROOT)}</span></div>
+    <div>AGUA QUE GASTA EL CULTIVO
+      <b>${valor(mensual.EVLAND)}<span style="font-size:8px"> L/m² al día</span></b>
       <span>${cambio(mensual.EVLAND)}</span></div>
     <div class="fuente">Fuente: NASA POWER (MERRA-2), diario y mensual, 1991–2025.
       Reanálisis, no un sensor: los umbrales son de referencia.
@@ -2725,14 +2784,15 @@ function pintarTerreno() {
     return;
   }
   caja.innerHTML = `
-    <div>ELEVACIÓN<b>${TERRENO.elevacion_media_m}<span style="font-size:8px"> m</span></b>
-      <span>${TERRENO.elevacion_min_m}–${TERRENO.elevacion_max_m} m</span></div>
-    <div>PENDIENTE<b>${TERRENO.pendiente_media_deg}<span style="font-size:8px"> °</span></b>
-      <span>media del área · máx ${TERRENO.pendiente_max_deg}°</span></div>
-    <div>PENDIENTE ≥ ${TERRENO.umbral_pendiente_deg}°<b>${TERRENO.pendiente_alta_pct}<span style="font-size:8px"> %</span></b>
-      <span>proxy de riesgo de erosión</span></div>
-    <div>PÍXEL<b>${TERRENO.metros_por_pixel}<span style="font-size:8px"> m</span></b>
-      <span>SRTM vía tiles Terrarium</span></div>
+    <div>ALTURA SOBRE EL MAR<b>${TERRENO.elevacion_media_m}<span style="font-size:8px"> m</span></b>
+      <span>entre ${TERRENO.elevacion_min_m} y ${TERRENO.elevacion_max_m} m</span></div>
+    <div>CÓMO ES EL TERRENO<b>${Lenguaje.pendiente(TERRENO.pendiente_media_deg)}</b>
+      <span>lo más inclinado: ${TERRENO.pendiente_max_deg}°</span></div>
+    <div>PARTE INCLINADA (≥ ${TERRENO.umbral_pendiente_deg}°)
+      <b>${TERRENO.pendiente_alta_pct}<span style="font-size:8px"> %</span></b>
+      <span>pista de erosión, no un modelo</span></div>
+    <div>TAMAÑO DE CADA PUNTO<b>${TERRENO.metros_por_pixel}<span style="font-size:8px"> m</span></b>
+      <span>datos SRTM de la NASA</span></div>
     <div class="fuente">Fuente: SRTM (NASA) vía tiles Terrarium públicos.
       La pendiente la calcula la demo; el umbral de 15° es orientativo, no un
       modelo de erosión. ${TERRENO.nota || ''}</div>`;
@@ -2755,9 +2815,9 @@ function pintarSatelite() {
   const valor = (clave, capa) => {
     if (capa.valor === null || capa.valor === undefined) { return 'sin dato'; }
     if (clave === 'lluvia') {
-      return capa.valor === 0 ? 'sin lluvia (< 0,1 mm/h)' : `${capa.valor} mm/h`;
+      return capa.valor === 0 ? 'no está lloviendo' : Lenguaje.lluviaHora(capa.valor);
     }
-    return `≈ ${Number(capa.valor).toFixed(2)}`;
+    return Lenguaje.verde(capa.valor);
   };
   const item = (clave, rotulo) => {
     const capa = capas[clave];
@@ -2769,7 +2829,7 @@ function pintarSatelite() {
       title="Ampliar ${capa.nombre}">
       ${contenido}
       <span><b>${rotulo}</b>${valor(clave, capa)} · ${capa.fecha} ·
-        ${metros(capa.resolucion_m)}/px</span>
+        cada punto mide ${metros(capa.resolucion_m)}</span>
     </button>`;
   };
   caja.innerHTML = item('ndvi', 'NDVI MODIS')
@@ -2869,14 +2929,22 @@ function pintarLecturas(parcela, sensor, estado, lecturas) {
   const lluvia = lluviaReal();
   const seco = sensor.humedad < Vision.UMBRAL_RIEGO;
   caja.innerHTML = `
-    <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${sensor.humedad}<small style="font-size:9px"> %</small></b></div>
-    <div>TEMPERATURA<b>${sensor.temperatura}<small style="font-size:9px"> °C</small></b></div>
-    <div class="${estado.riego ? 'bien' : ''}">RIEGO<b>${estado.riego ? 'ON' : 'off'}</b></div>
-    <div class="${estado.ventilacion ? 'bien' : ''}">VENTILA<b>${estado.ventilacion ? 'ON' : 'off'}</b></div>
-    <div class="${estado.techo ? 'bien' : ''}">TECHO<b>${estado.techo ? 'cerr.' : 'abierto'}</b></div>
-    <div>LLUVIA<b>${lluvia}<small style="font-size:8px"> mm/h</small></b></div>
-    <div>PLANTAS<b>${parcela.plantas_georreferenciadas ?? '—'}</b></div>
-    <div>ÁREA<b>${parcela.area_ha}<small style="font-size:8px"> ha</small></b></div>`;
+    <div class="${seco ? 'alerta' : 'bien'}">HUMEDAD<b>${sensor.humedad}<small style="font-size:9px"> %</small></b>
+      <span>${Lenguaje.estadoHumedad(sensor.humedad)}</span></div>
+    <div>TEMPERATURA<b>${sensor.temperatura}<small style="font-size:9px"> °C</small></b>
+      <span>del aire</span></div>
+    <div class="${estado.riego ? 'bien' : ''}">RIEGO<b>${estado.riego ? 'ON' : 'off'}</b>
+      <span>${estado.riego ? 'regando' : 'parado'}</span></div>
+    <div class="${estado.ventilacion ? 'bien' : ''}">VENTILA<b>${estado.ventilacion ? 'ON' : 'off'}</b>
+      <span>${estado.ventilacion ? 'abierta' : 'cerrada'}</span></div>
+    <div class="${estado.techo ? 'bien' : ''}">TECHO<b>${estado.techo ? 'cerr.' : 'abierto'}</b>
+      <span>plástico</span></div>
+    <div>LLUVIA<b>${lluvia}<small style="font-size:8px"> mm/h</small></b>
+      <span>${Lenguaje.lluviaHora(lluvia)}</span></div>
+    <div>PLANTAS<b>${parcela.plantas_georreferenciadas ?? '—'}</b>
+      <span>georreferenciadas</span></div>
+    <div>ÁREA<b>${parcela.area_ha}<small style="font-size:8px"> ha</small></b>
+      <span>${Lenguaje.areaM2(parcela.area_ha)}</span></div>`;
 }
 
 /* ---------- Fotos: satélite real recortado + cámara simulada ---------- */
@@ -3100,7 +3168,7 @@ function dibujarCultivo(ctx, ancho, alto, parcela, ahora) {
 }
 
 function pintarFoto(canvas, tipo, parcela) {
-  if (!canvas || !parcela) { return; }
+  if (!canvas || !parcela || typeof canvas.getContext !== 'function') { return; }
   const ancho = canvas.width || 480;
   const alto = canvas.height || 300;
   const ctx = canvas.getContext('2d');
@@ -3109,27 +3177,66 @@ function pintarFoto(canvas, tipo, parcela) {
 
 let fotosPintadas = 0;
 let fotosConMapa = false;
+let FOTOS_CAMPO = null;   // metadata de datos/fotos/atribucion.json (fotos con licencia)
+
+/* Foto de referencia del cultivo: es una foto de campo real, no la parcela. */
+function fotoDeCultivo(parcela) {
+  if (!FOTOS_CAMPO) { return null; }
+  const clave = String(parcela.cultivo || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return FOTOS_CAMPO[clave] || null;
+}
+
+async function cargarFotosCampo() {
+  try {
+    const respuesta = await fetch('../datos/fotos/atribucion.json');
+    if (!respuesta.ok) { return; }
+    const datos = await respuesta.json();
+    FOTOS_CAMPO = {};
+    Object.entries(datos).forEach(([clave, meta]) => {
+      if (!meta || !meta.archivo) { return; }
+      FOTOS_CAMPO[clave] = {
+        ...meta,
+        src: `../datos/fotos/${String(meta.archivo).split('/').pop()}`,
+      };
+    });
+    const caja = document.getElementById('vision-fotos');
+    if (caja) { delete caja.dataset.firma; }
+    if (monitorAbierto) { pintarFotos(parcelaActual()); }
+  } catch {
+    // sin metadatos (o sin red): la tarjeta sigue mostrando la cámara simulada
+  }
+}
+
 function pintarFotos(parcela) {
   const caja = document.getElementById('vision-fotos');
   if (!caja || !parcela) { return; }
-  if (caja.dataset.parcela !== parcela.id) {
-    caja.dataset.parcela = parcela.id;
+  const foto = fotoDeCultivo(parcela);
+  const firma = `${parcela.id}-${foto ? foto.src : 'sin-foto'}`;
+  if (caja.dataset.firma !== firma) {
+    caja.dataset.firma = firma;
     fotosPintadas = 0;
+    const tarjeta = foto
+      ? `<button class="foto-mini" data-foto="cultivo" title="Ampliar la foto de campo">
+          <img id="foto-cultivo" src="${foto.src}" loading="lazy"
+            alt="Foto de referencia de un campo de ${parcela.cultivo}">
+          <span><b>Foto de campo</b>referencia · ${foto.autor} · ${foto.licencia}</span>
+        </button>`
+      : `<button class="foto-mini" data-foto="cultivo" title="Ampliar la foto de la cámara simulada">
+          <canvas id="foto-cultivo" width="480" height="300"></canvas>
+          <span><b>Cámara</b>simulada: aún no hay foto de este cultivo</span>
+        </button>`;
     caja.innerHTML = `
       <button class="foto-mini" data-foto="satelite" title="Ampliar foto satelital">
         <canvas id="foto-satelite" width="480" height="300"></canvas>
         <span><b>Satélite</b>Esri World Imagery (real, no NASA)</span>
-      </button>
-      <button class="foto-mini" data-foto="cultivo" title="Ampliar foto de la cámara">
-        <canvas id="foto-cultivo" width="480" height="300"></canvas>
-        <span><b>Cámara</b>imagen simulada por la demo</span>
-      </button>`;
+      </button>${tarjeta}`;
     caja.querySelectorAll('button[data-foto]').forEach((boton) => {
       boton.addEventListener('click', () => abrirFoto(boton.dataset.foto));
     });
   }
-  // La cámara simulada se "actualiza" cada 30 s; el satélite no cambia. Si la
-  // foto se pintó antes de que cargara el mapa, se repinta en cuanto llega.
+  // El satélite no cambia; se repinta al cargar el mapa. La cámara simulada sí
+  // se "actualiza" cada 30 s cuando no hay foto con licencia para el cultivo.
   if (Date.now() - fotosPintadas > 30000 || (imagenLista && !fotosConMapa)) {
     pintarFoto(document.getElementById('foto-satelite'), 'satelite', parcela);
     pintarFoto(document.getElementById('foto-cultivo'), 'cultivo', parcela);
@@ -3188,10 +3295,28 @@ function abrirFoto(tipo) {
       + ' (no NASA) recortada sobre el contorno de la parcela. El contorno y la forma son'
       + ' simulados; el suelo que se ve debajo es real.';
   } else {
-    dibujarCultivo(ctx, canvas.width, canvas.height, parcela, Date.now());
-    pie.innerHTML = `<b>Foto de la cámara de campo.</b> Imagen simulada, dibujada por la demo:`
-      + ' no es una foto real ni un diagnóstico. Cuando haya cámara, la app analizará color y'
-      + ' pedirá confirmación a un agrónomo.';
+    const foto = fotoDeCultivo(parcela);
+    if (foto) {
+      const imagen = new Image();
+      imagen.onload = () => {
+        ctx.fillStyle = '#08111c';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const escala = Math.min(canvas.width / imagen.width, canvas.height / imagen.height);
+        ctx.drawImage(imagen, (canvas.width - imagen.width * escala) / 2,
+          (canvas.height - imagen.height * escala) / 2,
+          imagen.width * escala, imagen.height * escala);
+      };
+      imagen.src = foto.src;
+      pie.innerHTML = `<b>Foto de referencia de ${foto.cultivo}.</b> No es tu parcela:`
+        + ` es una foto de campo con licencia <b>${foto.licencia}</b> de ${foto.autor}.`
+        + ` Origen: ${foto.url_origen}. Sirve para reconocer el cultivo; no es un`
+        + ' diagnóstico ni una lectura de tus plantas.';
+    } else {
+      dibujarCultivo(ctx, canvas.width, canvas.height, parcela, Date.now());
+      pie.innerHTML = `<b>Foto de la cámara de campo.</b> Imagen simulada, dibujada por la demo:`
+        + ' no es una foto real ni un diagnóstico. Cuando haya cámara, la app analizará color y'
+        + ' pedirá confirmación a un agrónomo.';
+    }
   }
   caja.classList.add('visible');
 }
@@ -3404,7 +3529,8 @@ function pintarTira() {
       const color = humedad < 25 ? '#ffb454' : '#58e39a';
       return `<button class="tarjeta-parcela${p.id === parcelaId ? ' activa' : ''}" data-id="${p.id}">
         <b><i style="background:${color}"></i>${p.nombre}</b>
-        <span>${p.cultivo} · ${p.area_ha} ha · ${(p.sensores || []).length} sensor(es)</span>
+        <span>${p.cultivo} · ${p.area_ha} ha (${Lenguaje.areaM2(p.area_ha)}) ·
+          ${(p.sensores || []).length} sensor(es)</span>
       </button>`;
     }).join('');
     tira.querySelectorAll('.tarjeta-parcela').forEach((boton) => {
@@ -3418,6 +3544,23 @@ function pintarTira() {
   }
 }
 
+/* El botón de terminar dice cuántas esquinas faltan y el área ya marcada. */
+function actualizarBotonTerminar() {
+  const boton = document.getElementById('vision-terminar');
+  const info = document.getElementById('vision-dibujo-info');
+  if (!boton) { return; }
+  const n = dibujo.puntos.length;
+  if (n < 3) {
+    boton.disabled = true;
+    boton.textContent = `Faltan ${3 - n} esquina(s) para terminar`;
+    if (info) { info.textContent = `${n} esquina(s) marcadas. Marca al menos 3 en el mapa.`; }
+    return;
+  }
+  boton.disabled = false;
+  boton.textContent = `Terminar parcela · ${Lenguaje.superficieHa(areaHa(dibujo.puntos))}`;
+  if (info) { info.textContent = `${n} esquinas. Pulsa el botón verde para guardar.`; }
+}
+
 function montarParcelas() {
   const selector = document.getElementById('parcela-selector');
   pintarTira();
@@ -3425,15 +3568,50 @@ function montarParcelas() {
     selector.addEventListener('change', (evento) => elegirParcela(evento.target.value));
   }
 
-  // Mapa: arrastrar para mover, rueda para acercar, clic para elegir parcela.
+  // Mapa: arrastrar para mover, rueda o dos dedos para acercar, clic para elegir.
   const canvas = document.getElementById('vision-mapa');
+  const punteros = new Map();
+  let pinch = null;
+  const distanciaEntreDedos = () => {
+    const [a, b] = [...punteros.values()];
+    return Math.hypot(a.x - b.x, a.y - b.y);
+  };
+  const medioEntreDedos = () => {
+    const [a, b] = [...punteros.values()];
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+  };
   if (canvas) {
     canvas.addEventListener('pointerdown', (evento) => {
+      punteros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+      try { canvas.setPointerCapture(evento.pointerId); } catch { /* puntero sintético */ }
+      if (punteros.size === 2) {
+        pinch = { distancia: distanciaEntreDedos(), medio: medioEntreDedos() };
+        arrastre = null;
+        canvas.classList.add('arrastrando');
+        return;
+      }
+      if (punteros.size > 2) { return; }
       arrastre = { x: evento.clientX, y: evento.clientY, cx: vista.cx, cy: vista.cy, movido: false };
       canvas.classList.add('arrastrando');
-      canvas.setPointerCapture(evento.pointerId);
     });
     canvas.addEventListener('pointermove', (evento) => {
+      if (punteros.has(evento.pointerId)) {
+        punteros.set(evento.pointerId, { x: evento.clientX, y: evento.clientY });
+      }
+      // Dos dedos: acercar/alejar alrededor del punto medio y mover con él.
+      if (pinch && punteros.size >= 2) {
+        const distancia = distanciaEntreDedos();
+        const medio = medioEntreDedos();
+        if (pinch.distancia > 0) { zoomEn(distancia / pinch.distancia, medio.x, medio.y); }
+        vista.cx -= (medio.x - pinch.medio.x) / vista.escala;
+        vista.cy -= (medio.y - pinch.medio.y) / vista.escala;
+        limitarVista();
+        pinch.distancia = distancia;
+        pinch.medio = medio;
+        pinch.movido = true;
+        dibujarMapa(parcelaEstado);
+        return;
+      }
       if (!arrastre) { return; }
       const dx = evento.clientX - arrastre.x;
       const dy = evento.clientY - arrastre.y;
@@ -3444,6 +3622,12 @@ function montarParcelas() {
       dibujarMapa(parcelaEstado);
     });
     canvas.addEventListener('pointerup', (evento) => {
+      punteros.delete(evento.pointerId);
+      if (pinch) {
+        if (punteros.size < 2) { pinch = null; }
+        if (!punteros.size) { canvas.classList.remove('arrastrando'); }
+        return;  // terminar un pellizco no marca esquinas ni cambia de parcela
+      }
       if (!arrastre) { return; }
       const movido = arrastre.movido;
       arrastre = null;
@@ -3452,17 +3636,19 @@ function montarParcelas() {
       const [mx, my] = pantallaAMetros(evento.clientX, evento.clientY);
       if (dibujo.activo) {
         dibujo.puntos.push([Math.round(mx), Math.round(my)]);
-        const n = dibujo.puntos.length;
-        document.getElementById('vision-dibujo-info').textContent = n < 3
-          ? `${n} esquina(s). Marca al menos 3.`
-          : `${n} esquinas · ${areaHa(dibujo.puntos).toFixed(2)} ha. Pulsa Terminar.`;
+        actualizarBotonTerminar();
         dibujarMapa(parcelaEstado);
         return;
       }
       const tocada = PARCELAS.find((p) => dentroPoligono(mx, my, p.poligono_m || []));
       if (tocada) { elegirParcela(tocada.id); }
     });
-    canvas.addEventListener('pointercancel', () => { arrastre = null; canvas.classList.remove('arrastrando'); });
+    canvas.addEventListener('pointercancel', () => {
+      punteros.clear();
+      pinch = null;
+      arrastre = null;
+      canvas.classList.remove('arrastrando');
+    });
     canvas.addEventListener('wheel', (evento) => {
       evento.preventDefault();
       zoomEn(evento.deltaY < 0 ? 1.18 : 1 / 1.18, evento.clientX, evento.clientY);
@@ -3564,6 +3750,14 @@ async function refrescarBot() {
   pintarChipBot();
 }
 
+/* Glosario de campo: mismo texto que usa el lenguaje de la interfaz. */
+function montarGlosario() {
+  const lista = document.getElementById('glosario-lista');
+  if (!lista || !Lenguaje.GLOSARIO) { return; }
+  lista.innerHTML = Lenguaje.GLOSARIO.map(([termino, explicacion]) => `
+    <dt>${termino}</dt><dd>${explicacion}</dd>`).join('');
+}
+
 /* ---------- Eventos de la vista ---------- */
 document.getElementById('vision-cerrar').addEventListener('click', () => cerrarMonitor());
 document.getElementById('vision-lightbox').addEventListener('click', () => cerrarFoto());
@@ -3571,18 +3765,19 @@ document.getElementById('vision-registrar').addEventListener('click', () => {
   dibujo = { activo: true, puntos: [] };
   document.getElementById('vision-dibujo').hidden = false;
   document.getElementById('vision-dibujo-info').textContent =
-    'Haz clic en el mapa para marcar las esquinas de tu parcela.';
+    'Toca el mapa en cada esquina de tu parcela (mínimo 3).';
+  actualizarBotonTerminar();
   pintarVision();
 });
 document.getElementById('vision-cancelar').addEventListener('click', () => {
   dibujo = { activo: false, puntos: [] };
   document.getElementById('vision-dibujo').hidden = true;
+  actualizarBotonTerminar();
   pintarVision();
 });
 document.getElementById('vision-terminar').addEventListener('click', () => {
   if (dibujo.puntos.length < 3) {
-    document.getElementById('vision-dibujo-info').textContent =
-      'Necesito al menos 3 esquinas para cerrar la parcela.';
+    actualizarBotonTerminar();
     return;
   }
   const hectareas = areaHa(dibujo.puntos);
@@ -3603,6 +3798,7 @@ document.getElementById('vision-terminar').addEventListener('click', () => {
   PARCELAS.push(nueva);
   dibujo = { activo: false, puntos: [] };
   document.getElementById('vision-dibujo').hidden = true;
+  actualizarBotonTerminar();
   const selector = document.getElementById('parcela-selector');
   if (selector) {
     const op = document.createElement('option');
@@ -3690,6 +3886,9 @@ document.getElementById('chat-forma').addEventListener('submit', (evento) => {
   enviarAlBot(campo.value);
   campo.value = '';
 });
+document.querySelectorAll('.chat-rapidos button[data-comando]').forEach((boton) => {
+  boton.addEventListener('click', () => enviarAlBot(boton.dataset.comando));
+});
 document.getElementById('vision-boton').addEventListener('click', () => volarAlaParcela());
 ['peso-agua', 'peso-diversidad', 'escenario-lluvia'].forEach((id) => {
   const campo = document.getElementById(id);
@@ -3697,6 +3896,9 @@ document.getElementById('vision-boton').addEventListener('click', () => volarAla
 });
 
 montarParcelas();
+cargarFotosCampo();
+montarGlosario();
+actualizarBotonTerminar();
 pintarChipBot();
 enviarAlBot('/estado');
 window.addEventListener('resize', () => {
@@ -3736,6 +3938,7 @@ window.__tierra = {
   abrirMonitor,
   cerrarMonitor,
   volarAlaParcela,
+  vista,
   globo: { escena, camara, renderer, controles, texturas, THREE, capaMalla },
 };
 
