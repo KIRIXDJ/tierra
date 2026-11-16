@@ -1,0 +1,80 @@
+{
+ "version": 1,
+ "origen": "telegram",
+ "actualizado": "2026-11-15T09:56:24-04:00",
+ "modo": "comandos",
+ "parcelas": {
+  "la-esperanza": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  },
+  "el-hoyo": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  },
+  "la-loma": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  },
+  "los-almendros": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  },
+  "la-ceiba": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  },
+  "el-fundo": {
+   "riego": false,
+   "techo": false,
+   "ventilacion": false
+  }
+ },
+ "ultimo": {
+  "texto": "dame un informe de todas las parcelas",
+  "respuesta": "Informe de las 6 parcelas (simuladas) de Constanza:\n· La Esperanza — yuca · 0.82 ha · 2 sensor(es) · riego off · techo abierto\n· El Hoyo — frijol · 0.82 ha · 2 sensor(es) · riego off · techo abierto\n· La Loma — maíz · 1.12 ha · 2 sensor(es) · riego off · techo abierto\n· Los Almendros — habichuela · 1.04 ha · 2 sensor(es) · riego off · techo abierto\n· La Ceiba — sorgo · 0.9 ha · 2 sensor(es) · riego off · techo abierto\n· El Fundo — maní · 0.88 ha · 2 sensor(es) · riego off · techo abierto",
+  "ts": "2026-11-15T09:56:24-04:00"
+ },
+ "historial": [
+  {
+   "texto": "/start",
+   "respuesta": "Soy Elio, el bot de TIERRA. Comandos:\n/estado [parcela] — actuadores de una parcela\n/parcelas — lista de parcelas\n/clima [parcela] — últimos 30 días (ERA5/Open-Meteo)\n/rotaciones [parcela] — estrategias y meses secos\n/riego on|off|auto [parcela]\n/techo on|off|auto [parcela]\n/ventilar on|off [parcela]\n/foto [parcela] — recorte satelital real (Esri)\n/ayuda — esta lista\nSin argumento uso la primera parcela; \"todas\" aplica a todas.\nTambién puedes escribirme una pregunta y la contesto con los datos del sistema.",
+   "ts": "2026-11-13T17:18:49-04:00"
+  },
+  {
+   "texto": "/estado",
+   "respuesta": "La Esperanza (yuca, 1.06 ha)\nRiego apagado · techo abierto · ventilación cerrada\nHumedad 18 % · 28.4 °C (sensor simulado)",
+   "ts": "2026-11-13T17:18:49-04:00"
+  },
+  {
+   "texto": "/parcelas",
+   "respuesta": "Parcelas de Constanza:\n· la-esperanza — La Esperanza · yuca · 1.06 ha\n· el-hoyo — El Hoyo · frijol · 0.71 ha\n· la-loma — La Loma · maíz · 1.44 ha",
+   "ts": "2026-11-13T17:19:01-04:00"
+  },
+  {
+   "texto": "/foto El Hoyo",
+   "respuesta": "El Hoyo · frijol · 0.71 ha\nImagen satelital real de Esri World Imagery (no NASA). El polígono y los sensores son simulados.",
+   "ts": "2026-11-13T17:20:39-04:00"
+  },
+  {
+   "texto": "/estado",
+   "respuesta": "La Esperanza (yuca, 1.27 ha)\nRiego apagado · techo abierto · ventilación cerrada\nHumedad 18 % · 28.4 °C (sensor simulado)",
+   "ts": "2026-11-14T13:10:14-04:00"
+  },
+  {
+   "texto": "/parcelas",
+   "respuesta": "Parcelas de Constanza:\n· la-esperanza — La Esperanza · yuca · 0.82 ha\n· el-hoyo — El Hoyo · frijol · 0.82 ha\n· la-loma — La Loma · maíz · 1.12 ha\n· los-almendros — Los Almendros · habichuela · 1.04 ha\n· la-ceiba — La Ceiba · sorgo · 0.9 ha\n· el-fundo — El Fundo · maní · 0.88 ha",
+   "ts": "2026-11-15T09:44:39-04:00"
+  },
+  {
+   "texto": "dame un informe de todas las parcelas",
+   "respuesta": "Informe de las 6 parcelas (simuladas) de Constanza:\n· La Esperanza — yuca · 0.82 ha · 2 sensor(es) · riego off · techo abierto\n· El Hoyo — frijol · 0.82 ha · 2 sensor(es) · riego off · techo abierto\n· La Loma — maíz · 1.12 ha · 2 sensor(es) · riego off · techo abierto\n· Los Almendros — habichuela · 1.04 ha · 2 sensor(es) · riego off · techo abierto\n· La Ceiba — sorgo · 0.9 ha · 2 sensor(es) · riego off · techo abierto\n· El Fundo — maní · 0.88 ha · 2 sensor(es) · riego off · techo abierto",
+   "ts": "2026-11-15T09:56:24-04:00"
+  }
+ ]
+}

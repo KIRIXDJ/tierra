@@ -1,0 +1,299 @@
+{
+ "version": 3,
+ "simulado": true,
+ "nota": "Mapa: imagen satelital real de campos agrícolas al este del pueblo de Constanza (Esri World Imagery, no NASA). Las parcelas las dibujó el equipo sobre esos campos reales; son simuladas.",
+ "finca": "constanza",
+ "finca_nombre": "Constanza",
+ "parcelas": [
+  {
+   "id": "la-esperanza",
+   "nombre": "La Esperanza",
+   "cultivo": "yuca",
+   "siembra": "2026-09-15",
+   "humedad_inicial": 18,
+   "temperatura": 28.4,
+   "poligono_m": [
+    [
+     47,
+     -215
+    ],
+    [
+     149,
+     -204
+    ],
+    [
+     124,
+     -117
+    ],
+    [
+     26,
+     -147
+    ],
+    [
+     47,
+     -214
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-01",
+     "x_m": 89,
+     "y_m": -170
+    },
+    {
+     "id": "ESP-02",
+     "x_m": 119,
+     "y_m": -187
+    }
+   ],
+   "camara": "Surcos de yuca con suelo visible entre matas; sin encharcamiento.",
+   "area_ha": 0.82,
+   "plantas_georreferenciadas": 1640
+  },
+  {
+   "id": "el-hoyo",
+   "nombre": "El Hoyo",
+   "cultivo": "frijol",
+   "siembra": "2026-10-01",
+   "humedad_inicial": 33,
+   "temperatura": 24.1,
+   "poligono_m": [
+    [
+     152,
+     -205
+    ],
+    [
+     228,
+     -189
+    ],
+    [
+     218,
+     -91
+    ],
+    [
+     126,
+     -115
+    ],
+    [
+     153,
+     -203
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-03",
+     "x_m": 181,
+     "y_m": -148
+    },
+    {
+     "id": "ESP-04",
+     "x_m": 205,
+     "y_m": -169
+    }
+   ],
+   "camara": "Follaje cerrado entre hileras; hoja con brillo de rocío.",
+   "area_ha": 0.82,
+   "plantas_georreferenciadas": 1640
+  },
+  {
+   "id": "la-loma",
+   "nombre": "La Loma",
+   "cultivo": "maíz",
+   "siembra": "2026-08-20",
+   "humedad_inicial": 26,
+   "temperatura": 29.2,
+   "poligono_m": [
+    [
+     -53,
+     -275
+    ],
+    [
+     -25,
+     -253
+    ],
+    [
+     -28,
+     -220
+    ],
+    [
+     41,
+     -212
+    ],
+    [
+     5,
+     -85
+    ],
+    [
+     -67,
+     -135
+    ],
+    [
+     -54,
+     -271
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-05",
+     "x_m": -20,
+     "y_m": -174
+    },
+    {
+     "id": "ESP-06",
+     "x_m": -22,
+     "y_m": -213
+    }
+   ],
+   "camara": "Plantas altas; alguna hoja enrollada por el sol del mediodía.",
+   "area_ha": 1.12,
+   "plantas_georreferenciadas": 2240
+  },
+  {
+   "id": "los-almendros",
+   "nombre": "Los Almendros",
+   "cultivo": "habichuela",
+   "siembra": "2026-09-28",
+   "humedad_inicial": 22,
+   "temperatura": 25.6,
+   "poligono_m": [
+    [
+     -256,
+     -241
+    ],
+    [
+     -208,
+     -241
+    ],
+    [
+     -160,
+     -196
+    ],
+    [
+     -164,
+     -119
+    ],
+    [
+     -264,
+     -130
+    ],
+    [
+     -255,
+     -239
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-07",
+     "x_m": -213,
+     "y_m": -178
+    },
+    {
+     "id": "ESP-08",
+     "x_m": -211,
+     "y_m": -209
+    }
+   ],
+   "camara": "Habichuela en hileras con tutores; suelo húmedo en la base.",
+   "area_ha": 1.04,
+   "plantas_georreferenciadas": 2080
+  },
+  {
+   "id": "la-ceiba",
+   "nombre": "La Ceiba",
+   "cultivo": "sorgo",
+   "siembra": "2026-09-05",
+   "humedad_inicial": 24,
+   "temperatura": 27.1,
+   "poligono_m": [
+    [
+     -169,
+     -37
+    ],
+    [
+     -98,
+     -36
+    ],
+    [
+     -84,
+     -121
+    ],
+    [
+     -155,
+     -192
+    ],
+    [
+     -169,
+     -39
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-09",
+     "x_m": -130,
+     "y_m": -99
+    },
+    {
+     "id": "ESP-10",
+     "x_m": -114,
+     "y_m": -68
+    }
+   ],
+   "camara": "Sorgo de porte medio; espigas empezando a cuajar.",
+   "area_ha": 0.9,
+   "plantas_georreferenciadas": 1800
+  },
+  {
+   "id": "el-fundo",
+   "nombre": "El Fundo",
+   "cultivo": "maní",
+   "siembra": "2026-10-10",
+   "humedad_inicial": 21,
+   "temperatura": 26.3,
+   "poligono_m": [
+    [
+     -262,
+     -127
+    ],
+    [
+     -167,
+     -118
+    ],
+    [
+     -173,
+     -30
+    ],
+    [
+     -265,
+     -27
+    ]
+   ],
+   "sensores": [
+    {
+     "id": "ESP-11",
+     "x_m": -218,
+     "y_m": -76
+    },
+    {
+     "id": "ESP-12",
+     "x_m": -192,
+     "y_m": -97
+    }
+   ],
+   "camara": "Maní rastrero de hoja verde clara; suelo suelto entre camas.",
+   "area_ha": 0.88,
+   "plantas_georreferenciadas": 1760
+  }
+ ],
+ "mapa": {
+  "archivo": "mapa_constanza.jpg",
+  "zoom": 17,
+  "centro": {
+   "lat": 18.9045,
+   "lon": -70.716
+  },
+  "ancho_px": 1024,
+  "alto_px": 1024,
+  "metros_por_pixel": 1.1299,
+  "fuente": "Esri World Imagery (imagen satelital) · no NASA"
+ }
+}
