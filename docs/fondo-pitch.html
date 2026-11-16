@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Farm · fondo del pitch (3 min en bucle)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #04070d; overflow: hidden; }
+  video { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: contain;
+    background: #04070d; }
+  #ayuda { position: fixed; left: 20px; bottom: 18px; font: 12px system-ui, sans-serif;
+    color: #7e97ad; background: rgba(4, 7, 13, .72); border: 1px solid rgba(120,200,255,.2);
+    border-radius: 8px; padding: 8px 12px; transition: opacity .4s ease; }
+  body.andando #ayuda { opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<video id="video" src="fondo-pitch-3min.mp4" autoplay muted loop playsinline
+  preload="auto"></video>
+<div id="ayuda">Auto-Farm · fondo del pitch · 3:00 en bucle, sin sonido —
+  pulsa <b>F11</b> para pantalla completa · <b>espacio</b> para pausar</div>
+<script>
+  const video = document.getElementById('video');
+  // Al pulsar cualquier tecla se oculta la ayuda (para que no salga en la foto).
+  addEventListener('keydown', (evento) => {
+    document.body.classList.add('andando');
+    if (evento.code === 'Space') {
+      evento.preventDefault();
+      if (video.paused) { video.play(); } else { video.pause(); }
+    }
+  });
+  addEventListener('click', () => document.body.classList.add('andando'));
+  video.addEventListener('play', () => setTimeout(
+    () => document.body.classList.add('andando'), 4000));
+</script>
+</body>
+</html>

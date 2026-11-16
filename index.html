@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Farm · Datos de la NASA para decidir la próxima siembra</title>
+<meta name="description" content="Auto-Farm convierte datos de la NASA (clima, NDVI, lluvia y relieve) en decisiones claras para una finca: qué sembrar después, cuándo regar y por qué. Proyecto del NASA Space Apps Challenge 2026, Local Event República Dominicana (UNIROMANA).">
+<meta property="og:title" content="Auto-Farm · Datos de la NASA para decidir la próxima siembra">
+<meta property="og:description" content="42 años de clima, NDVI satelital y relieve convertidos en rotaciones con evidencia, y un asistente que responde con los datos de tu finca.">
+<meta property="og:image" content="proyecto/img/portada.jpg">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+<style>
+  :root {
+    --fondo: #04070d; --panel: rgba(10, 18, 30, .82); --borde: rgba(120, 200, 255, .18);
+    --texto: #dce9f5; --secundario: #94aabf; --cian: #35d6ff; --verde: #58e39a;
+    --ambar: #ffb454; --maximo: 1120px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--fondo); color: var(--texto);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif; line-height: 1.6; }
+  a { color: var(--cian); }
+  img { max-width: 100%; display: block; }
+  .contenedor { width: min(100% - 40px, var(--maximo)); margin: 0 auto; }
+
+  header.barra { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+    background: rgba(4, 7, 13, .82); border-bottom: 1px solid var(--borde); }
+  .barra .contenedor { display: flex; align-items: center; gap: 18px; padding: 12px 0; }
+  .marca { font-weight: 700; letter-spacing: .22em; color: var(--cian); font-size: 13px;
+    text-decoration: none; white-space: nowrap; }
+  nav { margin-left: auto; display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+  nav a { color: var(--secundario); text-decoration: none; }
+  nav a:hover { color: var(--cian); }
+  .boton { display: inline-block; font: inherit; font-weight: 600; text-decoration: none;
+    border-radius: 10px; padding: 12px 22px; border: 1px solid var(--borde); color: var(--texto); }
+  .boton.principal { background: linear-gradient(100deg, var(--cian), var(--verde));
+    color: #04121b; border: 0; }
+  .boton:hover { transform: translateY(-1px); }
+
+  #inicio { position: relative; padding: 90px 0 70px; overflow: hidden; }
+  #inicio::before { content: ""; position: absolute; inset: 0;
+    background: url("proyecto/img/fondo.jpg") center 30% / cover no-repeat; opacity: .5;
+    filter: saturate(1.05); }
+  #inicio::after { content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(4,7,13,.96) 0%, rgba(4,7,13,.72) 55%, rgba(4,7,13,.35) 100%); }
+  #inicio .contenedor { position: relative; z-index: 1; }
+  .evento { font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--verde); margin-bottom: 14px; }
+  h1 { font-size: clamp(42px, 7vw, 74px); line-height: 1.02; letter-spacing: .04em;
+    background: linear-gradient(100deg, var(--cian), var(--verde)); -webkit-background-clip: text;
+    background-clip: text; color: transparent; margin-bottom: 18px; }
+  .entradilla { font-size: clamp(17px, 2.4vw, 22px); color: var(--texto); max-width: 34ch;
+    margin-bottom: 12px; }
+  .apoyo { color: var(--secundario); max-width: 46ch; margin-bottom: 26px; font-size: 15px; }
+  .acciones { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px; }
+  .metricas { display: flex; gap: 10px; flex-wrap: wrap; }
+  .metricas span { font-size: 12px; color: var(--secundario); border: 1px solid var(--borde);
+    background: rgba(11, 20, 32, .7); border-radius: 999px; padding: 7px 13px; }
+  .metricas b { color: var(--texto); }
+
+  section { padding: 64px 0; border-top: 1px solid var(--borde); }
+  .kicker { font-size: 12px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--cian); margin-bottom: 10px; }
+  h2 { font-size: clamp(26px, 3.6vw, 36px); margin-bottom: 14px; letter-spacing: .01em; }
+  .introduccion { color: var(--secundario); max-width: 62ch; margin-bottom: 30px; }
+
+  .rejilla-3 { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .tarjeta { background: var(--panel); border: 1px solid var(--borde); border-radius: 14px;
+    padding: 20px; }
+  .tarjeta h3 { font-size: 16px; margin-bottom: 8px; }
+  .tarjeta p { color: var(--secundario); font-size: 14px; }
+  .numero { display: inline-grid; place-items: center; width: 30px; height: 30px;
+    border-radius: 50%; background: rgba(53, 214, 255, .14); color: var(--cian);
+    font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+
+  .paso { display: grid; gap: 22px; grid-template-columns: 1fr 1fr; align-items: center;
+    margin-bottom: 34px; }
+  .paso:nth-child(even) .texto { order: 2; }
+  .paso img { border-radius: 14px; border: 1px solid var(--borde);
+    max-height: 430px; width: 100%; object-fit: cover; object-position: top center; }
+  .paso h3 { font-size: 19px; margin-bottom: 8px; }
+  .paso p { color: var(--secundario); font-size: 15px; }
+
+  #elio .panel { display: grid; gap: 26px; grid-template-columns: 1.15fr .85fr;
+    align-items: center; background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 16px; padding: 26px; }
+  #elio img { border-radius: 12px; border: 1px solid var(--borde); max-height: 460px;
+    width: auto; margin: 0 auto; }
+  .comandos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .comandos code { background: rgba(53, 214, 255, .10); border: 1px solid var(--borde);
+    color: var(--texto); border-radius: 8px; padding: 5px 9px; font-size: 12.5px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 8px; }
+  th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--borde);
+    vertical-align: top; }
+  th { color: var(--cian); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+  td:first-child { color: var(--texto); font-weight: 600; width: 34%; }
+  td { color: var(--secundario); }
+  .etiqueta-real, .etiqueta-sim { font-size: 11px; border-radius: 999px; padding: 2px 8px;
+    border: 1px solid var(--borde); white-space: nowrap; }
+  .etiqueta-real { color: var(--verde); border-color: rgba(88, 227, 154, .5); }
+  .etiqueta-sim { color: var(--ambar); border-color: rgba(255, 180, 84, .5); }
+
+  .lista-datos { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .lista-datos div { background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 12px; padding: 14px 16px; font-size: 14px; color: var(--secundario); }
+  .lista-datos b { color: var(--texto); display: block; margin-bottom: 3px; }
+
+  .equipo { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .equipo div { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+    padding: 14px 16px; }
+  .equipo b { display: block; }
+  .equipo span { color: var(--secundario); font-size: 13px; }
+
+  #video { text-align: center; }
+  #video video { width: min(100%, 860px); border-radius: 14px; border: 1px solid var(--borde);
+    margin: 18px auto 10px; background: #000; }
+  .nota { color: var(--secundario); font-size: 12.5px; }
+
+  .enlaces { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .enlaces a { display: block; background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 12px; padding: 16px; text-decoration: none; color: var(--texto); }
+  .enlaces a:hover { border-color: var(--cian); }
+  .enlaces b { display: block; margin-bottom: 4px; }
+  .enlaces span { color: var(--secundario); font-size: 13px; }
+
+  footer { padding: 40px 0 60px; border-top: 1px solid var(--borde); color: var(--secundario);
+    font-size: 13px; }
+  footer a { color: var(--cian); }
+  @media (max-width: 860px) {
+    nav { display: none; }
+    .paso { grid-template-columns: 1fr; }
+    .paso:nth-child(even) .texto { order: 0; }
+    #elio .panel { grid-template-columns: 1fr; }
+    section { padding: 48px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <div class="contenedor">
+    <a class="marca" href="#inicio">AUTO-FARM</a>
+    <nav>
+      <a href="#problema">Problema</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#elio">Elio</a>
+      <a href="#honestidad">Qué es real</a>
+      <a href="#datos">Datos</a>
+      <a href="#equipo">Equipo</a>
+      <a href="#enlaces">Enlaces</a>
+    </nav>
+  </div>
+</header>
+
+<section id="inicio">
+  <div class="contenedor">
+    <p class="evento">NASA Space Apps Challenge 2026 · Local Event República Dominicana · UNIROMANA</p>
+    <h1>AUTO-FARM</h1>
+    <p class="entradilla">Datos de la NASA para decidir la próxima siembra.</p>
+    <p class="apoyo">Una finca de Constanza, 42 años de clima, imágenes satelitales y relieve:
+      Auto-Farm los convierte en una recomendación que se entiende — qué sembrar después, cuándo
+      regar y por qué — y en Elio, un asistente que responde con los datos de esa finca.</p>
+    <div class="acciones">
+      <a class="boton principal" href="web/">Probar la app</a>
+      <a class="boton" href="#video">Ver el demo (30 s)</a>
+    </div>
+    <div class="metricas">
+      <span><b>42</b> años de reanálisis NASA POWER</span>
+      <span><b>6</b> parcelas de demostración</span>
+      <span>NDVI satelital · lluvia IMERG · relieve SRTM</span>
+    </div>
+  </div>
+</section>
+
+<section id="problema">
+  <div class="contenedor">
+    <p class="kicker">El problema</p>
+    <h2>Decidir la próxima siembra no debería ser una corazonada</h2>
+    <p class="introduccion">El clima de una finca ya no es el de hace 40 años, y los datos para
+      verlo existen y son públicos. El problema es que están en portales técnicos: tablas,
+      píxeles y siglas que no caben en la libreta del agricultor.</p>
+    <div class="rejilla-3">
+      <div class="tarjeta">
+        <span class="numero">1</span>
+        <h3>El clima cambió</h3>
+        <p>En la finca piloto de Azua la lluvia reciente es el doble de su normal; en Constanza,
+          apenas un 3&nbsp;% por encima. La misma temporada significa cosas distintas en cada lugar.</p>
+      </div>
+      <div class="tarjeta">
+        <span class="numero">2</span>
+        <h3>Los datos no se leen</h3>
+        <p>Una imagen satelital no dice «siembra yuca»: Auto-Farm traduce el dato a una decisión,
+          con la fuente y el error a la vista, no como una caja negra.</p>
+      </div>
+      <div class="tarjeta">
+        <span class="numero">3</span>
+        <h3>Los asistentes inventan</h3>
+        <p>Elio solo usa los datos estructurados de la finca y responde «no tengo ese dato» cuando
+          le falta. Cita la fuente de cada cifra y deja las decisiones agronómicas al agrónomo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="contenedor">
+    <p class="kicker">Cómo funciona</p>
+    <h2>Tres pasos, de la órbita a la parcela</h2>
+    <div class="paso">
+      <div class="texto">
+        <h3>1 · Mira tu finca, no un mapa cualquiera</h3>
+        <p>El globo muestra la tendencia de 42 años de reanálisis. Al entrar, el mapa es imagen
+          satelital real de la zona y las parcelas se eligen con un clic: sensores, clima,
+          relieve y satélite de esa parcela, cada uno con su fuente.</p>
+      </div>
+      <img src="proyecto/img/monitor.jpg" alt="Monitor de Auto-Farm con el mapa de la finca y el panel de la parcela" loading="lazy">
+    </div>
+    <div class="paso">
+      <div class="texto">
+        <h3>2 · Compara la temporada con su normal</h3>
+        <p>La lluvia de los últimos 30 días, la humedad del suelo, el NDVI y el relieve se comparan
+          contra su propia historia. Así se ve si la finca está en un año húmedo, seco o normal,
+          sin depender de la memoria.</p>
+      </div>
+      <img src="proyecto/img/rotacion.jpg" alt="Panel de rotaciones con tres estrategias, puntaje y evidencia" loading="lazy">
+    </div>
+    <div class="paso">
+      <div class="texto">
+        <h3>3 · Decide qué sembrar después</h3>
+        <p>Tres rotaciones con puntaje sobre 100, el porqué, la evidencia que las sostiene, los
+          huecos que faltan y el riesgo de cada una. Los pesos y el escenario de lluvia se mueven
+          y el puntaje se recalcula a la vista.</p>
+      </div>
+      <img src="proyecto/img/portada.jpg" alt="Portada de Auto-Farm con el globo de tendencias climáticas" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section id="elio">
+  <div class="contenedor">
+    <p class="kicker">El asistente</p>
+    <h2>Elio: respuestas con los datos de la finca, no con imaginación</h2>
+    <div class="panel">
+      <div>
+        <p class="introduccion" style="margin-bottom:12px">Elio es el agrónomo digital del
+          proyecto. Responde por comandos, por pregunta libre (con cuenta) y por Telegram, con
+          el contexto de la finca: clima, suelo, satélite, rotaciones y sensores simulados.
+          Si un dato no está, lo dice en vez de estimarlo.</p>
+        <div class="comandos">
+          <code>/estado</code><code>/clima</code><code>/riesgos</code>
+          <code>/rotaciones</code><code>/parcela</code><code>/ayuda</code>
+        </div>
+        <p class="nota" style="margin-top:14px">También en Telegram:
+          <a href="https://t.me/climaxeliobot">@climaxeliobot</a>. La IA en vivo es para cuentas
+          de cliente; la demo funciona sin gastar la API.</p>
+      </div>
+      <img src="proyecto/img/movil.jpg" alt="Auto-Farm en un teléfono: panel de la parcela y chat de Elio" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<section id="honestidad">
+  <div class="contenedor">
+    <p class="kicker">Transparencia</p>
+    <h2>Qué es real y qué es simulado</h2>
+    <p class="introduccion">Un proyecto que decide sobre una finca tiene que decir de dónde sale
+      cada número. Esto es lo que hay detrás de la pantalla:</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Qué es</th><th>Estado</th></tr></thead>
+      <tbody>
+        <tr><td>Clima histórico y riesgos</td>
+          <td>NASA POWER (reanálisis MERRA-2), 1984–2025, y los últimos 30 días de ERA5 vía
+            Open-Meteo. POWER <b>estima</b>, no mide en la finca.</td>
+          <td><span class="etiqueta-real">real</span></td></tr>
+        <tr><td>Satélite</td>
+          <td>NDVI de MODIS/Terra e IMERG de GPM, a través de NASA GIBS. El píxel de 250–289 m
+            no es un sensor dentro de la parcela.</td>
+          <td><span class="etiqueta-real">real</span></td></tr>
+        <tr><td>Relieve y suelo</td>
+          <td>SRTM (NASA/USGS) para pendiente; ISRIC SoilGrids para textura y materia orgánica
+            (este último no es NASA).</td>
+          <td><span class="etiqueta-real">real</span></td></tr>
+        <tr><td>Sensores, techo y cámara</td>
+          <td>Simulados en la demo, como se avisa en la propia app. El hardware (ESP32, válvulas,
+            techo) no está instalado todavía.</td>
+          <td><span class="etiqueta-sim">simulado</span></td></tr>
+        <tr><td>Fincas de clientes</td>
+          <td>El mapa y la geometría son reales; el clima, satélite y rotaciones de esa finca
+            dicen «por generar» hasta que se calculan. No se enseñan datos de otra finca.</td>
+          <td><span class="etiqueta-sim">por generar</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="datos">
+  <div class="contenedor">
+    <p class="kicker">Datos y créditos</p>
+    <h2>Todo sale de fuentes públicas</h2>
+    <div class="lista-datos">
+      <div><b>NASA POWER</b>Clima y riesgos de 42 años (MERRA-2).</div>
+      <div><b>NASA GIBS</b>Imágenes MODIS (NDVI) y GPM IMERG (lluvia).</div>
+      <div><b>SRTM · NASA/USGS</b>Elevación y pendiente.</div>
+      <div><b>ISRIC SoilGrids 2.0</b>Textura, carbono y pH del suelo.</div>
+      <div><b>Open-Meteo · ERA5</b>Los últimos 30 días y el pronóstico.</div>
+      <div><b>Esri World Imagery</b>Imagen satelital de la finca.</div>
+    </div>
+    <p class="nota" style="margin-top:16px">Fotos de cultivo: Wikimedia Commons con licencia
+      CC BY / CC BY-SA, atribuidas en la app. NASA Space Apps Challenge es un evento de la NASA;
+      este proyecto no está afiliado ni respaldado por la NASA.</p>
+  </div>
+</section>
+
+<section id="equipo">
+  <div class="contenedor">
+    <p class="kicker">Equipo</p>
+    <h2>Seis personas, una finca de verdad</h2>
+    <div class="equipo">
+      <div><b>Brian</b><span>Liderazgo, integración de datos, app y bot</span></div>
+      <div><b>Ruben</b><span>Climatología NASA POWER de las fincas piloto</span></div>
+      <div><b>Yoel</b><span>Serie reciente, anomalías y caché sin conexión</span></div>
+      <div><b>Oscar</b><span>Monitor, tarjetas y experiencia del agricultor</span></div>
+      <div><b>Marlon</b><span>Motor de rotaciones y criterios de decisión</span></div>
+      <div><b>Alison</b><span>Pruebas, textos y revisión de lo que se afirma</span></div>
+    </div>
+    <p class="nota" style="margin-top:14px">UNIROMANA · Local Event República Dominicana,
+      NASA Space Apps Challenge 2026.</p>
+  </div>
+</section>
+
+<section id="video">
+  <div class="contenedor">
+    <p class="kicker">Demo</p>
+    <h2>Treinta segundos de Auto-Farm</h2>
+    <video controls preload="none" poster="proyecto/img/poster-video.jpg">
+      <source src="docs/demo-30s-v5.mp4" type="video/mp4">
+      Tu navegador no muestra el vídeo. <a href="docs/demo-30s-v5.mp4">Descárgalo aquí</a>.
+    </video>
+    <p class="nota">Vídeo del producto; la voz está generada con Edge TTS.</p>
+  </div>
+</section>
+
+<section id="enlaces">
+  <div class="contenedor">
+    <p class="kicker">Explorar</p>
+    <h2>La app, el material y el código</h2>
+    <div class="enlaces">
+      <a href="web/"><b>Probar la app</b><span>La demo completa en el navegador, sin instalar nada.</span></a>
+      <a href="docs/deck/"><b>Presentación</b><span>El deck del proyecto, en español.</span></a>
+      <a href="docs/submission/"><b>Submission</b><span>La entrega del reto, en inglés.</span></a>
+      <a href="docs/demo-30s-v5.mp4"><b>Vídeo (30 s)</b><span>Descarga del demo con voz.</span></a>
+      <a href="https://github.com/KIRIXDJ/tierra"><b>Repositorio de la demo</b><span>Sitio público de demostración en GitHub.</span></a>
+    </div>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="contenedor">
+    <p class="kicker">Contacto</p>
+    <h2>¿Hablamos de tu finca?</h2>
+    <p class="introduccion">Para pilotos, clases o prensa:</p>
+    <a class="boton principal" href="mailto:brautofarm@gmail.com">brautofarm@gmail.com</a>
+  </div>
+</section>
+
+<footer>
+  <div class="contenedor">
+    <p>Auto-Farm · equipo de UNIROMANA · NASA Space Apps Challenge 2026, Local Event República
+      Dominicana. Datos de NASA POWER, NASA GIBS, SRTM, ISRIC SoilGrids, Open-Meteo/ERA5 y Esri
+      World Imagery. NASA Space Apps es un evento de la NASA; este proyecto no está afiliado ni
+      respaldado por la NASA.</p>
+  </div>
+</footer>
+
+</body>
+</html>

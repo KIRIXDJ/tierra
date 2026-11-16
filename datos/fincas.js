@@ -1,0 +1,1 @@
+window.__FINCAS__ = {"version":1,"fincas":[{"id":"constanza","nombre":"Constanza","lat":18.91,"lon":-70.74},{"id":"azua","nombre":"Azua","lat":18.45,"lon":-70.73},{"id":"san_francisco_de_macoris","nombre":"San Francisco de Macorís","lat":19.3,"lon":-70.25}]};

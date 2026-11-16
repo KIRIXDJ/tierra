@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auto-Farm · Project demo (7 slides)</title>
+<style>
+  :root { --fondo:#04070d; --panel:#0b1420; --texto:#dce9f5; --sec:#7e97ad;
+    --cian:#35d6ff; --verde:#58e39a; --ambar:#ffb454; --borde:rgba(120,200,255,.18); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; background:var(--fondo); color:var(--texto);
+    font-family:"Segoe UI", system-ui, -apple-system, sans-serif; overflow:hidden; }
+  .deck { position:absolute; inset:0; max-width:calc(100vh*16/9); max-height:calc(100vw*9/16);
+    margin:auto; overflow:hidden; }
+  .slide { position:absolute; inset:0; padding:5vh 6vw; display:flex; flex-direction:column;
+    justify-content:center; opacity:0; visibility:hidden; transition:opacity .3s ease; }
+  .slide.active { opacity:1; visibility:visible; }
+  h1 { font-size:clamp(30px,5.2vw,66px); line-height:1.05; }
+  h2 { font-size:clamp(22px,3vw,40px); line-height:1.15; margin-bottom:2vh; }
+  h3 { font-size:clamp(13px,1.3vw,18px); color:var(--cian); letter-spacing:.16em;
+    text-transform:uppercase; margin-bottom:1.6vh; }
+  p, li { font-size:clamp(14px,1.45vw,20px); line-height:1.5; }
+  ul { margin-left:1.2vw; } li { margin-bottom:.9vh; }
+  li b, p b { color:var(--cian); }
+  .sub { color:var(--sec); }
+  .marca { font-size:clamp(12px,1.1vw,15px); letter-spacing:.32em; color:var(--cian);
+    text-transform:uppercase; margin-bottom:2vh; }
+  .grad { background:linear-gradient(100deg,var(--cian),var(--verde));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .rejilla { display:grid; gap:1.4vw; grid-template-columns:1fr 1fr; }
+  .caja { border:1px solid var(--borde); border-radius:12px; padding:1.6vh 1.4vw; background:var(--panel); }
+  .caja .titulo { display:block; font-weight:600; font-size:clamp(13px,1.4vw,19px); margin-bottom:.6vh; }
+  .caja p { color:var(--sec); font-size:clamp(12px,1.15vw,16px); }
+  .cifra { font-family:ui-monospace,Consolas,monospace; color:var(--cian);
+    font-size:clamp(30px,4.6vw,58px); line-height:1; }
+  .fila { display:flex; gap:3vw; margin-top:2.4vh; }
+  .etiqueta { color:var(--sec); font-size:clamp(11px,1vw,14px); }
+  .aviso { border:1px solid rgba(255,180,84,.5); background:rgba(255,180,84,.08);
+    border-radius:10px; padding:1.1vh 1.2vw; color:var(--ambar);
+    font-size:clamp(11px,1.1vw,15px); margin-top:1.6vh; }
+  .pie { position:absolute; left:6vw; right:96px; bottom:2.4vh; display:flex;
+    justify-content:space-between; font-size:clamp(10px,.95vw,13px); color:var(--sec); }
+  .nav { position:absolute; right:16px; bottom:12px; display:flex; gap:6px; }
+  .nav button { width:34px; height:34px; border-radius:8px; border:1px solid var(--borde);
+    background:rgba(4,10,18,.8); color:var(--texto); font-size:16px; cursor:pointer; }
+  .centro { text-align:center; align-items:center; }
+  .nota { font-size:clamp(12px,1.2vw,16px); color:var(--sec); margin-top:1.8vh; }
+  a { color:var(--cian); }
+  .slide h2::after { content:''; display:block; width:72px; height:3px;
+    margin-top:1.2vh; border-radius:2px;
+    background:linear-gradient(90deg, var(--cian), var(--verde)); }
+  .slide.centro h2::after { margin-left:auto; margin-right:auto; }
+  .slide.centro { background: radial-gradient(600px 320px at 50% 30%,
+    rgba(53,214,255,.10), transparent 70%); }
+  .slide.fondo { background-size: cover; background-position: center; }
+  .slide.fondo::before { content:''; position:absolute; inset:0; z-index:0;
+    background: linear-gradient(90deg, rgba(4,7,13,.97) 0%, rgba(4,7,13,.90) 48%,
+      rgba(4,7,13,.66) 76%, rgba(4,7,13,.50) 100%); }
+  .slide.fondo > * { z-index:1; }
+  .slide.fondo > :not(.pie) { position:relative; }
+  .slide.fondo .caja { background: rgba(7,14,24,.90); }
+  .slide.fondo-centro::before { background: radial-gradient(ellipse at 50% 42%,
+    rgba(4,7,13,.30) 0%, rgba(4,7,13,.74) 55%, rgba(4,7,13,.95) 84%); }
+  .caja { background: linear-gradient(180deg, rgba(53,214,255,.05), transparent 42%), var(--panel); }
+  /* Impresión: una diapositiva por página, sin navegación. */
+  @media print {
+    html, body { height:auto; overflow:visible; }
+    .deck { position:static; max-width:none; max-height:none; overflow:visible; }
+    .slide { position:relative; inset:auto; opacity:1; visibility:visible;
+      height:100vh; page-break-after:always; break-after:page; }
+    .nav { display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <section class="slide centro active fondo fondo-centro" style="background-image:url('../capturas/portada-globo.png')">
+    <div class="marca">NASA Space Apps Challenge 2026 · Dominican Republic</div>
+    <h1>AUTO-FARM<br><span class="grad">NASA data for the next planting decision</span></h1>
+    <p class="sub" style="margin-top:2.6vh; max-width:66ch">
+      A farmer-first decision-support tool: NASA Earth observations + local soil +
+      crop traits + farmer priorities, to compare rotation strategies.
+    </p>
+    <div class="nota">Team: Brian, Ruben, Yoel, Oscar, Marlon, Alison · UNIROMANA</div>
+    <div class="nota">Demo: <a href="https://kirixdj.github.io/tierra/web/">kirixdj.github.io/tierra/web/</a>
+      · Code: <a href="https://github.com/KIRIXDJ/tierra">github.com/KIRIXDJ/tierra</a></div>
+    <div class="pie"><span>Project demo</span><span>1 / 7</span></div>
+  </section>
+
+  <section class="slide">
+    <h3>The problem</h3>
+    <h2>Farmers decide with last year's weather</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Same country, different reality</span>
+        <p>In one week Azua received <b>+103 %</b> of its normal rainfall while Constanza
+           received <b>+3 %</b>. A national average would hide both farms.</p></div>
+      <div class="caja"><span class="titulo">Data does not reach the field</span>
+        <p>Satellites produce global layers; the farmer needs an answer for his plot:
+           what to plant, when to irrigate, what risk he faces.</p></div>
+    </div>
+    <div class="aviso">Rotation choices involve water, soil health, pests, markets and
+      risk — a crop that helps one farm can hurt another.</div>
+    <div class="pie"><span>Source: Open-Meteo/ERA5 (non-NASA), own 1991–2020 normal</span><span>2 / 7</span></div>
+  </section>
+
+  <section class="slide fondo" style="background-image:url('../capturas/monitor.png')">
+    <h3>What we built</h3>
+    <h2>One screen that opens on the farm</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">Real satellite map</span>
+        <p>Three demo plots over real imagery, with sensors, roof and camera labelled
+           as simulated.</p></div>
+      <div class="caja"><span class="titulo">NASA observations</span>
+        <p>NASA POWER climate and risks (heat, heavy rain, dry days, frost, root-zone
+           moisture, evapotranspiration), SRTM terrain, MODIS NDVI, GPM IMERG.</p></div>
+      <div class="caja"><span class="titulo">Local soil + crop traits</span>
+        <p>ISRIC SoilGrids texture, carbon and pH (non-NASA, labelled); crop water
+           demand and critical months.</p></div>
+      <div class="caja"><span class="titulo">Farmer priorities</span>
+        <p>Sliders for water saving and diversification, plus a rainfall scenario to
+           see which strategy holds up.</p></div>
+    </div>
+    <div class="pie"><span>NASA POWER · SRTM · MODIS · IMERG · ISRIC</span><span>3 / 7</span></div>
+  </section>
+
+  <section class="slide fondo" style="background-image:url('../capturas/monitor-rotacion.png')">
+    <h3>The core deliverable</h3>
+    <h2>Three rotations, compared with evidence</h2>
+    <div class="fila">
+      <div><div class="cifra">59/100</div><div class="etiqueta">Current: cassava</div></div>
+      <div><div class="cifra">76/100</div><div class="etiqueta">Alternative 1: maize → bean</div></div>
+      <div><div class="cifra">93/100</div><div class="etiqueta">Alternative 2: cassava → peanut → sorghum</div></div>
+    </div>
+    <ul style="margin-top:2.6vh">
+      <li><b>Why</b> it is suggested, and the <b>NASA evidence</b> behind it (dry months of the farm).</li>
+      <li><b>Benefits</b>: legumes fix nitrogen; more crop diversity spreads water risk.</li>
+      <li><b>Information gaps</b> and <b>risks</b> that need local review by an agronomist.</li>
+    </ul>
+    <div class="aviso">Scores are orientation only, not an agronomic recommendation.</div>
+    <div class="pie"><span>Rotation engine: NASA POWER climatology + crop traits</span><span>4 / 7</span></div>
+  </section>
+
+  <section class="slide fondo" style="background-image:url('../capturas/monitor-fotos.png')">
+    <h3>Farmer-first design</h3>
+    <h2>Plain language, a phone, and a real bot</h2>
+    <div class="rejilla">
+      <div class="caja"><span class="titulo">No jargon</span>
+        <p>“127 L/m²” instead of “126.8 mm”; “green 65 out of 100” instead of NDVI 0.65;
+           a field glossary inside the app.</p></div>
+      <div class="caja"><span class="titulo">Real Telegram bot</span>
+        <p>@climaxeliobot answers <b>/estado</b>, <b>/clima</b>, <b>/techo on</b> and free
+           questions using only the farm's data.</p></div>
+      <div class="caja"><span class="titulo">Mobile and automatic</span>
+        <p>Pinch-zoom map, automatic irrigation below 25 % soil moisture and roof
+           closing with real ERA5 rain.</p></div>
+      <div class="caja"><span class="titulo">Honest labels</span>
+        <p>Sensors, roof and camera are simulated and said so; sources marked NASA or
+           non-NASA.</p></div>
+    </div>
+    <div class="pie"><span>Works without internet: self-contained demo</span><span>5 / 7</span></div>
+  </section>
+
+  <section class="slide fondo" style="background-image:url('../capturas/monitor-satelite.png')">
+    <h3>Validity and limits</h3>
+    <h2>What we know, and what we do not</h2>
+    <ul>
+      <li><b>Uncertainty shown</b>: FDR correction over 2,592 grid cells, bootstrap
+          confidence intervals, adjusted p-values.</li>
+      <li><b>Satellite vs ground</b>: NASA POWER is reanalysis; MODIS pixel ~289 m and
+          IMERG ~2.3 km, larger than a 1 ha plot — explained on screen.</li>
+      <li><b>Declared gaps</b>: bare-field calendar, pest cycles, local market and
+          agronomic validation are not covered yet.</li>
+      <li><b>Roadmap</b>: SMAP, ECOSTRESS, GEDI, GRACE and Landsat are next; they need
+          Earthdata access and pixel harmonisation.</li>
+    </ul>
+    <div class="aviso">Support tool: it does not replace farmer judgment or local
+      agronomic expertise.</div>
+    <div class="pie"><span>Every limitation is stated in the product</span><span>6 / 7</span></div>
+  </section>
+
+  <section class="slide centro">
+    <div class="marca">Thank you</div>
+    <h1>Run it, ask it, break it</h1>
+    <p class="sub" style="margin-top:2.4vh">Demo:
+      <a href="https://kirixdj.github.io/tierra/web/">kirixdj.github.io/tierra/web/</a><br>
+      Code: <a href="https://github.com/KIRIXDJ/tierra">github.com/KIRIXDJ/tierra</a><br>
+      Bot: @climaxeliobot on Telegram</p>
+    <div class="nota">Team: Brian, Ruben, Yoel, Oscar, Marlon, Alison · UNIROMANA ·
+      NASA Space Apps Challenge 2026, Dominican Republic</div>
+    <div class="pie"><span>Pitch: 7 slides, 30 seconds</span><span>7 / 7</span></div>
+  </section>
+
+</div>
+<div class="nav">
+  <button id="atras" aria-label="Previous">←</button>
+  <button id="siguiente" aria-label="Next">→</button>
+</div>
+<script>
+  const diapositivas = [...document.querySelectorAll('.slide')];
+  let actual = 0;
+  function mostrar(n) {
+    actual = Math.max(0, Math.min(diapositivas.length - 1, n));
+    diapositivas.forEach((d, i) => d.classList.toggle('active', i === actual));
+    const pie = document.querySelectorAll('.slide.active .pie span:last-child')[0];
+    if (pie) { pie.textContent = `${actual + 1} / ${diapositivas.length}`; }
+  }
+  document.getElementById('siguiente').addEventListener('click', () => mostrar(actual + 1));
+  document.getElementById('atras').addEventListener('click', () => mostrar(actual - 1));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); mostrar(actual + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); mostrar(actual - 1); }
+    if (e.key === 'Home') { mostrar(0); }
+    if (e.key === 'End') { mostrar(diapositivas.length - 1); }
+  });
+  diapositivas.forEach((d, i) => {
+    const pie = d.querySelectorAll('.pie span:last-child')[0];
+    if (pie) { pie.textContent = `${i + 1} / ${diapositivas.length}`; }
+  });
+  mostrar(0);
+</script>
+</body>
+</html>
