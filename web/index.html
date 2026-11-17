@@ -2479,7 +2479,7 @@ function dibujarMapa(estado) {
 
   // 3. Plantas georreferenciadas de la parcela activa (muestra).
   const activaP = parcelaActual();
-  if (activaP) {
+  if (activaP && fincaEsDemo) {
     ctx.fillStyle = 'rgba(120, 240, 170, 0.85)';
     plantasDeParcela(activaP, 120).forEach(([x, y]) => {
       const [px, py] = aPantalla(x, y);
@@ -2487,8 +2487,9 @@ function dibujarMapa(estado) {
     });
   }
 
-  // 4. Sensores y cámara de cada parcela.
+  // 4. Sensores y cámara de cada parcela (solo demo: un cliente no tiene hardware).
   PARCELAS.forEach((p) => {
+    if (!fincaEsDemo) { return; }
     const activa = p.id === parcelaId;
     (p.sensores || []).forEach((sensor) => {
       const [sx, sy] = aPantalla(sensor.x_m, sensor.y_m);
@@ -3625,7 +3626,7 @@ function pintarTira() {
           data-id="${esc(p.id)}">
         <b><i style="background:${color}"></i>${esc(p.nombre)}</b>
         <span title="${esc(p.cultivo)} · ${esc(Lenguaje.areaM2(p.area_ha))}">
-          ${esc(p.cultivo)} · ${esc(p.area_ha)} ha · ${(p.sensores || []).length} sens.</span>
+          ${esc(p.cultivo)} · ${esc(p.area_ha)} ha${fincaEsDemo ? ` · ${(p.sensores || []).length} sens.` : ''}</span>
       </button>`;
     }).join('');
     tira.querySelectorAll('.tarjeta-parcela').forEach((boton) => {
@@ -4074,6 +4075,12 @@ function aplicarFinca({ parcelas, mapa, etiqueta, esDemo, finca }) {
   }
   const chat = document.getElementById('chat-mensajes');
   if (chat) { chat.innerHTML = ''; }
+  const campo = document.getElementById('chat-texto');
+  if (campo) {
+    campo.placeholder = fincaEsDemo
+      ? '/estado · /riego off · /techo on'
+      : '/estado · /clima · /ayuda';
+  }
   enviarAlBot('/estado');
   const nota = document.getElementById('vision-datos-nota');
   if (nota) { nota.hidden = Boolean(esDemo); }
