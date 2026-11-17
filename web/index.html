@@ -3767,11 +3767,11 @@ function cerrarMonitor() {
   cerrarFoto();
 }
 
-/* El globo se acerca a Constanza y de ahí sale el monitoreo: el "zoom" de la demo. */
-function volarAlaParcela() {
-  if (monitorAbierto) { cerrarMonitor(); return; }
-  const finca = fincaDeParcelas();
-  if (!finca) { abrirMonitor(); return; }
+/* El globo vuela a las coordenadas de la finca (demo o cliente) y de ahí sale el
+   monitoreo: el "zoom" que ya usaba la demo, ahora también al iniciar sesión. */
+function volarAlaFinca() {
+  const finca = (MAPA_PARCELAS && MAPA_PARCELAS.centro) || fincaDeParcelas();
+  if (!finca || finca.lat === undefined) { abrirMonitor(); return; }
   volarA(finca.lat, finca.lon);
   const la = (finca.lat * Math.PI) / 180;
   const lo = (finca.lon * Math.PI) / 180;
@@ -3781,6 +3781,11 @@ function volarAlaParcela() {
     -Math.cos(la) * Math.sin(lo),
   ).multiplyScalar(1.42);
   setTimeout(() => abrirMonitor(), 1600);
+}
+
+function volarAlaParcela() {
+  if (monitorAbierto) { cerrarMonitor(); return; }
+  volarAlaFinca();
 }
 
 /* ---------- El bot real de Telegram escribe datos/estado_finca.json ---------- */
@@ -4258,7 +4263,7 @@ function restaurarSesion() {
     }
     dialogo.close();
     document.getElementById('cuenta-pin').value = '';
-    if (!monitorAbierto) { abrirMonitor(); }
+    if (!monitorAbierto) { volarAlaFinca(); }
   });
   restaurarSesion();
   document.addEventListener('visibilitychange', () => {
