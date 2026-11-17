@@ -641,7 +641,7 @@
       </div>
       <div id="vision-tira"></div>
       <div id="vision-pie">
-        <div class="bloque">
+        <div class="bloque solo-demo" id="b-fotos">
           <h3>Fotos <span>satélite real · foto de campo de referencia</span></h3>
           <div id="vision-fotos"></div>
         </div>
@@ -885,7 +885,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import * as Lenguaje from './lenguaje.js';
-import { mundoAPixel, metrosPorPixel } from './mapa_geo.js';
+import { mundoAPixel, metrosPorPixel, aMarcoDeDibujo } from './mapa_geo.js';
 
 const EQUIPO = '';
 const TEXTURAS = '../textures/';
@@ -4051,6 +4051,13 @@ function aplicarFinca({ parcelas, mapa, etiqueta, esDemo, finca }) {
   if (vision) { vision.dataset.modo = fincaEsDemo ? 'demo' : 'cliente'; }
   PARCELAS.splice(0, PARCELAS.length, ...parcelas);
   MAPA_PARCELAS = mapa;
+  // La API entrega la y hacia el norte; el mapa pinta hacia abajo (igual que las teselas).
+  if (mapa && mapa.modo === 'vivo') {
+    PARCELAS.forEach((p) => {
+      p.poligono_m = aMarcoDeDibujo(p.poligono_m);
+      (p.sensores || []).forEach((sensor) => { sensor.y_m = -sensor.y_m; });
+    });
+  }
   // `finca` es el id con el que están calculados los datos (constanza en la demo). El
   // mapa horneado no lo trae, así que tiene que venir explícito o se pierde al volver.
   FINCA_PARCELAS = finca || null;

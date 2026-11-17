@@ -43,6 +43,13 @@ export function centroDe(puntos) {
 }
 
 /* Lat/lon -> metros relativos al centro, con la escala real a esa latitud. */
+/* Los metros que calcula `aMetros` llevan la y hacia el norte, pero el canvas del
+   mapa pinta la y hacia abajo (como las teselas): al dibujar hay que cambiarle el
+   signo o la parcela sale espejada. */
+export function aMarcoDeDibujo(poligono) {
+  return (poligono || []).map(([x, y]) => [x, -y]);
+}
+
 export function aMetros(poligonoLatLon, centro) {
   // Metros por grado: de latitud es constante; de longitud se encoge con el coseno.
   const metrosPorGrado = (2 * Math.PI * RADIO_TIERRA) / 360;
