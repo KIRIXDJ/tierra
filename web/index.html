@@ -465,6 +465,7 @@
     padding: 8px 10px; font: inherit; font-size: 12px; outline: none; }
   #chat-forma button { background: transparent; border: 0; color: var(--cian);
     padding: 0 12px; font-size: 15px; cursor: pointer; }
+  #vision[data-modo="cliente"] .solo-demo { display: none; }
   #vision-aviso-campo { font-size: 11px; color: var(--secundario); line-height: 1.5;
     padding: 0 2px; }
   #vision-automatico { margin-top: 7px; font-size: 11px; line-height: 1.5;
@@ -567,7 +568,7 @@
   <p id="desafio">NASA Space Apps 2026 · Agricultura en transformación</p>
   <div id="portada-datos">
     <span><b>42</b> años de reanálisis</span>
-    <span><b id="portada-parcelas">3</b> parcelas demo · Constanza</span>
+    <span><b id="portada-parcelas">6</b> parcelas demo · Constanza</span>
     <span id="portada-ndvi" hidden><b>—</b> NDVI MODIS</span>
   </div>
   <div id="portada-botones">
@@ -653,8 +654,8 @@
             <div class="chat-rapidos" aria-label="Comandos rápidos">
               <button type="button" data-comando="/estado">/estado</button>
               <button type="button" data-comando="/clima">/clima</button>
-              <button type="button" data-comando="/riego off">/riego off</button>
-              <button type="button" data-comando="/techo on">/techo on</button>
+              <button type="button" data-comando="/riego off" class="solo-demo">/riego off</button>
+              <button type="button" data-comando="/techo on" class="solo-demo">/techo on</button>
               <button type="button" data-comando="/ayuda">/ayuda</button>
               <button type="button" data-comando="/ia ¿cómo va la temporada en Constanza?">pregunta libre</button>
             </div>
@@ -672,7 +673,7 @@
       </div>
     </div>
     <aside id="vision-lado">
-      <div class="bloque">
+      <div class="bloque solo-demo" id="b-sensores">
         <h3>Sensores <span id="vision-sensores-hora"></span></h3>
         <div id="parcela-lecturas"></div>
         <div id="vision-sensores"></div>
@@ -699,7 +700,7 @@
           <span class="dato-resumen"></span></summary>
         <div id="vision-satelite"></div>
       </details>
-      <details class="bloque" id="b-actuadores">
+      <details class="bloque solo-demo" id="b-actuadores">
         <summary><h3>Actuadores <span>simulados</span></h3>
           <span class="dato-resumen"></span></summary>
         <div id="vision-actuadores"></div>
@@ -722,14 +723,14 @@
           <input type="range" id="escenario-lluvia" min="-40" max="40" step="5" value="0">
           <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.</span></div>
       </details>
-      <details class="bloque" id="vision-campo">
+      <details class="bloque solo-demo" id="vision-campo">
         <summary><h3>Foto del cultivo</h3></summary>
         <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
           <input type="file" id="vision-archivo" accept="image/*" capture="environment">
         </label>
         <div id="vision-diagnostico"></div>
       </details>
-      <div id="parcela-camara"></div>
+      <div id="parcela-camara" class="solo-demo"></div>
       <details id="vision-metodo">
         <summary>Método y límites</summary>
         <p><b>Clima:</b> 42 años de tendencia NASA POWER (Sen + Mann-Kendall con
@@ -842,8 +843,8 @@
       caja.querySelector('p').innerHTML =
         'El navegador bloquea los módulos cuando el archivo se abre con doble clic.'
         + '<br><br>En la carpeta del proyecto ejecuta:<br>'
-        + '<code style="color:#35d6ff">python3 -m http.server 8000</code>'
-        + '<br><br>y entra en <code style="color:#35d6ff">http://localhost:8000/web/</code>';
+        + '<code style="color:#35d6ff">python3 tools/servir_local.py</code>'
+        + '<br><br>y entra en <code style="color:#35d6ff">http://127.0.0.1:8000/web/</code>';
     });
   }
 </script>
@@ -2138,6 +2139,7 @@ const USUARIOS = (window.__USUARIOS__ && window.__USUARIOS__.usuarios) || [];
 const CUENTA_CLAVE = 'auto-farm.usuario';
 const CUENTA_DATOS = 'auto-farm.cuenta';
 let cuentaActiva = null;
+let fincaEsDemo = true;   // false en la finca de un cliente: sin hardware
 let datosDemo = null;   // foto de la demo para poder volver al salir
 // Respaldo inerte: si Monitor faltara, el globo y el resto del app siguen vivos.
 const Monitor = window.Monitor || {
@@ -2294,7 +2296,7 @@ function ajustarVista(verTodo) {
 /* La foto satelital solo cubre su propio cuadrado: no dejamos que el mapa
    muestre vacío negro a los lados al mover o alejar. */
 function limitarVista() {
-  if (!MAPA_PARCELAS) { return; }
+  if (!MAPA_PARCELAS || MAPA_PARCELAS.modo === 'vivo') { return; }
   const { ancho, alto } = cajaMapa();
   const mitad = (MAPA_PARCELAS.ancho_px * MAPA_PARCELAS.metros_por_pixel) / 2;
   const mx = Math.max(0, mitad - ancho / (2 * vista.escala));
@@ -2320,7 +2322,7 @@ function pantallaAMetros(clientX, clientY) {
 }
 
 function escalaMinima() {
-  if (!MAPA_PARCELAS) { return 0.25; }
+  if (!MAPA_PARCELAS || MAPA_PARCELAS.modo === 'vivo') { return 0.25; }
   const { ancho, alto } = cajaMapa();
   const ladoM = MAPA_PARCELAS.ancho_px * MAPA_PARCELAS.metros_por_pixel;
   return Math.max(ancho / ladoM, alto / ladoM);
@@ -3982,7 +3984,8 @@ function enviarAlBot(texto) {
     });
     return;
   }
-  const salida = Vision.interpretarComando(limpio, { parcela, estado: parcelaEstado || {} });
+  const salida = Vision.interpretarComando(limpio, { parcela, estado: parcelaEstado || {},
+    sinHardware: !fincaEsDemo });
   Object.entries(salida.cambios || {}).forEach(([clave, valor]) => {
     if (parcela) {
       if (valor === null) {
@@ -4040,6 +4043,9 @@ function guardarDemo() {
 
 /* Cambia la finca en pantalla: mapa horneado, parcelas y etiqueta. */
 function aplicarFinca({ parcelas, mapa, etiqueta, esDemo, finca }) {
+  fincaEsDemo = Boolean(esDemo);
+  const vision = document.getElementById('vision');
+  if (vision) { vision.dataset.modo = fincaEsDemo ? 'demo' : 'cliente'; }
   PARCELAS.splice(0, PARCELAS.length, ...parcelas);
   MAPA_PARCELAS = mapa;
   // `finca` es el id con el que están calculados los datos (constanza en la demo). El
@@ -4063,14 +4069,24 @@ function aplicarFinca({ parcelas, mapa, etiqueta, esDemo, finca }) {
   if (sub) {
     sub.innerHTML = esDemo
       ? ((datosDemo && datosDemo.subtitulo) || sub.innerHTML)
-      : 'Mapa satelital real de tu finca · sensores y techo simulados · '
-        + '<b>clima, satélite y rotación: por generar</b>';
+      : 'Mapa satelital real de tu finca · <b>sin sensores ni techo instalados</b> · '
+        + 'clima, satélite y rotación: por generar';
   }
   const chat = document.getElementById('chat-mensajes');
   if (chat) { chat.innerHTML = ''; }
   enviarAlBot('/estado');
   const nota = document.getElementById('vision-datos-nota');
   if (nota) { nota.hidden = Boolean(esDemo); }
+  const aviso = document.getElementById('vision-aviso-campo');
+  if (aviso) {
+    aviso.innerHTML = fincaEsDemo
+      ? '<b>Vista de demostración.</b> Mapa satélite real de la zona y clima de NASA POWER/ERA5; '
+        + 'parcelas, sensores ESP32 y techo simulados. El bot de Telegram es real: '
+        + '<b>@climaxeliobot</b>.'
+      : '<b>Finca real, sin hardware instalado.</b> El mapa satelital (Esri) es de tu finca; '
+        + 'no hay sensores, techo, cámara ni foto de tu cultivo, por eso esas tarjetas no se '
+        + 'muestran. El clima, el suelo y la rotación de esta finca están por generar.';
+  }
 }
 
 function ponerCuentaActiva(usuario) {

@@ -194,6 +194,25 @@
     if (!t || t === '/ayuda' || t === 'ayuda' || t === '/start') {
       return { respuesta: `Hola. Soy el bot de ${nombre}.\n\n${ayuda}`, cambios };
     }
+    /* Finca real sin hardware instalado: no se fingen sensores ni se mueven actuadores. */
+    if (c.sinHardware) {
+      if (t === '/estado' || t === 'estado') {
+        return {
+          respuesta: `*${nombre}* (${parcela.cultivo || 'sin cultivo'}, `
+            + `${parcela.area_ha ?? '?'} ha)\nEsta finca no tiene sensores instalados: no puedo `
+            + 'leer humedad, temperatura ni batería. Cuando se generen el clima y el suelo de tu '
+            + 'finca te los doy con su fuente.',
+          cambios,
+        };
+      }
+      if (/\/riego|riega|regar|\/techo|techo|lona|\/ventilacion|ventila|\/auto|automatico|automático/.test(t)) {
+        return {
+          respuesta: 'Esta finca no tiene actuadores instalados: no puedo mover el riego, '
+            + 'el techo ni la ventilación. Son equipos que se instalan en campo.',
+          cambios,
+        };
+      }
+    }
     if (t === '/estado' || t === 'estado') {
       return {
         respuesta: `*${nombre}* (${parcela.cultivo || 'sin cultivo'}, ${parcela.area_ha ?? '?'} ha)\n`
