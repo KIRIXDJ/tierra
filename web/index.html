@@ -467,7 +467,7 @@
     padding: 0 12px; font-size: 15px; cursor: pointer; }
   #vision[data-modo="cliente"] .solo-demo { display: none; }
   #vision-aviso-campo { font-size: 11px; color: var(--secundario); line-height: 1.5;
-    padding: 0 2px; }
+    padding: 0 2px; flex-shrink: 0; }
   #vision-automatico { margin-top: 7px; font-size: 11px; line-height: 1.5;
     color: var(--secundario); border-left: 2px solid rgba(53, 214, 255, .35);
     padding-left: 7px; }
@@ -4090,9 +4090,9 @@ function aplicarFinca({ parcelas, mapa, etiqueta, esDemo, finca }) {
       ? '<b>Vista de demostración.</b> Mapa satélite real de la zona y clima de NASA POWER/ERA5; '
         + 'parcelas, sensores ESP32 y techo simulados. El bot de Telegram es real: '
         + '<b>@climaxeliobot</b>.'
-      : '<b>Finca real, sin hardware instalado.</b> El mapa satelital (Esri) es de tu finca; '
-        + 'no hay sensores, techo, cámara ni foto de tu cultivo, por eso esas tarjetas no se '
-        + 'muestran. El clima, el suelo y la rotación de esta finca están por generar.';
+      : '<b>Finca real, sin hardware instalado.</b> El mapa satelital es de tu finca; no hay '
+        + 'sensores, techo, cámara ni foto de tu cultivo. El clima, el suelo y la rotación de '
+        + 'esta finca están por generar.';
   }
 }
 
