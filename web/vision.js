@@ -214,14 +214,15 @@
       }
     }
     if (t === '/estado' || t === 'estado') {
+      const humedad = estado.humedad ?? parcela.humedad_inicial ?? null;
       return {
         respuesta: `*${nombre}* (${parcela.cultivo || 'sin cultivo'}, ${parcela.area_ha ?? '?'} ha)\n`
-          + `Humedad: ${estado.humedad ?? '?'} %\n`
+          + `Humedad: ${humedad ?? '?'} %\n`
           + `Temperatura: ${parcela.temperatura ?? '?'} °C\n`
           + `Riego: ${estado.riego ? 'encendido' : 'apagado'}\n`
           + `Ventilación: ${estado.ventilacion ? 'abierta' : 'cerrada'}\n`
           + `Techo: ${estado.techo ? 'cerrado' : 'abierto'}\n`
-          + `${estado.humedad !== null && estado.humedad < UMBRAL_RIEGO
+          + `${humedad !== null && humedad < UMBRAL_RIEGO
             ? '⚠️ Falta agua: por debajo del umbral.' : 'Sin alertas.'}`,
         cambios,
       };

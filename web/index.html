@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
@@ -561,8 +561,1368 @@
   }
 
 </style>
+<style id="rediseno-portada">
+  /* ===== Rediseño UI · capa 1: portada, tema y transición ===== */
+  html[data-tema="claro"] {
+    --fondo: #eef1f5;
+    --panel: rgba(255, 255, 255, 0.88);
+    --borde: rgba(15, 23, 42, 0.14);
+    --texto: #0b1220;
+    --secundario: #5b6b7f;
+    --cian: #2563eb;
+    --verde: #0f9d58;
+    --ambar: #b45309;
+  }
+  html, body { transition: background .35s ease, color .35s ease; }
+  html[data-tema="claro"] body { background: var(--fondo); }
+
+  #tema-boton {
+    position: fixed; top: 18px; right: 18px; z-index: 70;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 17px;
+    color: var(--texto); background: var(--panel);
+    border: 1px solid var(--borde); cursor: pointer;
+    backdrop-filter: blur(10px); transition: background .2s ease, color .2s ease;
+  }
+  #tema-boton:hover { background: var(--texto); color: var(--fondo); }
+
+  /* La portada ahora es una composición centrada sobre el globo. */
+  #marca {
+    inset: 0; width: 100%; padding: 0 24px;
+    align-items: center; justify-content: center; text-align: center; gap: 14px;
+    background: radial-gradient(95% 75% at 50% 52%,
+      rgba(4, 7, 13, 0.04) 32%, rgba(4, 7, 13, 0.62) 100%);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  html[data-tema="claro"] #marca {
+    background: radial-gradient(95% 75% at 50% 52%,
+      rgba(238, 241, 245, 0.05) 30%, rgba(238, 241, 245, 0.78) 100%);
+  }
+  #marca h1 {
+    background: none; -webkit-text-fill-color: currentColor; color: var(--texto);
+    font-size: clamp(52px, 8.5vw, 118px); letter-spacing: .16em; font-weight: 700;
+    line-height: .95; text-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+  }
+  #marca #subtitulo {
+    font-size: clamp(15px, 1.25vw, 19px) !important; color: var(--secundario) !important;
+    max-width: 46ch; margin: 6px auto 2px !important; line-height: 1.5;
+  }
+  #marca #desafio { font-size: 10px; letter-spacing: .22em; opacity: .75; }
+
+  #portada-botones { justify-content: center; margin-top: 16px; pointer-events: auto; }
+  #portada-cuenta, #portada-cta {
+    border-radius: 999px; padding: 14px 28px; font-size: 14px; font-weight: 600;
+    letter-spacing: .02em; transition: background .2s ease, color .2s ease,
+      border-color .2s ease, transform .15s ease;
+  }
+  #portada-cuenta {
+    background: var(--texto); color: var(--fondo); border: 1px solid var(--texto);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .28);
+  }
+  #portada-cuenta:hover, #portada-cuenta:focus-visible {
+    background: transparent; color: var(--texto); border-color: var(--texto);
+    transform: translateY(-1px); box-shadow: none;
+  }
+  #portada-cta {
+    background: transparent; color: var(--texto); border: 1px solid var(--borde);
+    backdrop-filter: blur(8px);
+  }
+  #portada-cta:hover, #portada-cta:focus-visible {
+    background: var(--texto); color: var(--fondo); border-color: var(--texto);
+  }
+
+  /* Cuatro datos destacados bajo los botones. */
+  #portada-stats {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin-top: 22px; pointer-events: none;
+  }
+  #portada-stats .stat {
+    min-width: 138px; padding: 14px 18px; border-radius: 16px;
+    background: var(--panel); border: 1px solid var(--borde);
+    backdrop-filter: blur(14px); text-align: left;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, .18);
+  }
+  #portada-stats .stat small {
+    display: block; font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--secundario); margin-bottom: 6px;
+  }
+  #portada-stats .stat b {
+    font-size: 26px; font-weight: 650; color: var(--texto);
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+  }
+  #portada-stats .stat i { font-style: normal; font-size: 12px; color: var(--secundario); margin-left: 3px; }
+  #portada-fuente {
+    margin-top: 10px; font-size: 10px; letter-spacing: .12em; color: var(--secundario);
+    text-transform: uppercase; pointer-events: none;
+  }
+
+  /* Los datos antiguos pasan a pie de página discreto. */
+  #portada-datos {
+    position: fixed; left: 0; right: 0; bottom: 20px; margin: 0 auto;
+    justify-content: center; gap: 18px; pointer-events: none; opacity: .62;
+  }
+  #portada-datos span {
+    background: none; border: 0; padding: 0; font-size: 10px; letter-spacing: .08em;
+    backdrop-filter: none;
+  }
+
+  /* Fuera los botones Tendencia y Mi parcela de la esquina. */
+  #chips { display: none !important; }
+
+  /* Al tocar el globo, la portada se desvanece y vuelve al dejar de interactuar. */
+  body.explorando #marca { opacity: 0; transform: scale(.985); pointer-events: none; }
+  body.explorando #variables, body.explorando #leyenda,
+  body.explorando #resumen-global { opacity: 0; pointer-events: none; }
+  #variables, #leyenda, #resumen-global { transition: opacity .45s ease; }
+
+  /* Transición dramática hacia la parcela. */
+  #transicion {
+    position: fixed; inset: 0; z-index: 90; pointer-events: none;
+    background: radial-gradient(circle at 50% 58%, rgba(2, 6, 23, .15) 0%,
+      rgba(2, 6, 23, .92) 62%, #020617 100%);
+    opacity: 0; transition: opacity .38s ease, transform .9s ease;
+    transform: scale(1);
+  }
+  #transicion.activa { opacity: 1; transform: scale(1.04); }
+  #transicion.zoom { transform: scale(1.5); }
+
+  /* Login centrado y con el título centrado. */
+  #cuenta-dialog { margin: auto; }
+  #cuenta-forma h2 { text-align: center; font-size: 16px; letter-spacing: .12em; }
+  #cuenta-forma p { text-align: center; }
+  html[data-tema="claro"] #cuenta-dialog { background: #ffffff; }
+
+  /* Scrollbar coherente con el tema. */
+  * { scrollbar-width: thin; scrollbar-color: var(--borde) transparent; }
+  *::-webkit-scrollbar { width: 10px; height: 10px; }
+  *::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--texto) 22%, transparent);
+    border-radius: 999px; border: 2px solid transparent; background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--texto) 38%, transparent);
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+
+  @media (max-width: 720px) {
+    #marca h1 { font-size: clamp(40px, 13vw, 64px); letter-spacing: .12em; }
+    #marca { gap: 10px; padding: 0 16px; }
+    #portada-stats { gap: 8px; margin-top: 16px; }
+    #portada-stats .stat { min-width: calc(50% - 8px); padding: 11px 13px; }
+    #portada-stats .stat b { font-size: 22px; }
+    #portada-botones { width: 100%; }
+    #portada-cuenta, #portada-cta { flex: 1 1 100%; }
+    #portada-datos { gap: 10px; font-size: 9px; bottom: 14px; }
+  }
+</style>
+<style id="rediseno-parcela">
+  /* ===== Rediseño UI · capa 2: pantalla de parcela ===== */
+
+  /* Cabecera: solo AUTO-FARM; fuera el subtítulo y el selector viejo. */
+  #vision-cabecera { padding: 12px 18px; background: rgba(4, 7, 13, .58); }
+  html[data-tema="claro"] #vision-cabecera { background: rgba(255, 255, 255, .72); }
+  #vision-cabecera > div:first-child { display: flex; align-items: baseline; gap: 10px; }
+  #vision-cabecera h2, #vision-sub { display: none !important; }
+  #vision-cabecera > div:first-child > div {
+    font-size: 15px !important; letter-spacing: .28em !important; color: var(--texto) !important;
+    font-weight: 700; margin: 0 !important;
+  }
+  #parcela-selector { display: none; }
+  #vision-tira { display: none; }
+  #vision-bot { display: none; }
+
+  /* El mapa manda: una sola fila grande y el panel derecho más estrecho. */
+  #vision-cuerpo { grid-template-columns: minmax(0, 1fr) 372px; gap: 14px; padding: 10px 16px 14px; }
+  #vision-izq { grid-template-rows: minmax(0, 1fr) auto; }
+  #vision-pie { grid-template-columns: minmax(0, 1fr); max-height: min(250px, 30vh); }
+  #b-fotos { display: none !important; }
+
+  /* Fotos: solo cuando se piden con el icono de cámara. */
+  #vision.fotos-abiertas #b-fotos {
+    display: flex !important; position: fixed; z-index: 55;
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(720px, 92vw); max-height: 80vh; overflow: auto;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 18px;
+    padding: 16px; backdrop-filter: blur(18px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+  }
+  #vision.fotos-abiertas #vision-mapa-caja { filter: brightness(.6); }
+  #boton-fotos.activo { border-color: var(--cian); color: var(--cian); }
+
+  /* Buscador de parcelas estilo navegador, sobre el mapa. */
+  #buscador-parcelas { position: absolute; top: 12px; left: 12px; z-index: 6;
+    width: min(330px, calc(100% - 90px)); }
+  #buscador-parcelas input {
+    width: 100%; height: 40px; border-radius: 12px; border: 1px solid var(--borde);
+    background: var(--panel); color: var(--texto); font: inherit; font-size: 13px;
+    padding: 0 40px 0 14px; outline: none; backdrop-filter: blur(14px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+  }
+  #buscador-parcelas input:focus { border-color: var(--cian); }
+  #buscador-parcelas .lupa { position: absolute; right: 13px; top: 11px; font-size: 14px;
+    color: var(--secundario); pointer-events: none; }
+  #buscador-lista { list-style: none; margin: 6px 0 0; padding: 6px;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+    backdrop-filter: blur(16px); max-height: 260px; overflow: auto;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .4); display: none; }
+  #buscador-lista.abierta { display: block; }
+  #buscador-lista li { padding: 9px 11px; border-radius: 8px; cursor: pointer;
+    display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+  #buscador-lista li small { color: var(--secundario); font-size: 11px; }
+  #buscador-lista li:hover, #buscador-lista li.activa { background: var(--texto); color: var(--fondo); }
+  #buscador-lista li:hover small { color: var(--fondo); opacity: .7; }
+
+  /* Panel derecho: renglones tipo carta, todos con el mismo borde. */
+  #vision-lado { gap: 9px; padding-right: 2px; }
+  #vision-lado > .bloque {
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 14px;
+    padding: 11px 13px; box-shadow: 0 10px 26px rgba(0, 0, 0, .16);
+  }
+  #vision-lado > .bloque h3 { margin-bottom: 7px; }
+  #vision-lado #b-rotacion { padding: 10px 12px; }
+  #vision-lado #b-rotacion .rotacion-fila { padding: 7px 8px; }
+  #vision-lado #b-rotacion p, #vision-lado #b-rotacion li { font-size: 10.5px; line-height: 1.4; }
+
+  /* Elio: cuadrícula, comandos plegables y estado conectado/desconectado. */
+  #vision-chat { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  .chat-cabecera { display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+    gap: 10px; padding: 8px 10px; border-bottom: 1px solid var(--borde); }
+  .elio-nombre { display: flex; flex-direction: column; gap: 2px; }
+  .elio-canal { font-size: 10px; color: var(--secundario); }
+  #elio-conexion {
+    justify-self: end; font-size: 10px; font-weight: 600; letter-spacing: .04em;
+    padding: 5px 10px; border-radius: 8px; border: 1px solid transparent; white-space: nowrap;
+  }
+  #elio-conexion.ok { color: #052e18; background: var(--verde); border-color: var(--verde); }
+  #elio-conexion.no { color: #2b0a0a; background: #ff7a7a; border-color: #ff7a7a; }
+  details.comandos-chat { border-bottom: 1px solid var(--borde); }
+  details.comandos-chat > summary { cursor: pointer; list-style: none; padding: 7px 10px;
+    font-size: 11px; color: var(--secundario); display: flex; justify-content: space-between; }
+  details.comandos-chat > summary::-webkit-details-marker { display: none; }
+  details.comandos-chat > summary::after { content: '▾'; }
+  details.comandos-chat[open] > summary::after { content: '▴'; }
+  .chat-rapidos { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 4px; padding: 6px 8px; border-bottom: 0; }
+
+  /* Tema claro en la parcela. */
+  html[data-tema="claro"] #vision {
+    background: radial-gradient(1200px 700px at 18% 0%, #ffffff 0%, #eef1f5 62%);
+  }
+  html[data-tema="claro"] .bloque {
+    background: #ffffff; border-color: rgba(15, 23, 42, .12);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .08);
+  }
+  html[data-tema="claro"] #vision-mapa-caja { background: #e2e8f0; }
+  html[data-tema="claro"] #vision-cabecera { border-color: rgba(15, 23, 42, .1); }
+
+  /* Móvil: mapa arriba y panel debajo, sin apretujar. */
+  @media (max-width: 860px) {
+    #vision-cuerpo { grid-template-columns: 1fr; grid-template-rows: minmax(280px, 46vh) minmax(0, 1fr);
+      padding: 8px; gap: 8px; }
+    #vision-izq { grid-template-rows: minmax(0, 1fr); }
+    #vision-pie { max-height: 230px; }
+    #buscador-parcelas { width: min(280px, calc(100% - 70px)); }
+    #vision-cabecera > div:first-child > div { font-size: 13px !important; }
+  }
+</style>
+<style id="rediseno-ajustes">
+  /* ===== Ajustes de contraste, móvil y detalles ===== */
+  html[data-tema="claro"] #marca {
+    background: radial-gradient(80% 70% at 50% 50%,
+      rgba(238, 241, 245, .93) 0%, rgba(238, 241, 245, .74) 52%,
+      rgba(238, 241, 245, .34) 100%);
+  }
+  html[data-tema="claro"] #marca h1 { color: #0b1220; text-shadow: 0 12px 44px rgba(255, 255, 255, .7); }
+  html[data-tema="claro"] #portada-fuente,
+  html[data-tema="claro"] #portada-datos span { color: #475569; }
+  html[data-tema="claro"] #portada-datos b { color: #0b1220; }
+
+  @media (max-width: 720px) {
+    #portada-cuenta, #portada-cta { flex: none; width: 100%; border-radius: 14px;
+      padding: 14px 18px; }
+    #tema-boton { top: 74px; right: 12px; width: 40px; height: 40px; font-size: 15px; }
+    #variables { max-width: calc(100vw - 120px); overflow-x: auto; }
+    #variables button { white-space: nowrap; }
+    #portada-stats .stat { min-width: calc(50% - 8px); }
+  }
+</style>
+<style id="rediseno-ajustes2">
+  /* Elio: cabecera en dos filas y estado a la derecha. */
+  .chat-cabecera { grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto; }
+  .elio-nombre { grid-column: 2; grid-row: 1; }
+  .elio-canal { grid-column: 2; grid-row: 2; }
+  #elio-conexion { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+  #chat-mensajes { overflow-y: auto; }
+  #vision-pie { max-height: min(286px, 34vh); }
+
+  /* El botón de tema no tapa la × de la parcela. */
+  body.explorando #tema-boton { display: none; }
+
+  /* Hover con inversión en los controles de la parcela. */
+  #vision button:hover:not(:disabled):not(.activo) {
+    background: var(--texto); color: var(--fondo); border-color: var(--texto);
+  }
+  #vision button:hover:not(:disabled) .elio-canal { color: inherit; }
+
+  @media (max-width: 860px) {
+    body.explorando #tema-boton { display: none; }
+    #buscador-parcelas { width: calc(100% - 172px); }
+    #vision-mapa-hud button.ancho { display: none; }
+    #vision-pie { max-height: 320px; }
+  }
+</style>
+<style id="rediseno-claro-parcela">
+  html[data-tema="claro"] #vision-chat { background: #ffffff; border-color: rgba(15, 23, 42, .12); }
+  html[data-tema="claro"] .chat-cabecera { background: #ffffff; }
+  html[data-tema="claro"] #chat-mensajes { background: #f8fafc; }
+  html[data-tema="claro"] #chat-texto,
+  html[data-tema="claro"] #cuenta-forma input,
+  html[data-tema="claro"] #parcela-selector {
+    background: #ffffff; color: #0b1220; border-color: rgba(15, 23, 42, .18);
+  }
+  html[data-tema="claro"] #vision-mapa-hud button {
+    background: #ffffff; color: #0b1220; border-color: rgba(15, 23, 42, .16);
+  }
+  html[data-tema="claro"] #vision-mapa-hud button:hover {
+    background: #0b1220; color: #ffffff; border-color: #0b1220;
+  }
+  html[data-tema="claro"] #vision-pie .bloque { background: #ffffff; }
+  html[data-tema="claro"] .chat-rapidos button { color: #0b1220; }
+</style>
+<style id="rediseno-elio-alto">
+  #vision-pie { max-height: min(330px, 38vh); }
+  #vision-chat { min-height: 250px; }
+  #chat-mensajes { min-height: 96px; max-height: 150px; }
+</style>
+<style id="open-design-modern-minimal">
+  /* Dirección de diseño aplicada desde OpenDesign:
+     od tools directions --id modern-minimal
+     (Linear / Vercel: sistema tipográfico, neutrales finos, acento azul,
+     bordes de un pelo, números tabulares y poco peso visual). */
+  :root {
+    --fuente-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text",
+      "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    --cian: #3b6df6;
+    --acento: #3b6df6;
+  }
+  html, body, button, input, select, textarea { font-family: var(--fuente-ui); }
+  html[data-tema="claro"] {
+    --fondo: #fbfcfd;
+    --panel: #ffffff;
+    --texto: #181b20;
+    --secundario: #6b7280;
+    --borde: #e6e8ec;
+    --cian: #3b6df6;
+  }
+  #marca h1 { letter-spacing: .02em; font-weight: 650; }
+  #portada-stats .stat { box-shadow: none; border: 1px solid var(--borde); }
+  #portada-cuenta { box-shadow: none; }
+  #portada-cuenta:hover { box-shadow: none; }
+  #vision-lado > .bloque { box-shadow: none; }
+  #buscador-lista { box-shadow: 0 12px 32px rgba(0, 0, 0, .18); }
+  #vision.fotos-abiertas #b-fotos { box-shadow: 0 24px 64px rgba(0, 0, 0, .45); }
+</style>
+<style id="rediseno-final">
+  #vision-tema { font-size: 15px; line-height: 1; padding: 7px 9px; }
+  #vision-mapa-hud button { background: rgba(4, 10, 18, .86); color: #f2f7fb;
+    border: 1px solid rgba(255, 255, 255, .14); }
+  #vision-mapa-hud button:hover:not(:disabled) { background: #f2f7fb; color: #0b1220; }
+  html[data-tema="claro"] #vision-mapa-hud button { background: #ffffff; color: #0b1220;
+    border-color: rgba(15, 23, 42, .16); }
+  .bloque { transition: border-color .2s ease; }
+  .bloque:hover { border-color: var(--cian); }
+</style>
+<style id="rediseno-ubicacion-panel">
+  /* Ubicación de la parcela en el panel derecho. */
+  #vision-ubicacion { font-size: 11px; line-height: 1.55; color: var(--secundario); }
+  #vision-ubicacion b { color: var(--texto); font-weight: 600; }
+  /* Panel de celda del globo: ventana flotante con renglones. */
+  #panel {
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 16px;
+    padding: 16px; backdrop-filter: blur(16px);
+    box-shadow: 0 22px 60px rgba(0, 0, 0, .32);
+  }
+  #panel #panel-serie { width: 100%; border-radius: 10px; }
+  #panel #comparar { border-radius: 10px; }
+  html[data-tema="claro"] #panel {
+    background: #ffffff; box-shadow: 0 18px 44px rgba(15, 23, 42, .12);
+  }
+</style>
+<style id="iteracion2a">
+  /* Portada más pequeña: que el globo respire. */
+  #marca { gap: 8px; }
+  #marca h1 { font-size: clamp(38px, 5.4vw, 76px); letter-spacing: .03em; }
+  #marca #subtitulo { font-size: 13px !important; max-width: 40ch; margin-top: 2px !important; }
+  #marca #desafio { font-size: 9px; }
+  #portada-botones { margin-top: 10px; gap: 8px; }
+  #portada-cuenta, #portada-cta { padding: 10px 20px; font-size: 12.5px; }
+  #portada-stats { gap: 8px; margin-top: 12px; }
+  #portada-stats .stat { min-width: 108px; padding: 8px 12px; border-radius: 12px; }
+  #portada-stats .stat small { font-size: 8px; margin-bottom: 3px; }
+  #portada-stats .stat b { font-size: 19px; }
+  #portada-stats .stat i { font-size: 10px; }
+  #portada-fuente { margin-top: 6px; font-size: 8.5px; }
+  #portada-datos { bottom: 10px; opacity: .5; }
+
+  /* El velo de la portada sigue siendo oscuro también en modo claro. */
+  html[data-tema="claro"] #marca {
+    background: radial-gradient(95% 75% at 50% 52%,
+      rgba(4, 7, 13, .12) 28%, rgba(4, 7, 13, .64) 100%);
+  }
+  html[data-tema="claro"] #marca h1 { color: #f4f9ff; text-shadow: 0 12px 44px rgba(0, 0, 0, .55); }
+  html[data-tema="claro"] #marca #subtitulo,
+  html[data-tema="claro"] #marca #desafio,
+  html[data-tema="claro"] #portada-fuente,
+  html[data-tema="claro"] #portada-datos span { color: #c9d7e4 !important; }
+
+  /* Cursor de ojo y pista EXAMINAR sobre el globo. */
+  #lienzo { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='1.8'><path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z'/><circle cx='12' cy='12' r='3.2'/></svg>") 17 17, zoom-in; }
+  body.explorando #lienzo { cursor: grab; }
+  #pista-globo {
+    position: fixed; z-index: 30; pointer-events: none; display: none;
+    padding: 9px 16px; border-radius: 999px; font-size: 11px; letter-spacing: .22em;
+    text-transform: uppercase; font-weight: 700; color: #06121e;
+    background: #ffffff; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  }
+  body.explorando #pista-globo { display: none !important; }
+
+  /* Botón VOLVER dentro del modo globo. */
+  #volver-globo {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    z-index: 65; display: none; align-items: center; gap: 8px;
+    padding: 13px 26px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .35); color: #06121e; background: #ffffff;
+    font: inherit; font-size: 12px; font-weight: 700; letter-spacing: .18em;
+    text-transform: uppercase; box-shadow: 0 16px 44px rgba(0, 0, 0, .45);
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  #volver-globo:hover { transform: translateX(-50%) scale(1.04); background: #06121e; color: #ffffff; }
+  body.explorando #volver-globo { display: inline-flex; }
+
+  /* La interfaz se desvanece durante la transición a la parcela. */
+  body.saliendo #marca, body.saliendo #variables, body.saliendo #leyenda,
+  body.saliendo #resumen-global, body.saliendo #tema-boton, body.saliendo #chips {
+    opacity: 0 !important; pointer-events: none !important;
+    transition: opacity .35s ease !important;
+  }
+
+  /* Cabecera de la parcela más compacta. */
+  #vision-cabecera { padding: 6px 14px; gap: 10px; }
+  #vision-cabecera > div:first-child > div { font-size: 13px !important; letter-spacing: .22em !important; }
+  #vision-reloj { font-size: 15px; }
+  #vision-reloj small { font-size: 8px; }
+  .cuenta { padding: 5px 9px; font-size: 11px; }
+  #vision-cerrar { font-size: 18px; padding: 2px 7px; }
+
+  /* Los dos cuadrados finales del panel derecho. */
+  #fila-final { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  #fila-final > details {
+    border: 1px solid var(--borde); border-radius: 14px; background: var(--panel);
+    aspect-ratio: 1 / 1; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 10px; text-align: center;
+    cursor: pointer; transition: transform .16s ease, background .16s ease, color .16s ease;
+  }
+  #fila-final > details:hover {
+    background: var(--texto); color: var(--fondo); transform: scale(1.035);
+  }
+  #fila-final > details:hover summary { color: var(--fondo); }
+  #fila-final > details summary {
+    list-style: none; font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--texto);
+  }
+  #fila-final > details summary::-webkit-details-marker { display: none; }
+  #fila-final > details[open] {
+    aspect-ratio: auto; align-items: stretch; justify-content: flex-start; text-align: left;
+    grid-column: 1 / -1;
+  }
+  #fila-final > details p, #fila-final > details dl { font-size: 10.5px; line-height: 1.5; margin-top: 6px; }
+</style>
+<style id="iteracion2a-botones">
+  /* Los botones de la portada viven sobre el velo oscuro en ambos temas. */
+  #marca #portada-cuenta {
+    background: #ffffff; color: #06121e; border-color: #ffffff;
+  }
+  #marca #portada-cuenta:hover, #marca #portada-cuenta:focus-visible {
+    background: transparent; color: #ffffff; border-color: #ffffff;
+  }
+  #marca #portada-cta {
+    background: rgba(255, 255, 255, .08); color: #ffffff;
+    border-color: rgba(255, 255, 255, .45);
+  }
+  #marca #portada-cta:hover, #marca #portada-cta:focus-visible {
+    background: #ffffff; color: #06121e; border-color: #ffffff;
+  }
+  html[data-tema="claro"] #marca #portada-cuenta {
+    background: #ffffff; color: #06121e; border-color: #ffffff;
+  }
+  html[data-tema="claro"] #marca #portada-cuenta:hover {
+    background: transparent; color: #ffffff; border-color: #ffffff;
+  }
+  html[data-tema="claro"] #marca #portada-cta {
+    background: rgba(255, 255, 255, .08); color: #ffffff;
+    border-color: rgba(255, 255, 255, .45);
+  }
+  html[data-tema="claro"] #marca #portada-cta:hover {
+    background: #ffffff; color: #06121e; border-color: #ffffff;
+  }
+</style>
+<style id="iteracion2b-elio">
+  /* El mapa ocupa todo el alto izquierdo; Elio vive en el panel derecho. */
+  #vision-izq { grid-template-rows: minmax(0, 1fr); }
+  #vision-pie { display: none; }
+  #vision-cuerpo { grid-template-columns: minmax(0, 1fr) 392px; }
+
+  /* Elio: caja compacta, cabecera mínima y campo visible. */
+  #b-elio { padding: 9px 10px; }
+  #vision-chat { min-height: 0; max-height: 268px; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  .chat-cabecera { grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: auto;
+    padding: 5px 6px; gap: 8px; }
+  #elio-avatar { width: 34px; height: 34px; }
+  .elio-nombre { font-size: 12px; }
+  .elio-nombre small { font-size: 9px; }
+  .elio-canal { display: none; }
+  #elio-conexion { grid-column: 3; grid-row: 1; font-size: 9px; padding: 4px 8px; }
+  details.comandos-chat > summary { padding: 5px 8px; font-size: 10px; }
+  .chat-rapidos { grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 3px; padding: 4px 6px; }
+  .chat-rapidos button { font-size: 10px; padding: 4px 6px; }
+  #chat-mensajes { min-height: 54px; max-height: 92px; padding: 6px 8px; }
+  #chat-forma input { min-height: 32px; font-size: 11px; }
+  #chat-forma button { min-height: 32px; padding: 0 10px; font-size: 13px; }
+  #vision.datos-abiertos #chat-mensajes { max-height: 92px; }
+</style>
+<style id="iteracion2b-fix">
+  body:has(#vision.visible) #volver-globo { display: none !important; }
+</style>
+<style id="iteracion2c">
+  /* Panel derecho: bordes visibles y hover pop. */
+  #vision-lado > .bloque {
+    border-color: color-mix(in srgb, var(--texto) 26%, transparent);
+    transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+  }
+  #vision-lado > .bloque:hover {
+    transform: translateY(-2px) scale(1.008);
+    border-color: var(--cian);
+  }
+  #vision-lado details.bloque > summary {
+    border-radius: 9px; padding: 3px 5px; margin: -3px -5px;
+    transition: background .16s ease, color .16s ease;
+  }
+  #vision-lado details.bloque > summary:hover {
+    background: var(--texto); color: var(--fondo);
+  }
+  #vision-lado details.bloque > summary:hover h3,
+  #vision-lado details.bloque > summary:hover h3 span,
+  #vision-lado details.bloque > summary:hover .dato-resumen { color: var(--fondo); }
+  #vision-lado details.bloque > summary:hover::after { color: var(--fondo); }
+
+  /* Rotación como tarjetas alineadas. */
+  #b-rotacion .dato-resumen { display: none; }
+  #b-rotacion h3 { text-transform: uppercase; letter-spacing: .14em; font-weight: 800; }
+  #rotacion-filas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  #rotacion-filas .rotacion-fila {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px; padding: 9px 5px; border-radius: 12px; text-align: center;
+    border: 1px solid var(--borde); background: rgba(255, 255, 255, .03);
+    font-size: 9.5px; line-height: 1.25; transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  #rotacion-filas .rotacion-fila b { font-size: 15px; }
+  #rotacion-filas .rotacion-fila:hover { transform: scale(1.05); background: var(--texto); color: var(--fondo); }
+  #rotacion-filas .rotacion-fila.gana { border-color: var(--cian); }
+  #rotacion-detalle h4 {
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 5px 8px; margin: 6px 0 4px; font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  #rotacion-detalle ul {
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 10px;
+    padding: 7px 9px 7px 20px; margin: 0 0 4px; transition: transform .15s ease;
+  }
+  #rotacion-detalle ul:hover { transform: scale(1.01); }
+  #b-rotacion .control { background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 10px; padding: 7px 9px; }
+  #b-rotacion input[type="range"] { accent-color: var(--cian); }
+
+  /* Fotos: fondo oscurecido y aparición con zoom. */
+  #vision.fotos-abiertas::before {
+    content: ''; position: fixed; inset: 0; z-index: 54;
+    background: rgba(2, 6, 14, .72); backdrop-filter: blur(3px);
+  }
+  #vision.fotos-abiertas #b-fotos {
+    animation: aparecerFoto .28s cubic-bezier(.2, .8, .3, 1.1) both;
+  }
+  @keyframes aparecerFoto {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(.86); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  .subir-foto {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 10px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px dashed var(--borde); font-size: 11px; color: var(--texto);
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .subir-foto:hover { background: var(--texto); color: var(--fondo); transform: scale(1.03); }
+  #fotos-usuario { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  #fotos-usuario img { width: 96px; height: 72px; object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--borde); }
+
+  /* Glosario como botón centrado. */
+  #fila-final { display: block; }
+  #vision-metodo { border: 1px solid var(--borde); border-radius: 14px; background: var(--panel);
+    padding: 9px 11px; }
+  #vision-metodo summary { cursor: pointer; font-size: 10px; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; list-style: none; text-align: center; }
+  #vision-metodo summary::-webkit-details-marker { display: none; }
+  #vision-glosario {
+    width: max-content; max-width: 100%; margin: 9px auto 0; border: 1px solid var(--borde);
+    border-radius: 999px; background: var(--panel); padding: 9px 18px; cursor: pointer;
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    text-align: center; list-style: none; transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  #vision-glosario summary { list-style: none; }
+  #vision-glosario summary::-webkit-details-marker { display: none; }
+  #vision-glosario:hover { transform: scale(1.05); background: var(--texto); color: var(--fondo); }
+  #vision-glosario dl { margin-top: 8px; }
+
+  /* Tooltips rápidos y temáticos. */
+  [data-tip] { position: relative; }
+  [data-tip]::after {
+    content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%;
+    transform: translateX(-50%) translateY(4px); white-space: nowrap;
+    background: var(--texto); color: var(--fondo); font-size: 10px; font-weight: 600;
+    letter-spacing: .04em; padding: 6px 10px; border-radius: 8px; opacity: 0;
+    pointer-events: none; transition: opacity .12s ease, transform .12s ease; z-index: 80;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .28);
+  }
+  [data-tip]:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+<style id="iteracion2c-fix">
+  #vision.fotos-abiertas #vision-pie { display: contents; }
+  #fila-final > details {
+    aspect-ratio: auto !important; display: block !important; padding: 0 !important;
+    border: 0 !important; background: transparent !important; text-align: left !important;
+    transform: none !important;
+  }
+  #fila-final > details:hover { background: transparent !important; color: inherit !important; }
+  #vision-metodo { margin: 0; }
+  #vision-glosario { margin: 9px auto 0; }
+</style>
+<style id="iteracion2c-fix2">
+  #fila-final > #vision-metodo {
+    border: 1px solid var(--borde) !important; border-radius: 14px !important;
+    background: var(--panel) !important; padding: 9px 11px !important; margin: 0 !important;
+  }
+  #fila-final > #vision-glosario {
+    display: block !important; width: max-content !important; max-width: 100% !important;
+    margin: 9px auto 0 !important; padding: 9px 18px !important;
+    border: 1px solid var(--borde) !important; border-radius: 999px !important;
+    background: var(--panel) !important; text-align: center !important;
+    font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  #fila-final > #vision-glosario:hover {
+    background: var(--texto) !important; color: var(--fondo) !important; transform: scale(1.05);
+  }
+</style>
+<style id="iteracion2c-fix3">
+  #vision-mapa-hud [data-tip]::after {
+    bottom: auto; top: calc(100% + 8px);
+  }
+</style>
+<style id="iteracion2c-tooltips2">
+  #vision-chat { height: 252px; max-height: 252px; }
+  .chat-rapidos button, .rotacion-fila, .control, .subir-foto { position: relative; }
+</style>
+<style id="iteracion2d">
+  /* Elio como caja cuadrada pequeña. */
+  #b-elio {
+    width: min(100%, 336px); aspect-ratio: 1 / 1; margin: 0 auto;
+    display: flex; flex-direction: column;
+  }
+  #b-elio #vision-chat { height: 100%; max-height: none; }
+  #b-elio #chat-mensajes { min-height: 0; max-height: none; }
+
+  /* Cabecera un poco más fina. */
+  #vision-cabecera { padding: 4px 12px; }
+
+  /* Foto del cultivo como tarjeta con botón. */
+  #vision-campo {
+    border: 1px solid var(--borde); border-radius: 14px; background: var(--panel);
+    padding: 9px 11px;
+  }
+  #vision-campo summary h3 { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+  #vision-campo .campo.foto {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 8px; padding: 7px 13px; border-radius: 999px;
+    border: 1px dashed var(--borde); font-size: 10.5px; cursor: pointer;
+    transition: transform .15s ease, background .15s ease, color .15s ease;
+  }
+  #vision-campo .campo.foto:hover {
+    background: var(--texto); color: var(--fondo); transform: scale(1.03);
+  }
+  #vision-campo .campo.foto input[type="file"] { display: none; }
+
+  /* Login en modo claro. */
+  html[data-tema="claro"] dialog#cuenta-dialog {
+    background: #ffffff; color: #181b20; border-color: #e6e8ec;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, .18);
+  }
+  html[data-tema="claro"] dialog#cuenta-dialog h2 { color: #0b1220; }
+  html[data-tema="claro"] dialog#cuenta-dialog p { color: #5b6573; }
+  html[data-tema="claro"] dialog#cuenta-dialog input {
+    background: #ffffff; color: #0b1220; border-color: #d7dce3;
+  }
+  html[data-tema="claro"] dialog#cuenta-dialog button {
+    background: #0b1220; color: #ffffff;
+  }
+</style>
+<style id="iteracion2e">
+  #vision.fotos-abiertas #boton-fotos { position: relative; z-index: 56; }
+</style>
+<style id="iteracion2e2">
+  #b-fotos { position: fixed; }
+  #cerrar-fotos {
+    position: absolute; top: 8px; right: 10px; z-index: 60;
+    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--borde);
+    background: var(--panel); color: var(--texto); font-size: 15px; line-height: 1;
+    cursor: pointer; display: grid; place-items: center;
+  }
+  #cerrar-fotos:hover { background: var(--texto); color: var(--fondo); }
+</style>
+<style id="iteracion2e3">
+  #vision-chat #chat-forma button { position: relative; }
+</style>
+<style id="iteracion3a">
+  /* C1: dos tarjetas simétricas dentro de una caja vertical. */
+  #caja-info-portada {
+    position: fixed; right: 26px; bottom: 26px; width: 302px; z-index: 6;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .tarjeta-info {
+    width: 100%; box-sizing: border-box; position: relative;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 14px;
+    padding: 10px 12px 12px; text-align: center; backdrop-filter: blur(10px);
+  }
+  .tarjeta-info header {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; margin-bottom: 6px; min-height: 22px;
+  }
+  .tarjeta-info h3 {
+    font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+    font-weight: 700; color: var(--texto);
+  }
+  .ojo-info {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 24px; border-radius: 7px; cursor: pointer;
+    display: grid; place-items: center; background: transparent;
+    border: 1px solid var(--borde); color: var(--texto);
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+  }
+  .ojo-info:hover {
+    background: var(--texto); color: var(--fondo); transform: translateY(-50%) scale(1.08);
+  }
+  .tarjeta-info.plegada #resumen-global,
+  .tarjeta-info.plegada #leyenda { display: none; }
+
+  #resumen-global, #leyenda {
+    position: static; inset: auto; width: auto; max-width: none;
+    background: transparent; border: 0; padding: 0; margin: 0;
+    backdrop-filter: none; text-align: center; font-size: 10.5px;
+    line-height: 1.5; color: var(--secundario);
+  }
+  #resumen-global b, #leyenda strong { color: var(--texto); }
+  #leyenda .barra { margin: 7px 0 4px; }
+  #leyenda .extremos { font-size: 9.5px; }
+  #leyenda .nota { font-size: 9.5px; text-align: center; }
+  #leyenda #filtro { justify-content: center; font-size: 10px; }
+
+  /* El menú de variables se queda en la vista completa. */
+  body.explorando #variables {
+    opacity: 1 !important; pointer-events: auto !important; z-index: 40;
+  }
+
+  /* Sin letras azules: texto en blanco/negro según el tema. */
+  #variables button { color: var(--secundario); transition: background .15s ease, color .15s ease, transform .15s ease; }
+  #variables button:hover { background: var(--texto); color: var(--fondo); transform: scale(1.04); }
+  #variables button.activa { background: var(--texto); color: var(--fondo); }
+  #vision-lado .bloque h3 span,
+  #vision-lado .dato-resumen,
+  #vision summary span,
+  #vision-cabecera h2,
+  #leyenda strong,
+  #panel h2,
+  #panel-coords,
+  .rotacion-fila b { color: var(--texto); }
+  #vision .bloque h3 span { color: var(--secundario); }
+
+  /* Hover con inversión y zoom pequeño en los botones de la portada. */
+  #portada-cuenta:hover, #portada-cta:hover, #portada-cuenta:focus-visible, #portada-cta:focus-visible {
+    transform: scale(1.035);
+  }
+
+  /* Tooltip global: JS lo coloca para que nunca salga de pantalla. */
+  #tooltip-global {
+    position: fixed; z-index: 9999; max-width: 240px; pointer-events: none;
+    background: var(--texto); color: var(--fondo);
+    font-size: 10.5px; font-weight: 600; line-height: 1.35;
+    padding: 7px 10px; border-radius: 8px; opacity: 0;
+    transform: translateY(4px); transition: opacity .12s ease, transform .12s ease;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, .3);
+  }
+  #tooltip-global.visible { opacity: 1; transform: translateY(0); }
+  [data-tip]::after { content: none !important; }
+</style>
+<style id="iteracion3a2">
+  body.explorando #caja-info-portada { opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+  /* Sin azul en textos del panel y cabecera. */
+  #vision-cabecera .cuenta, #vision-cabecera #vision-cuenta,
+  #vision-cabecera #vision-tema, #vision-cabecera #vision-cerrar,
+  #vision-ubicacion b, #vision-ubicacion span,
+  #b-ubicacion h3 span, #vision-lado h3 span,
+  .chip-estado, .chip-estado.conectado, .chip-estado.simulado,
+  #vision-cabecera .elio-canal, .elio-canal,
+  #vision-lado .bloque h3, #vision-lado .bloque h3 span,
+  #vision-lado summary h3, #vision-lado summary h3 span,
+  #vision-lado .dato-resumen, #vision-lado .nota,
+  #b-rotacion h3, #b-rotacion .control label,
+  #vision-glosario, #vision-metodo summary { color: var(--texto); }
+  #vision-lado .bloque h3 span, #vision-lado summary h3 span { color: var(--secundario); }
+</style>
+<style id="iteracion3b">
+  /* C2: cuadrante propio con título. */
+  #b-datos-finca { padding: 10px 12px; }
+  #b-datos-finca > h3 { margin: 0 0 8px; text-align: left; }
+  #b-datos-finca > details {
+    border: 0; border-top: 1px solid color-mix(in srgb, var(--texto) 22%, transparent);
+    border-radius: 0; background: transparent; padding: 6px 0; margin: 0;
+  }
+  #b-datos-finca > details:last-of-type { border-bottom: 0; }
+  #b-datos-finca > details > summary { padding: 4px 4px; margin: 0; }
+  #b-datos-finca > details > summary:hover {
+    background: var(--texto); color: var(--fondo);
+  }
+  #b-datos-finca > details > summary:hover * { color: var(--fondo) !important; }
+  #b-datos-finca > details > summary:hover .dato-resumen { color: var(--fondo) !important; }
+
+  /* Rotación: opción seleccionada visible. */
+  #rotacion-filas .rotacion-fila.activa {
+    border-color: var(--texto); background: var(--texto); color: var(--fondo);
+  }
+  #rotacion-filas .rotacion-fila.activa b { color: var(--fondo); }
+
+  /* Recomendaciones: título + info en una sola tarjeta centrada. */
+  #rotacion-detalle .rotacion-tema {
+    border: 1px solid var(--borde); border-radius: 12px; background: var(--panel);
+    padding: 8px 10px; margin: 6px 0; transition: transform .15s ease;
+  }
+  #rotacion-detalle .rotacion-tema:hover { transform: scale(1.01); }
+  #rotacion-detalle .rotacion-tema h4 {
+    text-align: center; border: 0; background: transparent; margin: 0 0 6px;
+    padding: 0; font-size: 9.5px;
+  }
+  #rotacion-detalle .rotacion-tema ul {
+    border: 0; background: transparent; padding: 0 0 0 16px; margin: 0;
+  }
+
+  /* Radar de foto del cultivo. */
+  .radar-foto {
+    position: relative; display: flex; flex-direction: column; align-items: center;
+    gap: 6px; margin: 10px auto 4px; padding: 14px 12px 12px; width: 100%;
+    box-sizing: border-box; cursor: pointer; overflow: hidden; border-radius: 14px;
+    border: 1px dashed var(--borde); color: var(--texto);
+    background: radial-gradient(circle at 50% 38%, rgba(53, 214, 255, .10), transparent 62%);
+    transition: transform .16s ease, border-color .16s ease;
+  }
+  .radar-foto:hover { transform: scale(1.02); border-color: var(--texto); }
+  .radar-anillo {
+    width: 96px; height: 96px; border-radius: 50%; position: relative;
+    border: 1px solid color-mix(in srgb, var(--texto) 40%, transparent);
+    box-shadow: 0 0 0 10px color-mix(in srgb, var(--texto) 8%, transparent),
+                0 0 0 22px color-mix(in srgb, var(--texto) 4%, transparent);
+  }
+  .radar-anillo::before {
+    content: ''; position: absolute; inset: 14px; border-radius: 50%;
+    border: 1px solid color-mix(in srgb, var(--texto) 26%, transparent);
+  }
+  .radar-barra {
+    position: absolute; top: 50%; left: 50%; width: 48px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--texto));
+    transform-origin: 0 50%; animation: radar-giro 2.6s linear infinite;
+    opacity: .8;
+  }
+  @keyframes radar-giro { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .radar-camara { position: relative; z-index: 2; margin-top: -66px; }
+  .radar-texto {
+    font-size: 9.5px; font-weight: 800; letter-spacing: .12em; text-align: center;
+  }
+  .radar-foto input[type="file"] { display: none; }
+  #vision-diagnostico { text-align: center; font-size: 10.5px; }
+
+  /* Método y límites con inversión real. */
+  #vision-metodo { transition: transform .15s ease, background .15s ease, color .15s ease; }
+  #vision-metodo:hover { background: var(--texto); color: var(--fondo); transform: scale(1.02); }
+  #vision-metodo:hover summary, #vision-metodo:hover p, #vision-metodo:hover b { color: var(--fondo); }
+  #vision-metodo summary { transition: color .15s ease; }
+
+  /* Globs de Elio visibles en claro. */
+  html[data-tema="claro"] .burbuja.bot {
+    background: #e8edf4; color: #0b1220; border: 1px solid #d7dee8;
+  }
+  html[data-tema="claro"] .burbuja.yo { background: #dbeafe; color: #0b1220; }
+
+  /* Sin azul en los textos restantes. */
+  #vision-sensores-hora, #vision-automatico, #vision .nota,
+  #vision-lado .dato-resumen, #vision-lado small,
+  #vision-cerrar, #vision-cuenta, #vision-tema { color: var(--texto); }
+  #vision-sensores-hora, #vision-automatico { color: var(--secundario); }
+</style>
+<style id="iteracion3b2">
+  #vision-campo #parcela-camara, #vision-campo .campo.foto { display: none; }
+  #vision-campo #vision-diagnostico { font-size: 10px; color: var(--secundario); text-align: center; }
+  #vision-campo #vision-diagnostico b { color: var(--texto); }
+</style>
+<style id="iteracion3c">
+  /* Ventanas del panel derecho: dos por fila si se achican. */
+  #vision-lado {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px; align-content: start;
+  }
+  #vision-lado > .bloque { grid-column: 1 / -1; position: relative; }
+  #vision-lado > .bloque.media { grid-column: span 1; }
+  #ventana-barra {
+    grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 0 2px 2px; font-size: 9px; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--secundario);
+  }
+  #orden-predefinido {
+    border: 1px solid var(--borde); border-radius: 999px; background: transparent;
+    color: var(--texto); font: inherit; font-size: 9.5px; letter-spacing: .06em;
+    padding: 5px 10px; cursor: pointer;
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+  }
+  #orden-predefinido:hover { background: var(--texto); color: var(--fondo); transform: scale(1.04); }
+  .ventana-asa, .ventana-ancho {
+    position: absolute; top: 5px; z-index: 8; width: 20px; height: 18px;
+    display: grid; place-items: center; cursor: grab; padding: 0;
+    border: 1px solid var(--borde); border-radius: 6px; background: var(--panel);
+    color: var(--secundario); font-size: 11px; line-height: 1;
+    opacity: 0; transition: opacity .15s ease, background .15s ease, color .15s ease;
+  }
+  .ventana-asa { right: 5px; }
+  .ventana-ancho { right: 28px; cursor: pointer; }
+  #vision-lado > .bloque:hover .ventana-asa,
+  #vision-lado > .bloque:hover .ventana-ancho { opacity: 1; }
+  .ventana-asa:hover, .ventana-ancho:hover { background: var(--texto); color: var(--fondo); }
+  #vision-lado > .bloque.arrastrando { opacity: .55; }
+
+  /* Sin azul restante en el panel. */
+  #vision-lado h3 span, #vision-lado .dato-resumen,
+  #vision-sensores-hora, #vision-cabecera .cuenta { color: var(--secundario) !important; }
+  #vision-lado h3, #vision-lado summary h3 { color: var(--texto) !important; }
+
+  @media (max-width: 860px) {
+    #vision-lado { grid-template-columns: 1fr; }
+    #vision-lado > .bloque, #vision-lado > .bloque.media { grid-column: 1 / -1; }
+    .ventana-ancho { display: none; }
+    .ventana-asa { opacity: 1; }
+  }
+</style>
+<style id="iteracion3c2">
+  #vision-lado > .bloque.media { font-size: 10px; }
+  #vision-lado > .bloque.media * { min-width: 0; overflow-wrap: anywhere; }
+  #vision-lado > .bloque.media #vision-sensores,
+  #vision-lado > .bloque.media #parcela-lecturas,
+  #vision-lado > .bloque.media #vision-clima,
+  #vision-lado > .bloque.media #vision-riesgos,
+  #vision-lado > .bloque.media #vision-terreno,
+  #vision-lado > .bloque.media #vision-satelite,
+  #vision-lado > .bloque.media #vision-actuadores {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  #vision-lado > .bloque.media #vision-sensores b,
+  #vision-lado > .bloque.media #vision-clima b { font-size: 92%; }
+</style>
+<style id="iteracion3c3">
+  #vision-lado > .bloque.media { font-size: 9.5px; }
+  #vision-lado > .bloque.media #vision-sensores em,
+  #vision-lado > .bloque.media #vision-sensores small {
+    font-size: 7.5px; letter-spacing: 0; text-transform: uppercase;
+  }
+  #vision-lado > .bloque.media #vision-sensores b { font-size: 12px; }
+  #vision-lado > .bloque.media #vision-sensores span { padding: 3px 3px; }
+  #vision-lado > .bloque.media #vision-sensores > div { gap: 3px; }
+  #vision-lado > .bloque.media #vision-sensores-hora { display: none; }
+  #vision-lado > .bloque.media #vision-historial { height: 44px; }
+  #vision-lado > .bloque.media h3 { font-size: 9px; }
+</style>
+<style id="iteracion3c4">
+  #vision-cuerpo { grid-template-columns: minmax(0, 1fr) 460px; }
+  #vision-lado > .bloque.media #vision-sensores { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  #vision-lado > .bloque.media #vision-sensores em { white-space: nowrap; }
+</style>
+<style id="iteracion3d">
+  @media (max-width: 860px) {
+    .ventana-asa { display: none; }
+  }
+</style>
+<style id="iteracion3e">
+  #fila-final > #vision-metodo:hover {
+    background: var(--texto) !important; color: var(--fondo) !important;
+    transform: scale(1.02);
+  }
+  #fila-final > #vision-metodo:hover summary,
+  #fila-final > #vision-metodo:hover p,
+  #fila-final > #vision-metodo:hover b { color: var(--fondo) !important; }
+  #fila-final > #vision-glosario:hover {
+    background: var(--texto) !important; color: var(--fondo) !important;
+  }
+</style>
+<style id="iteracion4a">
+  /* Sin selección de texto (salvo campos editables y el chat). */
+  * { -webkit-user-select: none; user-select: none; }
+  input, textarea, #chat-mensajes, #chat-mensajes * { -webkit-user-select: text; user-select: text; }
+
+  /* X de la parcela y botones de cabecera con inversión legible. */
+  #vision-cerrar {
+    background: var(--panel) !important; color: var(--texto) !important;
+    border: 1px solid var(--borde) !important;
+  }
+  #vision-cerrar:hover {
+    background: var(--texto) !important; color: var(--fondo) !important;
+    border-color: var(--texto) !important;
+  }
+  #vision-cabecera .cuenta {
+    background: var(--panel); color: var(--texto); border: 1px solid var(--borde);
+  }
+  #vision-cabecera .cuenta:hover {
+    background: var(--texto); color: var(--fondo); border-color: var(--texto);
+  }
+
+  /* Área de análisis de imagen más grande. */
+  #vision-campo { padding: 12px; }
+  .radar-foto { min-height: 208px; padding: 18px 14px 16px; }
+  .radar-anillo { width: 122px; height: 122px; }
+  .radar-anillo::before { inset: 18px; }
+  .radar-barra { width: 60px; }
+  .radar-camara { width: 30px; height: 30px; margin-top: -84px; }
+  .radar-texto { font-size: 10px; line-height: 1.35; }
+  #vision-diagnostico { margin-top: 8px; }
+
+  /* Espacio propio para los botones de ventana. */
+  #vision-lado > .bloque { padding-top: 26px; }
+  .ventana-asa, .ventana-ancho { top: 5px; }
+</style>
+<style id="iteracion4b">
+  #vision-lado > .bloque.moviendo { opacity: .55; outline: 1px dashed var(--cian); }
+  .ventana-asa:active { cursor: grabbing; }
+</style>
+<style id="iteracion4c">
+  #vision-lado > #parcela-camara, #vision-lado > #fila-final {
+    grid-column: 1 / -1; width: 100%;
+  }
+  #vision-lado > #parcela-camara {
+    margin-top: 8px; font-size: 10px; color: var(--secundario);
+  }
+  #vision-lado > #fila-final { margin-top: 10px; }
+  #vision-campo { margin-bottom: 4px; }
+</style>
+<style id="iteracion5">
+  /* Elio recupera protagonismo. */
+  #b-elio {
+    width: 100%; height: 340px; aspect-ratio: auto; margin: 0;
+  }
+  #b-elio #vision-chat { height: 100%; max-height: none; }
+  #b-elio #chat-mensajes { min-height: 60px; max-height: none; }
+
+  /* Pie del panel siempre visible abajo. */
+  #vision-lado > #fila-final {
+    position: sticky; bottom: 0; z-index: 9; grid-column: 1 / -1;
+    background: var(--fondo); padding: 8px 0 4px; margin-top: 10px;
+    border-top: 1px solid var(--borde);
+  }
+  #vision-lado { padding-bottom: 4px; }
+
+  /* “Foto del cultivo” con inversión de color en el texto. */
+  #vision-campo > summary { padding: 4px 6px; margin: -4px -6px; border-radius: 8px;
+    transition: background .15s ease, color .15s ease; }
+  #vision-campo > summary:hover { background: var(--texto); color: var(--fondo); }
+  #vision-campo > summary:hover h3,
+  #vision-campo > summary:hover h3 span { color: var(--fondo) !important; }
+
+  /* Asas visibles y cabeceras agarrables. */
+  #vision-lado > .bloque .ventana-asa { opacity: .55; cursor: grab; width: 24px; height: 22px; }
+  #vision-lado > .bloque:hover .ventana-asa { opacity: 1; }
+  #vision-lado > .bloque > h3,
+  #vision-lado > .bloque > summary { cursor: grab; }
+  #vision-lado > .bloque.moviendo { cursor: grabbing; }
+</style>
+<style id="iteracion6">
+  #vision-lado {
+    display: flex; flex-direction: column; overflow: hidden; gap: 8px;
+    padding: 10px 12px;
+  }
+  #ventanas-scroll {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px; align-content: start; padding-right: 2px;
+  }
+  #ventanas-scroll > .bloque { grid-column: 1 / -1; }
+  #ventanas-scroll > .bloque.media { grid-column: span 1; }
+  #ventanas-scroll > .bloque { padding-top: 26px; }
+  #ventana-barra { flex: 0 0 auto; }
+  #vision-lado > #fila-final {
+    flex: 0 0 auto; position: static; bottom: auto; margin: 0;
+    background: var(--panel); border-top: 1px solid var(--borde);
+    padding: 8px 0 2px; z-index: auto;
+  }
+  #vision-lado > #fila-final > #vision-metodo,
+  #vision-lado > #fila-final > #vision-glosario { margin-left: auto; margin-right: auto; }
+
+  @media (max-width: 860px) {
+    #ventanas-scroll { grid-template-columns: 1fr; }
+    #ventanas-scroll > .bloque, #ventanas-scroll > .bloque.media { grid-column: 1 / -1; }
+  }
+</style>
+<style id="iteracion6b">
+  #vision-campo #parcela-camara {
+    margin-top: 6px; font-size: 10px; line-height: 1.45;
+    color: var(--secundario); text-align: left;
+  }
+  #vision-campo #parcela-camara b { color: var(--texto); }
+</style>
+<style id="iteracion7">
+  /* Un solo botón de información al pie del panel. */
+  #vision-lado > #fila-final {
+    flex: 0 0 auto; position: static; margin: 0; padding: 8px 0 2px;
+    background: var(--panel); border-top: 1px solid var(--borde);
+  }
+  #abrir-info {
+    width: 100%; padding: 11px 14px; border-radius: 999px; cursor: pointer;
+    background: var(--panel); color: var(--texto); border: 1px solid var(--borde);
+    font: inherit; font-size: 10px; font-weight: 800; letter-spacing: .09em;
+    text-transform: uppercase;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+  }
+  #abrir-info:hover, #abrir-info:focus-visible {
+    background: var(--texto); color: var(--fondo); transform: scale(1.02);
+  }
+
+  /* Ventana centrada de información y glosario. */
+  #info-dialog {
+    width: min(720px, 92vw); max-height: 84vh; padding: 0; overflow: hidden;
+    border: 1px solid var(--borde); border-radius: 18px;
+    background: var(--panel); color: var(--texto);
+    box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+  }
+  #info-dialog::backdrop {
+    background: rgba(2, 6, 14, .74); backdrop-filter: blur(4px);
+  }
+  #info-dialog[open] { animation: info-aparece .22s cubic-bezier(.2, .8, .3, 1.1) both; }
+  @keyframes info-aparece {
+    from { opacity: 0; transform: translateY(10px) scale(.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  #info-dialog header {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 18px; border-bottom: 1px solid var(--borde);
+    position: sticky; top: 0; background: var(--panel); z-index: 2;
+  }
+  #info-dialog h2 {
+    margin: 0; font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--texto);
+  }
+  #cerrar-info {
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    border: 1px solid var(--borde); background: var(--panel); color: var(--texto);
+    font-size: 18px; line-height: 1; display: grid; place-items: center;
+    transition: background .15s ease, color .15s ease, transform .15s ease;
+  }
+  #cerrar-info:hover { background: var(--texto); color: var(--fondo); transform: scale(1.06); }
+  #info-cuerpo {
+    max-height: calc(84vh - 62px); overflow-y: auto; padding: 14px 20px 20px;
+  }
+  #info-dialog details { border-top: 1px solid var(--borde); padding: 12px 0 4px; }
+  #info-dialog details:first-child { border-top: 0; padding-top: 4px; }
+  #info-dialog details > summary {
+    list-style: none; cursor: default; pointer-events: none;
+    font-size: 11px; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--texto); margin-bottom: 8px;
+  }
+  #info-dialog details > summary::-webkit-details-marker { display: none; }
+  #info-dialog p, #info-dialog li, #info-dialog dd { font-size: 11.5px; line-height: 1.6; color: var(--secundario); }
+  #info-dialog b, #info-dialog dt { color: var(--texto); }
+  #info-dialog dt { margin-top: 6px; font-size: 11.5px; }
+  #info-dialog dd { margin: 0; }
+
+  /* La transición también desvanece las tarjetas de la derecha (C1). */
+  body.saliendo #caja-info-portada, body.saliendo #portada-fuente,
+  body.saliendo #portada-datos {
+    opacity: 0 !important; pointer-events: none !important;
+    transition: opacity .3s ease !important;
+  }
+</style>
+<style id="iteracion7b">
+  #info-dialog {
+    position: fixed; inset: 0; margin: auto; height: auto;
+    max-height: 84vh; width: min(720px, 92vw);
+  }
+  #info-cuerpo {
+    max-height: calc(84vh - 62px); overflow-y: auto;
+    text-align: left; text-transform: none; letter-spacing: normal;
+  }
+  #info-dialog p, #info-dialog li, #info-dialog dd, #info-dialog dt {
+    text-align: left; text-transform: none; letter-spacing: normal;
+  }
+  #info-dialog h2 { text-align: left; }
+</style>
+<style id="iteracion8">
+  /* El botón queda al final de todas las opciones, dentro del scroll. */
+  #ventanas-scroll > #fila-final {
+    grid-column: 1 / -1; margin-top: 4px; padding: 10px 0 2px;
+    border-top: 1px solid var(--borde); background: transparent;
+  }
+  #ventanas-scroll > #fila-final #abrir-info { width: 100%; }
+
+  /* La ventana de información es solo texto dividido, sin hover ni transiciones. */
+  #info-dialog section + section { border-top: 1px solid var(--borde); margin-top: 14px; padding-top: 14px; }
+  #info-dialog section h3 {
+    font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--texto); margin: 0 0 8px;
+  }
+  #info-dialog section p, #info-dialog section dd, #info-dialog section li {
+    text-align: left; text-transform: none; letter-spacing: normal;
+  }
+  #info-dialog #vision-metodo, #info-dialog #vision-glosario {
+    border: 0; padding: 0; background: transparent;
+  }
+  #info-dialog, #info-dialog * { transition: none !important; }
+  #info-dialog section:hover, #info-dialog p:hover, #info-dialog h3:hover,
+  #info-dialog dl:hover, #info-dialog dd:hover { background: transparent; color: inherit; transform: none; }
+</style>
+<style id="iteracion9">
+  /* Sin mover ventanas, sin media línea y sin orden predefinido. */
+  .ventana-asa, .ventana-ancho, #ventana-barra { display: none !important; }
+  #ventanas-scroll > .bloque { padding-top: 10px; }
+
+  /* Botón de información: solo zoom pequeño, sin inversión. */
+  #abrir-info:hover, #abrir-info:focus-visible {
+    background: var(--panel) !important; color: var(--texto) !important;
+    border-color: var(--borde) !important; transform: scale(1.03) !important;
+  }
+</style>
+<style id="iteracion10">
+  /* 1) Rotación: inversión también en los textos internos. */
+  #rotacion-filas .rotacion-fila:hover,
+  #rotacion-filas .rotacion-fila.activa {
+    background: var(--texto) !important; color: var(--fondo) !important;
+  }
+  #rotacion-filas .rotacion-fila:hover span,
+  #rotacion-filas .rotacion-fila:hover b,
+  #rotacion-filas .rotacion-fila.activa span,
+  #rotacion-filas .rotacion-fila.activa b { color: var(--fondo) !important; }
+
+  /* 2) Sin barra horizontal al hacer hover en el botón de información. */
+  #ventanas-scroll { overflow-x: hidden !important; }
+  #ventanas-scroll > #fila-final { overflow: hidden; }
+  #abrir-info:hover, #abrir-info:focus-visible { transform: scale(1.02) !important; }
+
+  /* 3) La información es solo texto: sin inversión ni hover en el contenido. */
+  #info-dialog #info-cuerpo,
+  #info-dialog #info-cuerpo * { transition: none !important; }
+  #info-dialog #vision-metodo:hover,
+  #info-dialog #vision-glosario:hover,
+  #info-dialog #info-cuerpo *:hover {
+    background: transparent !important; color: inherit !important;
+    transform: none !important; border-color: inherit !important;
+  }
+  #info-dialog #vision-metodo:hover p,
+  #info-dialog #vision-glosario:hover dd,
+  #info-dialog #vision-glosario:hover li { color: var(--secundario) !important; }
+  #info-dialog #vision-metodo:hover b,
+  #info-dialog #vision-glosario:hover dt { color: var(--texto) !important; }
+</style>
+<style id="iteracion11">
+  #ventanas-scroll > #fila-final {
+    display: block !important; height: auto !important; min-height: 52px;
+    overflow: visible !important; padding: 10px 0 6px !important;
+  }
+  #abrir-info {
+    display: block !important; width: 100% !important; box-sizing: border-box;
+  }
+</style>
+<style id="revision-corporativa">
+  #fotos-aviso { margin: 6px 0 0; font-size: 10px; color: var(--ambar); }
+
+  @media (max-width: 720px) {
+    /* H-05: la fila de variables cabe o baja a dos líneas, sin cortes. */
+    #variables {
+      max-width: calc(100vw - 104px); flex-wrap: wrap; justify-content: center;
+      gap: 4px; padding: 5px; overflow: visible;
+    }
+    #variables button { font-size: 10.5px; padding: 7px 9px; min-height: 40px; }
+
+    /* H-06: blancos táctiles más cómodos. */
+    #portada-cuenta, #portada-cta { min-height: 46px; font-size: 13px; }
+    #portada-stats .stat { padding: 10px 12px; }
+    #portada-stats .stat small { font-size: 9px; }
+    #portada-stats .stat b { font-size: 20px; }
+    #portada-datos { font-size: 9px; }
+  }
+
+  @media (max-width: 860px) {
+    /* H-04: Elio con más alto, mensajes completos y comandos sin tapar. */
+    #b-elio { height: auto !important; min-height: 430px; aspect-ratio: auto !important; }
+    #b-elio #vision-chat { min-height: 400px; height: auto; max-height: none; }
+    #b-elio #chat-mensajes { min-height: 180px; max-height: 240px; padding: 9px 10px; }
+    details.comandos-chat { position: static; }
+    details.comandos-chat > summary { padding: 8px 10px; font-size: 10.5px; }
+    #vision-cabecera .cuenta, #vision-cerrar { min-height: 40px; min-width: 40px; }
+  }
+</style>
+<style id="revision-suite">
+  /* Textos mínimos de 10 px (H-06 y prueba de tipografía). */
+  #portada-stats .stat small { font-size: 10px !important; }
+  #portada-datos, #portada-fuente { font-size: 10px !important; }
+
+  /* El selector antiguo sigue existiendo para lectores de pantalla y pruebas,
+     pero no ocupa espacio ni se ve. */
+  #parcela-selector {
+    position: absolute !important; width: 1px !important; height: 1px !important;
+    opacity: 0 !important; overflow: hidden !important; pointer-events: none !important;
+    margin: 0 !important; padding: 0 !important; border: 0 !important;
+  }
+</style>
+<style id="revision-tipografia">
+  #marca #desafio, #portada-fuente, #leyenda .extremos, #leyenda .nota,
+  #vision-reloj small, #vision-bot, .rotacion-fila, .rotacion-fila span,
+  #rotacion-detalle h4, #rotacion-detalle .fuente,
+  #vision-campo #parcela-camara, #fotos-aviso, .radar-texto, .chip-estado, .chip-estado.no { font-size: 10px !important; }
+</style>
+<style id="revision-tipografia2">
+  #elio-conexion, #elio-conexion.no, .elio-nombre small,
+  #ventana-barra, #vision-lado > .bloque.media h3 { font-size: 10px !important; }
+  @media (max-width: 720px) {
+    #portada-stats .stat small, #portada-datos { font-size: 10px !important; }
+  }
+</style>
+<style id="revision2-ui">
+  @media (max-width: 860px) {
+    /* El chat nunca se sale de la ventana de Elio. */
+    #b-elio { overflow: hidden; }
+    #b-elio #vision-chat { max-height: 100%; min-height: 0; }
+  }
+</style>
+<style id="revision3-zindex">
+  #info-dialog { z-index: 1000; }
+</style>
 </head>
 <body>
+<div id="transicion" aria-hidden="true"></div>
+<div id="tooltip-global" role="tooltip"></div>
+<div id="pista-globo" aria-hidden="true">EXAMINAR</div>
+<button id="volver-globo" type="button">← Volver</button>
+<button id="tema-boton" type="button" aria-label="Cambiar entre tema claro y oscuro">☾</button>
 <canvas id="lienzo"></canvas>
 <header id="marca">
   <h1>AUTO-FARM</h1>
@@ -574,9 +1934,11 @@
     <span id="portada-ndvi" hidden><b>—</b> NDVI MODIS</span>
   </div>
   <div id="portada-botones">
-    <button id="portada-cuenta">Iniciar sesión · mi parcela</button>
+    <button id="portada-cuenta">Iniciar sesión</button>
     <button id="portada-cta">Ver parcela demo</button>
   </div>
+  <div id="portada-stats" aria-live="polite"></div>
+  <p id="portada-fuente">Open-Meteo/ERA5 (no NASA) + NASA POWER</p>
 </header>
 <nav id="variables"></nav>
 <div id="chips">
@@ -584,8 +1946,30 @@
     title="Muestra u oculta la tendencia de 42 años sobre el globo">Tendencia</button>
   <button id="vision-boton">Mi parcela</button>
 </div>
-<div id="resumen-global"></div>
-<aside id="leyenda"></aside>
+<div id="caja-info-portada">
+  <section class="tarjeta-info" data-caja="resumen">
+    <header>
+      <h3>Señal del globo</h3>
+      <button class="ojo-info" type="button" data-objetivo="resumen-global"
+        aria-label="Mostrar más info" data-tip="Mostrar más info">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </header>
+    <div id="resumen-global"></div>
+  </section>
+  <section class="tarjeta-info" data-caja="leyenda">
+    <header>
+      <h3>Leyenda</h3>
+      <button class="ojo-info" type="button" data-objetivo="leyenda"
+        aria-label="Mostrar más info" data-tip="Mostrar más info">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+          stroke-width="1.8" stroke-linecap="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </header>
+    <aside id="leyenda"></aside>
+  </section>
+</div>
 <aside id="panel">
   <button id="panel-cerrar" aria-label="Cerrar panel">×</button>
   <h2 id="panel-titulo">Celda</h2>
@@ -621,6 +2005,7 @@
     <span id="vision-datos-nota" class="chip-estado simulado" hidden>clima y rotación de esta finca: por generar</span>
     <div class="crece"></div>
     <div id="vision-reloj">--:--<small>hora local</small></div>
+    <button id="vision-tema" class="cuenta" type="button" title="Cambiar entre tema claro y oscuro">☾</button>
     <button id="vision-cuenta" class="cuenta" title="Entrar con usuario y PIN">Entrar</button>
     <button id="cuenta-salir" class="cuenta" hidden title="Volver a la finca de demostración">Salir</button>
     <button id="vision-cerrar" title="Volver al globo" aria-label="Volver al globo">×</button>
@@ -629,7 +2014,20 @@
     <div id="vision-izq">
       <div id="vision-mapa-caja">
         <canvas id="vision-mapa"></canvas>
+        <div id="buscador-parcelas">
+          <input id="buscador-entrada" type="search" autocomplete="off" spellcheck="false"
+            placeholder="Buscar parcela…" aria-label="Buscar parcela por nombre">
+          <span class="lupa" aria-hidden="true">⌕</span>
+          <ul id="buscador-lista" role="listbox"></ul>
+        </div>
         <div id="vision-mapa-hud">
+          <button id="boton-fotos" title="Ver fotos de la parcela" aria-label="Fotos">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2l1.2-1.6h8.6L17.5 7h2A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/>
+            <circle cx="12" cy="13" r="3.4"/>
+          </svg>
+        </button>
           <button id="vision-zoom-menos" title="Alejar">−</button>
           <button id="vision-zoom-mas" title="Acercar">+</button>
           <button id="vision-centrar" class="ancho" title="Ver todas las parcelas">Centrar</button>
@@ -642,8 +2040,14 @@
       <div id="vision-tira"></div>
       <div id="vision-pie">
         <div class="bloque solo-demo" id="b-fotos">
+          <button id="cerrar-fotos" type="button" aria-label="Cerrar fotos">×</button>
           <h3>Fotos <span>satélite real · foto de campo de referencia</span></h3>
           <div id="vision-fotos"></div>
+          <label class="subir-foto" for="foto-usuario">＋ Subir foto de mi parcela
+            <input type="file" id="foto-usuario" accept="image/*" hidden>
+          </label>
+          <div id="fotos-usuario"></div>
+          <p id="fotos-aviso" role="status"></p>
         </div>
         <div class="bloque">
           <h3>Elio · tu agrónomo digital <span>también en Telegram @climaxeliobot</span></h3>
@@ -652,15 +2056,19 @@
               <canvas id="elio-avatar" width="88" height="88" aria-hidden="true"></canvas>
               <span class="elio-nombre">Elio<small id="elio-estado">listo</small></span>
               <span class="elio-canal">Telegram · @climaxeliobot</span>
+              <span id="elio-conexion" class="ok">en línea</span>
             </div>
-            <div class="chat-rapidos" aria-label="Comandos rápidos">
-              <button type="button" data-comando="/estado">/estado</button>
-              <button type="button" data-comando="/clima">/clima</button>
-              <button type="button" data-comando="/riego off" class="solo-demo">/riego off</button>
-              <button type="button" data-comando="/techo on" class="solo-demo">/techo on</button>
-              <button type="button" data-comando="/ayuda">/ayuda</button>
-              <button type="button" data-comando="/ia ¿cómo va la temporada en Constanza?">pregunta libre</button>
-            </div>
+            <details class="comandos-chat">
+              <summary>Comandos rápidos</summary>
+              <div class="chat-rapidos" aria-label="Comandos rápidos">
+                <button type="button" data-comando="/estado">/estado</button>
+                <button type="button" data-comando="/clima">/clima</button>
+                <button type="button" data-comando="/riego off" class="solo-demo">/riego off</button>
+                <button type="button" data-comando="/techo on" class="solo-demo">/techo on</button>
+                <button type="button" data-comando="/ayuda">/ayuda</button>
+                <button type="button" data-comando="/ia ¿cómo va la temporada en Constanza?">pregunta libre</button>
+              </div>
+            </details>
             <div id="chat-mensajes" aria-live="polite"></div>
             <form id="chat-forma">
               <input id="chat-texto" autocomplete="off" placeholder="/estado · /riego off · /techo on">
@@ -669,18 +2077,23 @@
           </div>
         </div>
       </div>
-      <div id="vision-aviso-campo">
-        <b>Vista de demostración.</b> Mapa satélite real de la zona y clima de NASA POWER/ERA5;
-        parcelas, sensores ESP32 y techo simulados. El bot de Telegram es real: <b>@climaxeliobot</b>.
-      </div>
+
     </div>
     <aside id="vision-lado">
+      <div id="ventanas-scroll">
+      <div class="bloque" id="b-elio"></div>
+      <div class="bloque" id="b-ubicacion">
+        <h3>Ubicación <span>finca y parcela</span></h3>
+        <div id="vision-ubicacion">—</div>
+      </div>
       <div class="bloque solo-demo" id="b-sensores">
         <h3>Sensores <span id="vision-sensores-hora"></span></h3>
         <div id="parcela-lecturas"></div>
         <div id="vision-sensores"></div>
         <canvas id="vision-historial"></canvas>
       </div>
+      <section class="bloque" id="b-datos-finca">
+        <h3>Datos de la finca <span>C2 · clima, riesgo y suelo</span></h3>
       <details class="bloque" id="b-clima" open>
         <summary><h3>Clima real de la finca <span>NASA POWER · ERA5</span></h3>
           <span class="dato-resumen"></span></summary>
@@ -709,8 +2122,9 @@
         <p id="vision-automatico">Automático: riega si el suelo baja de 25 % y cierra el
           techo con lluvia. La lluvia viene de ERA5; el tiempo no se cambia desde aquí.</p>
       </details>
+      </section>
       <details class="bloque" id="b-rotacion" open>
-        <summary><h3>Rotación: 3 estrategias <span>puntaje de 100 · más alto = mejor</span></h3>
+        <summary><h3>ESTRATEGIA ROTATIVA</h3>
           <span class="dato-resumen"></span></summary>
         <div id="rotacion-filas"></div>
         <div id="rotacion-detalle"></div>
@@ -725,38 +2139,60 @@
           <input type="range" id="escenario-lluvia" min="-40" max="40" step="5" value="0">
           <span class="nota-escenario">Simulación de sensibilidad, no un pronóstico.</span></div>
       </details>
-      <details class="bloque solo-demo" id="vision-campo">
+      <details class="bloque solo-demo" id="vision-campo" open>
         <summary><h3>Foto del cultivo</h3></summary>
-        <label class="campo foto" for="vision-archivo">Analizar una foto del cultivo
+        <label class="radar-foto" for="vision-archivo" data-tip="Subir foto de cultivo para análisis">
+          <span class="radar-anillo" aria-hidden="true"></span>
+          <span class="radar-barra" aria-hidden="true"></span>
+          <svg class="radar-camara" viewBox="0 0 24 24" width="26" height="26" fill="none"
+            stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2l1.2-1.6h8.6L17.5 7h2A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/>
+            <circle cx="12" cy="13" r="3.4"/>
+          </svg>
+          <span class="radar-texto">SUBIR FOTO DE CULTIVO PARA ANÁLISIS</span>
           <input type="file" id="vision-archivo" accept="image/*" capture="environment">
         </label>
         <div id="vision-diagnostico"></div>
+        <div id="parcela-camara" class="solo-demo"></div>
       </details>
-      <div id="parcela-camara" class="solo-demo"></div>
-      <details id="vision-metodo">
-        <summary>Método y límites</summary>
-        <p><b>Clima:</b> 42 años de tendencia NASA POWER (Sen + Mann-Kendall con
-          corrección FDR) y los últimos 30 días de ERA5 contra su normal 1991–2020.
-          Son <b>reanálisis</b>: modelos alimentados con observaciones, no un sensor
-          en tu parcela.</p>
-        <p><b>Rotación:</b> el índice cruza los meses secos de la finca con la
-          demanda de agua de cada cultivo. Es orientativo, no una recomendación
-          agronómica; los parámetros de cultivo están por validar con un agrónomo.
-          Mercado local, ciclo de plagas, materia orgánica, erosión y el calendario
-          de campo desnudo <b>no</b> se miden todavía: son huecos declarados, no
-          supuestos.</p>
-        <p><b>Sensores y techo:</b> simulados. La lluvia que mueve el techo viene de
-          ERA5 (no se ajusta a mano). El bot de Telegram es real; los relés, no.</p>
-        <p><b>Satélite frente a suelo:</b> el pixel de SMAP (~9 km), IMERG (~10 km),
-          MODIS (250–1000 m) o ECOSTRESS (~70 m) es mayor que una parcela de 1 ha.
-          Por eso aquí no se finge medir en la parcela: se usan POWER/ERA5 a escala de
-          celda y el sensor de la finca dice "simulado". NDVI, evapotranspiración y
-          biomasa (GEDI) son la siguiente integración, no un dato que hoy mostremos.</p>
-      </details>
-      <details id="vision-glosario">
-        <summary>¿Qué significa esto? (glosario de campo)</summary>
-        <dl id="glosario-lista"></dl>
-      </details>
+      </div>
+      <div id="fila-final">
+        <button id="abrir-info" type="button">
+          INFORMACIÓN Y GLOSARIO DE CAMPO
+        </button>
+      </div>
+      <dialog id="info-dialog">
+        <header>
+          <h2>Información y glosario de campo</h2>
+          <button id="cerrar-info" type="button" aria-label="Cerrar" title="Cerrar">×</button>
+        </header>
+        <div id="info-cuerpo">
+          <section id="vision-metodo">
+            <h3>Método y límites</h3>
+            <p><b>Clima:</b> 42 años de tendencia NASA POWER (Sen + Mann-Kendall con
+              corrección FDR) y los últimos 30 días de ERA5 contra su normal 1991–2020.
+              Son <b>reanálisis</b>: modelos alimentados con observaciones, no un sensor
+              en tu parcela.</p>
+            <p><b>Rotación:</b> el índice cruza los meses secos de la finca con la
+              demanda de agua de cada cultivo. Es orientativo, no una recomendación
+              agronómica; los parámetros de cultivo están por validar con un agrónomo.
+              Mercado local, ciclo de plagas, materia orgánica, erosión y el calendario
+              de campo desnudo <b>no</b> se miden todavía: son huecos declarados, no
+              supuestos.</p>
+            <p><b>Sensores y techo:</b> simulados. La lluvia que mueve el techo viene de
+              ERA5 (no se ajusta a mano). El bot de Telegram es real; los relés, no.</p>
+            <p><b>Satélite frente a suelo:</b> el pixel de SMAP (~9 km), IMERG (~10 km),
+              MODIS (250–1000 m) o ECOSTRESS (~70 m) es mayor que una parcela de 1 ha.
+              Por eso aquí no se finge medir en la parcela: se usan POWER/ERA5 a escala de
+              celda y el sensor de la finca dice "simulado". NDVI, evapotranspiración y
+              biomasa (GEDI) son la siguiente integración, no un dato que hoy mostremos.</p>
+          </section>
+          <section id="vision-glosario">
+            <h3>Glosario de campo</h3>
+            <dl id="glosario-lista"></dl>
+          </section>
+        </div>
+      </dialog>
     </aside>
   </div>
   <div id="vision-lightbox">
@@ -2064,9 +3500,10 @@ lienzo.addEventListener('pointerup', (evento) => {
     return;
   }
   const punto = latLonDe(evento);
-  if (punto) {
+  if (punto && !window.__primerClickGlobo) {
     seleccionar(punto.lat, punto.lon);
   }
+  window.__primerClickGlobo = false;
 });
 document.getElementById('panel-cerrar').addEventListener('click', cerrarPanel);
 document.getElementById('panel-reintentar').addEventListener('click', () => {
@@ -2397,6 +3834,7 @@ function dibujarMapa(estado) {
 
   // 2. Parcelas encima del campo.
   const rotulos = [];   // cajas ya dibujadas: dos nombres no pueden pisarse
+  const anchoMapa = ctx.canvas.clientWidth || 999;
   PARCELAS.forEach((p) => {
     const puntos = (p.poligono_m || []).map(([x, y]) => aPantalla(x, y));
     if (puntos.length < 3) { return; }
@@ -2472,10 +3910,16 @@ function dibujarMapa(estado) {
       ctx.font = '700 9px "Segoe UI", system-ui, sans-serif';
       const t = 'TECHO CERRADO';
       const anchoT = ctx.measureText(t).width;
-      ctx.fillStyle = 'rgba(4, 7, 13, 0.8)';
-      ctx.fillRect(mx - anchoT / 2 - 3, my - 7, anchoT + 6, 13);
-      ctx.fillStyle = '#dce9f5';
-      ctx.fillText(t, mx - anchoT / 2, my + 3);
+      const cajaT = { x: mx - anchoT / 2 - 3, y: my - 7, w: anchoT + 6, h: 13 };
+      const pisaT = rotulos.some((otra) => cajaT.x < otra.x + otra.w && otra.x < cajaT.x + cajaT.w
+        && cajaT.y < otra.y + otra.h && otra.y < cajaT.y + cajaT.h);
+      if (anchoMapa >= 520 && !pisaT) {
+        rotulos.push(cajaT);
+        ctx.fillStyle = 'rgba(4, 7, 13, 0.8)';
+        ctx.fillRect(cajaT.x, cajaT.y, cajaT.w, cajaT.h);
+        ctx.fillStyle = '#dce9f5';
+        ctx.fillText(t, mx - anchoT / 2, my + 3);
+      }
     }
   });
 
@@ -2509,10 +3953,16 @@ function dibujarMapa(estado) {
       ctx.strokeStyle = 'rgba(4, 7, 13, 0.9)';
       ctx.lineWidth = 1;
       ctx.stroke();
-      if (activa) {
+      if (activa && anchoMapa >= 520) {
         ctx.font = '9px ui-monospace, Consolas, monospace';
-        ctx.fillStyle = 'rgba(230, 240, 250, 0.95)';
-        ctx.fillText(sensor.id, sx + 9, sy + 3);
+        const cajaS = { x: sx + 9, y: sy - 5, w: ctx.measureText(sensor.id).width + 4, h: 12 };
+        const pisaS = rotulos.some((otra) => cajaS.x < otra.x + otra.w && otra.x < cajaS.x + cajaS.w
+          && cajaS.y < otra.y + otra.h && otra.y < cajaS.y + cajaS.h);
+        if (!pisaS) {
+          rotulos.push(cajaS);
+          ctx.fillStyle = 'rgba(230, 240, 250, 0.95)';
+          ctx.fillText(sensor.id, sx + 11, sy + 3);
+        }
       }
     });
     // Cámara: pequeño icono en la esquina superior del polígono.
@@ -3409,7 +4859,7 @@ function pintarRotacion() {
   resumenBloque('b-rotacion', `hoy ${actual.indice ?? '–'}/100 · `
     + `mejor ${mejor}/100 → ${(estrategias.find((e) => e.indice === mejor) || {}).titulo || ''}`);
   caja.innerHTML = estrategias.map((e) => `
-    <button class="rotacion-fila${e.indice === mejor ? ' gana' : ''}" data-id="${e.id}">
+    <button class="rotacion-fila${e.indice === mejor ? ' gana' : ''}${e.id === rotacionId ? ' activa' : ''}" data-id="${e.id}">
       <span>${e.titulo}${e.provisional ? ' · provisional' : ''}</span>
       <b>${e.indice ?? '–'}/100</b>
     </button>`).join('');
@@ -3765,6 +5215,17 @@ function cerrarMonitor() {
   document.getElementById('vision').classList.remove('visible');
   document.getElementById('lienzo').style.opacity = '1';
   cerrarFoto();
+  // Al volver, el globo recupera su zoom y posición iniciales.
+  const globo = window.__tierra && window.__tierra.globo;
+  if (globo && window.__camInicial) {
+    destinoCamara = null;
+    globo.camara.position.copy(window.__camInicial);
+    if (window.__targetInicial) {
+      controles.target.copy(window.__targetInicial);
+    }
+    controles.update();
+    controles.autoRotate = true;
+  }
 }
 
 /* El globo vuela a las coordenadas de la finca (demo o cliente) y de ahí sale el
@@ -4339,6 +5800,846 @@ montarGlobo().finally(() => {
     setTimeout(() => abrirMonitor(), 500);
   }
 });
+</script>
+
+<script id="rediseno-portada-js">
+(function () {
+  'use strict';
+  const raiz = document.documentElement;
+  const CLAVE = 'autofarm:tema';
+
+  // ---------- tema claro / oscuro ----------
+  try {
+    if (localStorage.getItem(CLAVE) === 'claro') raiz.dataset.tema = 'claro';
+  } catch (e) { /* sin almacenamiento */ }
+  const botonTema = document.getElementById('tema-boton');
+  function pintarTema() {
+    const claro = raiz.dataset.tema === 'claro';
+    botonTema.textContent = claro ? '☀' : '☾';
+    botonTema.setAttribute('aria-label',
+      claro ? 'Cambiar a tema oscuro' : 'Cambiar a tema claro');
+  }
+  botonTema.addEventListener('click', () => {
+    const claro = raiz.dataset.tema === 'claro';
+    if (claro) delete raiz.dataset.tema; else raiz.dataset.tema = 'claro';
+    try { localStorage.setItem(CLAVE, claro ? 'oscuro' : 'claro'); } catch (e) {}
+    pintarTema();
+  });
+  pintarTema();
+
+  // ---------- datos destacados de la portada ----------
+  const caja = document.getElementById('portada-stats');
+  const CLAVE_FINCA = { lat: 18.91, lon: -70.74 };
+
+  function vientoTendencia() {
+    const t = window.__tierra;
+    const malla = t && t.datos;
+    if (!malla || !Array.isArray(malla.celdas) || !Array.isArray(malla.variables)) return null;
+    const indice = malla.variables.findIndex((v) => v.id === 'WS2M');
+    if (indice < 0) return null;
+    let mejor = null;
+    let distancia = Infinity;
+    malla.celdas.forEach((celda) => {
+      const d = (celda[0] - CLAVE_FINCA.lat) ** 2 + (celda[1] - CLAVE_FINCA.lon) ** 2;
+      if (d < distancia) { distancia = d; mejor = celda; }
+    });
+    const valor = mejor ? mejor[2 + indice * 3] : null;
+    return typeof valor === 'number' ? valor : null;
+  }
+
+  function pintarStats(datos) {
+    caja.innerHTML = '';
+    datos.forEach(([valor, unidad, etiqueta]) => {
+      const stat = document.createElement('div');
+      stat.className = 'stat';
+      const small = document.createElement('small');
+      small.textContent = etiqueta;
+      const b = document.createElement('b');
+      b.textContent = valor === null || valor === undefined || Number.isNaN(valor)
+        ? '—' : valor;
+      const i = document.createElement('i');
+      i.textContent = unidad;
+      stat.append(small, b, i);
+      caja.append(stat);
+    });
+  }
+
+  function desdeReciente() {
+    const t = window.__tierra;
+    const f = t && t.reciente && (t.reciente.fincas || [])[0];
+    if (!f) return false;
+    const temp = f.temperatura ? f.temperatura.media : null;
+    const lluvia = f.lluvia ? f.lluvia['30d_mm'] : null;
+    const humedad = f.humedad_superficial ? f.humedad_superficial.valor : null;
+    const viento = vientoTendencia();
+    pintarStats([
+      [temp === null ? null : Number(temp).toFixed(1).replace('.', ','), '°C', 'Temperatura'],
+      [lluvia === null ? null : Math.round(lluvia), 'L/m²', 'Lluvia · 30 días'],
+      [humedad === null ? null : Math.round(humedad * 100), '%', 'Humedad del suelo'],
+      [viento === null ? null : Number(viento).toFixed(2).replace('.', ','),
+        'm/s/década', 'Viento · tendencia'],
+    ]);
+    return true;
+  }
+
+  function esperarDatos() {
+    if (desdeReciente()) return;
+    let intentos = 0;
+    const timer = setInterval(() => {
+      intentos += 1;
+      if (desdeReciente()) clearInterval(timer);
+      else if (intentos > 60) { clearInterval(timer); pintarStats([]); }
+    }, 250);
+  }
+  esperarDatos();
+
+  // ---------- el globo se explora con clic y se vuelve con el botón ----------
+  const lienzo = document.getElementById('lienzo');
+  const pista = document.getElementById('pista-globo');
+  const volverGlobo = document.getElementById('volver-globo');
+
+  function explorar() {
+    if (window.__transicionando || document.body.classList.contains('saliendo')) return;
+    if (!document.body.classList.contains('explorando')) {
+      window.__primerClickGlobo = true;
+    }
+    document.body.classList.add('explorando');
+    pista.style.display = 'none';
+  }
+  function salirExplorar() {
+    document.body.classList.remove('explorando');
+    const t = window.__tierra;
+    if (t && t.cerrarPanel) t.cerrarPanel();
+  }
+
+  lienzo.addEventListener('pointerdown', explorar);
+
+  // EXAMINAR solo cuando el cursor está de verdad sobre la esfera del globo.
+  let rayoGlobo = null;
+
+  function sobreElGlobo(evento) {
+    const g = window.__tierra && window.__tierra.globo;
+    if (!g || !g.THREE) return false;
+    const THREE = g.THREE;
+    if (!rayoGlobo) rayoGlobo = new THREE.Raycaster();
+    const rect = lienzo.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((evento.clientX - rect.left) / rect.width) * 2 - 1,
+      -((evento.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    rayoGlobo.setFromCamera(ndc, g.camara);
+    const centro = new THREE.Vector3(0, 0, 0);
+    const radio = new THREE.Sphere(centro, 1.015);
+    const punto = new THREE.Vector3();
+    return Boolean(rayoGlobo.ray.intersectSphere(radio, punto));
+  }
+
+  const zonasUI = ['#variables', '#caja-info-portada', '#portada-botones', '#portada-stats',
+    '#marca h1', '#marca #subtitulo', '#marca #desafio', '#portada-fuente',
+    '#portada-datos', '#tema-boton', '#chips'];
+  function sobreInterfaz(evento) {
+    const x = evento.clientX;
+    const y = evento.clientY;
+    for (const selector of zonasUI) {
+      const el = document.querySelector(selector);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+    }
+    const encima = document.elementFromPoint(x, y);
+    return Boolean(encima && encima !== lienzo && !encima.closest('#lienzo'));
+  }
+
+  lienzo.addEventListener('mousemove', (evento) => {
+    if (window.__transicionando || document.body.classList.contains('saliendo')) {
+      pista.style.display = 'none'; lienzo.style.cursor = 'default'; return;
+    }
+    if (document.body.classList.contains('explorando')) { pista.style.display = 'none'; return; }
+    if (sobreInterfaz(evento) || !sobreElGlobo(evento)) {
+      pista.style.display = 'none';
+      lienzo.style.cursor = 'default';
+      return;
+    }
+    lienzo.style.cursor = '';
+    pista.style.display = 'block';
+    const ancho = pista.offsetWidth || 120;
+    const alto = pista.offsetHeight || 30;
+    pista.style.left = Math.min(window.innerWidth - ancho - 12, evento.clientX + 20) + 'px';
+    pista.style.top = Math.max(12, evento.clientY - alto - 14) + 'px';
+  });
+  lienzo.addEventListener('mouseleave', () => { pista.style.display = 'none'; });
+  volverGlobo.addEventListener('click', (evento) => {
+    evento.stopPropagation();
+    salirExplorar();
+  });
+
+  // Mostrar / ocultar las tarjetas C1 con el ojo.
+  document.querySelectorAll('.ojo-info').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const tarjeta = boton.closest('.tarjeta-info');
+      const plegada = tarjeta.classList.toggle('plegada');
+      boton.setAttribute('data-tip', plegada ? 'Mostrar más info' : 'Ocultar info');
+      boton.setAttribute('aria-label', plegada ? 'Mostrar más info' : 'Ocultar info');
+    });
+  });
+
+  // Posición inicial de la cámara para restaurar el zoom al volver.
+  (function capturarInicio() {
+    const t = window.__tierra;
+    if (t && t.listo && t.globo) {
+      window.__camInicial = t.globo.camara.position.clone();
+      window.__targetInicial = t.globo.controles.target.clone();
+      return;
+    }
+    setTimeout(capturarInicio, 200);
+  })();
+
+  // Tooltip global con cálculo de posición: nunca sale de pantalla ni tapa el botón.
+  const tip = document.getElementById('tooltip-global');
+  function colocarTip(elemento) {
+    const rect = elemento.getBoundingClientRect();
+    tip.textContent = elemento.getAttribute('data-tip') || '';
+    tip.classList.add('visible');
+    const caja = tip.getBoundingClientRect();
+    const hueco = 10;
+    let arriba = rect.top - caja.height - hueco;
+    let abajo = rect.bottom + hueco;
+    let y = arriba >= 8 ? arriba : abajo;
+    if (y + caja.height > window.innerHeight - 8) y = Math.max(8, arriba);
+    let x = rect.left + rect.width / 2 - caja.width / 2;
+    x = Math.max(8, Math.min(window.innerWidth - caja.width - 8, x));
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function ocultarTip() { tip.classList.remove('visible'); }
+
+  document.addEventListener('pointerover', (evento) => {
+    const el = evento.target.closest && evento.target.closest('[data-tip]');
+    if (el && el.getAttribute('data-tip')) colocarTip(el);
+  });
+  document.addEventListener('pointerout', (evento) => {
+    if (evento.target.closest && evento.target.closest('[data-tip]')) ocultarTip();
+  });
+  document.addEventListener('focusin', (evento) => {
+    const el = evento.target.closest && evento.target.closest('[data-tip]');
+    if (el) colocarTip(el);
+  });
+  document.addEventListener('focusout', ocultarTip);
+  window.addEventListener('scroll', ocultarTip, true);
+
+  // ---------- transición de zoom hacia la parcela ----------
+  const capa = document.getElementById('transicion');
+  function entrarConZoom() {
+    window.__transicionando = true;
+    document.body.classList.add('saliendo');
+    capa.classList.add('activa');
+    setTimeout(() => capa.classList.add('zoom'), 80);
+    setTimeout(() => {
+      window.__transicionando = false;
+      document.body.classList.remove('saliendo');
+    }, 4200);
+  }
+  document.getElementById('portada-cta').addEventListener('click', entrarConZoom);
+
+  const vision = document.getElementById('vision');
+  if (vision) {
+    const observador = new MutationObserver(() => {
+      if (vision.classList.contains('visible')) {
+        window.__transicionando = false;
+        document.body.classList.remove('saliendo');
+        setTimeout(() => {
+          capa.classList.remove('zoom');
+          capa.classList.remove('activa');
+        }, 700);
+      }
+    });
+    observador.observe(vision, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  // La portada desaparece mientras se está en la parcela.
+  const observadorCuerpo = new MutationObserver(() => {
+    document.body.classList.toggle('explorando',
+      Boolean(vision && vision.classList.contains('visible')));
+  });
+  if (vision) observadorCuerpo.observe(vision, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
+
+<script id="rediseno-parcela-js">
+(function () {
+  'use strict';
+  const escapar = (valor) => String(valor ?? '').replace(/[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const vision = document.getElementById('vision');
+
+  // ---------- buscador alfabético de parcelas ----------
+  const entrada = document.getElementById('buscador-entrada');
+  const lista = document.getElementById('buscador-lista');
+  const sinTildes = (t) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  function parcelas() {
+    const t = window.__tierra;
+    return (t && Array.isArray(t.parcelas) ? t.parcelas : [])
+      .slice().sort((a, b) => sinTildes(a.nombre || '').localeCompare(sinTildes(b.nombre || '')));
+  }
+
+  function pintarLista(filtro) {
+    const busqueda = sinTildes(filtro || '');
+    const encontradas = parcelas().filter((p) => sinTildes(p.nombre || '').includes(busqueda));
+    lista.innerHTML = '';
+    encontradas.forEach((p) => {
+      const item = document.createElement('li');
+      item.setAttribute('role', 'option');
+      item.innerHTML = '<span>' + escapar(p.nombre || p.id) + '</span><small>'
+        + escapar(p.cultivo || '') + '</small>';
+      item.addEventListener('mousedown', (evento) => {
+        evento.preventDefault();
+        if (window.__tierra.elegirParcela) window.__tierra.elegirParcela(p.id);
+        entrada.value = '';
+        lista.classList.remove('abierta');
+      });
+      lista.append(item);
+    });
+    lista.classList.toggle('abierta', encontradas.length > 0);
+  }
+
+  entrada.addEventListener('focus', () => pintarLista(entrada.value));
+  entrada.addEventListener('input', () => pintarLista(entrada.value));
+  entrada.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Escape') { lista.classList.remove('abierta'); entrada.blur(); }
+    if (evento.key === 'Enter') {
+      const primero = lista.querySelector('li');
+      if (primero) primero.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    }
+  });
+  document.addEventListener('click', (evento) => {
+    if (!evento.target.closest('#buscador-parcelas')) lista.classList.remove('abierta');
+  });
+
+  // ---------- fotos bajo el icono de cámara ----------
+  const botonFotos = document.getElementById('boton-fotos');
+  botonFotos.addEventListener('click', (evento) => {
+    evento.stopPropagation();
+    const abierto = vision.classList.toggle('fotos-abiertas');
+    botonFotos.classList.toggle('activo', abierto);
+    const sugerencias = document.getElementById('buscador-lista');
+    if (sugerencias) sugerencias.classList.remove('abierta');
+  });
+  document.addEventListener('click', (evento) => {
+    if (!vision.classList.contains('fotos-abiertas')) return;
+    if (evento.target.closest('#b-fotos') || evento.target.closest('#boton-fotos')) return;
+    vision.classList.remove('fotos-abiertas');
+    botonFotos.classList.remove('activo');
+  });
+
+  // ---------- estado de conexión dentro de Elio ----------
+  const chip = document.getElementById('elio-conexion');
+  function estadoElio() {
+    const fuente = document.getElementById('vision-bot');
+    const texto = (fuente ? fuente.textContent : '').toLowerCase();
+    const conectado = /conectad|en línea|en linea|online/.test(texto) && !/sin conexión|sin conexion/.test(texto);
+    chip.textContent = conectado ? 'conectado' : 'sin conexión';
+    chip.classList.toggle('ok', conectado);
+    chip.classList.toggle('no', !conectado);
+  }
+  estadoElio();
+  const observador = new MutationObserver(estadoElio);
+  const fuente = document.getElementById('vision-bot');
+  if (fuente) {
+    observador.observe(fuente, { childList: true, subtree: true, attributes: true });
+  }
+})();
+</script>
+
+<script id="tema-parcela-js">
+(function () {
+  'use strict';
+  const raiz = document.documentElement;
+  const boton = document.getElementById('vision-tema');
+  if (!boton) return;
+  const pintar = () => {
+    boton.textContent = raiz.dataset.tema === 'claro' ? '☀' : '☾';
+  };
+  boton.addEventListener('click', () => {
+    const claro = raiz.dataset.tema === 'claro';
+    if (claro) delete raiz.dataset.tema; else raiz.dataset.tema = 'claro';
+    try { localStorage.setItem('autofarm:tema', claro ? 'oscuro' : 'claro'); } catch (e) {}
+    pintar();
+    const otro = document.getElementById('tema-boton');
+    if (otro) otro.textContent = raiz.dataset.tema === 'claro' ? '☀' : '☾';
+  });
+  pintar();
+})();
+</script>
+
+<script id="ubicacion-parcela-js">
+(function () {
+  'use strict';
+  const escapar = (valor) => String(valor ?? '').replace(/[&<>"']/g,
+    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const caja = document.getElementById('vision-ubicacion');
+  if (!caja) return;
+  const numero = (v, d) => (typeof v === 'number' ? v.toFixed(d) : '—');
+  function pintar() {
+    const t = window.__tierra;
+    if (!t || !t.parcelaActual) return;
+    const parcela = t.parcelaActual();
+    if (!parcela) { caja.textContent = '—'; return; }
+    const finca = (t.fincas || [])[0] || {};
+    caja.innerHTML = '<b>' + escapar(parcela.nombre || parcela.id) + '</b> · '
+      + escapar(parcela.cultivo || 'sin cultivo') + ' · '
+      + numero(parcela.area_ha, 2) + ' ha<br>'
+      + 'Finca ' + escapar(finca.nombre || 'Constanza') + ' · '
+      + numero(finca.lat, 2) + ', ' + numero(finca.lon, 2) + '<br>'
+      + (parcela.plantas_georreferenciadas || 0) + ' plantas georreferenciadas';
+  }
+  pintar();
+  setInterval(pintar, 1200);
+})();
+</script>
+
+<script id="elio-derecha-js">
+(function () {
+  'use strict';
+  const bloque = document.getElementById('b-elio');
+  const chat = document.getElementById('vision-chat');
+  if (bloque && chat && chat.parentElement !== bloque) {
+    bloque.appendChild(chat);
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+      const t = window.__tierra;
+      if (t && t.pintarVision) t.pintarVision();
+    }, 60);
+  }
+})();
+</script>
+
+<script id="iteracion2c-js">
+(function () {
+  'use strict';
+  // ---------- tooltips temáticos ----------
+  const pistas = {
+    'boton-fotos': 'Imágenes satelitales',
+    'tema-boton': 'Cambiar tema',
+    'vision-tema': 'Cambiar tema',
+    'vision-zoom-mas': 'Acercar el mapa',
+    'vision-zoom-menos': 'Alejar el mapa',
+    'vision-centrar': 'Ver todas las parcelas',
+    'vision-cerrar': 'Volver al globo',
+    'vision-cuenta': 'Entrar a mi parcela',
+    'buscador-entrada': 'Buscar parcela por nombre',
+    'volver-globo': 'Volver a la interfaz'
+  };
+  Object.keys(pistas).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('data-tip', pistas[id]);
+  });
+  document.querySelectorAll('#variables button').forEach((b) => {
+    b.setAttribute('data-tip', 'Análisis de ' + b.textContent.trim().toLowerCase());
+  });
+  document.querySelectorAll('#vision-lado details > summary h3').forEach((h) => {
+    h.setAttribute('data-tip', h.textContent.trim().split('·')[0].trim());
+  });
+  document.querySelectorAll('.chat-rapidos button').forEach((b) => {
+    b.setAttribute('data-tip', 'Enviar: ' + b.textContent.trim());
+  });
+  document.querySelectorAll('#b-rotacion .control label').forEach((l) => {
+    l.setAttribute('data-tip', 'Ajustar ' + l.textContent.trim().split(':')[0]);
+  });
+  const masTips = {
+    'cerrar-fotos': 'Cerrar las fotos',
+    'vision-metodo': 'Cómo se calculan los datos',
+    'vision-glosario': 'Glosario de términos de campo',
+    'subir-foto': 'Añadir una foto de tu cultivo'
+  };
+  Object.keys(masTips).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('data-tip', masTips[id]);
+  });
+
+  // ---------- subir fotos propias ----------
+  const entrada = document.getElementById('foto-usuario');
+  const galeria = document.getElementById('fotos-usuario');
+  const aviso = document.getElementById('fotos-aviso');
+  const CLAVE = 'autofarm:fotos';
+  function leer() {
+    try { return JSON.parse(localStorage.getItem(CLAVE) || '[]'); } catch (e) { return []; }
+  }
+  function pintar() {
+    if (!galeria) return;
+    galeria.innerHTML = '';
+    leer().forEach((src) => {
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Foto subida por el usuario';
+      galeria.append(img);
+    });
+  }
+  if (entrada) {
+    entrada.addEventListener('change', () => {
+      const archivo = entrada.files && entrada.files[0];
+      if (!archivo) return;
+      if (archivo.size > 8 * 1024 * 1024) {
+        aviso.textContent = 'La foto pesa demasiado (máximo 8 MB).';
+        return;
+      }
+      const lector = new FileReader();
+      lector.onload = () => {
+        const imagen = new Image();
+        imagen.onload = () => {
+          const max = 900;
+          const escala = Math.min(1, max / Math.max(imagen.width, imagen.height));
+          const lienzo = document.createElement('canvas');
+          lienzo.width = Math.max(1, Math.round(imagen.width * escala));
+          lienzo.height = Math.max(1, Math.round(imagen.height * escala));
+          lienzo.getContext('2d').drawImage(imagen, 0, 0, lienzo.width, lienzo.height);
+          let datos = lienzo.toDataURL('image/jpeg', 0.72);
+          let calidad = 0.72;
+          while (datos.length > 380000 && calidad > 0.35) {
+            calidad -= 0.1;
+            datos = lienzo.toDataURL('image/jpeg', calidad);
+          }
+          if (datos.length > 600000) {
+            aviso.textContent = 'La foto sigue siendo muy grande; prueba con otra.';
+            return;
+          }
+          const fotos = leer();
+          fotos.unshift(datos);
+          while (fotos.length > 4) fotos.pop();
+          try {
+            localStorage.setItem(CLAVE, JSON.stringify(fotos));
+            aviso.textContent = '';
+          } catch (e) {
+            fotos.shift();
+            aviso.textContent = 'No se pudo guardar: almacenamiento lleno. Borra una foto.';
+          }
+          pintar();
+        };
+        imagen.src = String(lector.result);
+      };
+      lector.readAsDataURL(archivo);
+      entrada.value = '';
+    });
+  }
+  pintar();
+})();
+</script>
+
+<script id="iteracion2d-js">
+(function () {
+  'use strict';
+  // Tooltips de los botones de la portada.
+  const portada = { 'portada-cuenta': 'Entrar con tu usuario y PIN',
+                    'portada-cta': 'Abrir la finca de demostración' };
+  Object.keys(portada).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('data-tip', portada[id]);
+  });
+
+  // Tooltips de las tarjetas de rotación (se pintan dinámicamente).
+  const filas = document.getElementById('rotacion-filas');
+  function anotar() {
+    if (!filas) return;
+    filas.querySelectorAll('.rotacion-fila').forEach((b) => {
+      if (!b.dataset.tip) {
+        b.setAttribute('data-tip', 'Ver ' + b.textContent.trim().split(' ')[0].toLowerCase()
+          + ' · ' + (b.querySelector('b') ? b.querySelector('b').textContent : ''));
+      }
+    });
+  }
+  if (filas) {
+    new MutationObserver(anotar).observe(filas, { childList: true, subtree: true });
+    anotar();
+  }
+})();
+</script>
+
+<script id="cerrar-fotos-js">
+(function () {
+  'use strict';
+  const vision = document.getElementById('vision');
+  const boton = document.getElementById('cerrar-fotos');
+  if (boton && vision) {
+    boton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      vision.classList.remove('fotos-abiertas');
+      const cam = document.getElementById('boton-fotos');
+      if (cam) cam.classList.remove('activo');
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && vision && vision.classList.contains('fotos-abiertas')) {
+      vision.classList.remove('fotos-abiertas');
+    }
+  });
+})();
+</script>
+
+<script id="iteracion3b-js">
+(function () {
+  'use strict';
+  const detalle = document.getElementById('rotacion-detalle');
+  function agrupar() {
+    if (!detalle) return;
+    detalle.querySelectorAll('h4').forEach((h) => {
+      if (h.closest('.rotacion-tema')) return;
+      const seccion = document.createElement('section');
+      seccion.className = 'rotacion-tema';
+      h.before(seccion);
+      seccion.append(h);
+      let siguiente = seccion.nextElementSibling;
+      while (siguiente && siguiente.tagName !== 'H4') {
+        const proximo = siguiente.nextElementSibling;
+        seccion.append(siguiente);
+        siguiente = proximo;
+      }
+    });
+  }
+  if (detalle) {
+    new MutationObserver(agrupar).observe(detalle, { childList: true });
+    agrupar();
+  }
+})();
+</script>
+
+<script id="iteracion3c-js">
+(function () {
+  'use strict';
+  const lado = document.getElementById('vision-lado');
+  const zona = document.getElementById('ventanas-scroll') || lado;
+  if (!lado) return;
+  const bloques = Array.from(zona.querySelectorAll(':scope > .bloque'));
+  const original = bloques.map((b) => b.id).filter(Boolean);
+
+  const barra = document.createElement('div');
+  barra.id = 'ventana-barra';
+  barra.innerHTML = '<span>Ventanas</span>'
+    + '<button id="orden-predefinido" type="button" data-tip="Restaurar orden y tamaños">'
+    + 'Orden predefinido</button>';
+  lado.prepend(barra);
+
+  function guardar() {
+    const orden = Array.from(zona.querySelectorAll(':scope > .bloque'))
+      .map((b) => b.id).filter(Boolean);
+    const anchos = Array.from(zona.querySelectorAll(':scope > .bloque.media'))
+      .map((b) => b.id);
+    try {
+      localStorage.setItem('autofarm:ventanas', JSON.stringify({ orden, anchos }));
+    } catch (e) {}
+  }
+
+  function aplicar() {
+    return;
+    let datos = null;
+    try { datos = JSON.parse(localStorage.getItem('autofarm:ventanas') || 'null'); } catch (e) {}
+    if (!datos) return;
+    (datos.orden || []).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && el.parentElement === lado) zona.append(el);
+    });
+    (datos.anchos || []).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('media');
+    });
+  }
+
+  bloques.forEach((bloque) => {
+    bloque.classList.add('ventana');
+    const asa = document.createElement('button');
+    asa.className = 'ventana-asa';
+    asa.type = 'button';
+    asa.draggable = true;
+    asa.textContent = '⣿';
+    asa.title = 'Arrastrar esta ventana';
+    asa.setAttribute('data-tip', 'Arrastrar para cambiar el orden');
+    const ancho = document.createElement('button');
+    ancho.className = 'ventana-ancho';
+    ancho.type = 'button';
+    ancho.textContent = '⤢';
+    ancho.title = 'Mitad / ancho completo';
+    ancho.setAttribute('data-tip', 'Poner a media línea');
+    bloque.append(asa, ancho);
+
+    asa.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', bloque.id);
+      e.dataTransfer.effectAllowed = 'move';
+      bloque.classList.add('arrastrando');
+    });
+    asa.addEventListener('dragend', () => bloque.classList.remove('arrastrando'));
+    bloque.addEventListener('dragover', (e) => e.preventDefault());
+    bloque.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const id = e.dataTransfer.getData('text/plain');
+      const origen = id ? document.getElementById(id) : null;
+      if (!origen || origen === bloque) return;
+      const caja = bloque.getBoundingClientRect();
+      const despues = e.clientY > caja.top + caja.height / 2;
+      bloque.parentElement.insertBefore(origen, despues ? bloque.nextSibling : bloque);
+      bloque.classList.remove('arrastrando');
+      guardar();
+    });
+    ancho.addEventListener('click', () => {
+      bloque.classList.toggle('media');
+      ancho.setAttribute('data-tip',
+        bloque.classList.contains('media') ? 'Poner a ancho completo' : 'Poner a media línea');
+      guardar();
+    });
+  });
+
+  aplicar();
+  const reset = document.getElementById('orden-predefinido');
+  if (reset) {
+    reset.addEventListener('click', () => {
+      const presentes = Array.from(zona.querySelectorAll(':scope > .bloque'));
+      const refs = new Map(presentes.filter((b) => b.id).map((b) => [b.id, b]));
+      presentes.forEach((b) => b.remove());
+      original.forEach((id) => {
+        const el = refs.get(id);
+        if (el) zona.append(el);
+      });
+      presentes.forEach((b) => {
+        if (b.id && !original.includes(b.id)) lado.append(b);
+      });
+      zona.querySelectorAll('.media').forEach((b) => b.classList.remove('media'));
+      guardar();
+    });
+  }
+})();
+</script>
+
+<script id="iteracion4b-js">
+(function () {
+  'use strict';
+  const lado = document.getElementById('vision-lado');
+  const zona = document.getElementById('ventanas-scroll') || lado;
+  if (!lado) return;
+  function guardar() {
+    const orden = Array.from(zona.querySelectorAll(':scope > .bloque')).map((b) => b.id).filter(Boolean);
+    const anchos = Array.from(zona.querySelectorAll(':scope > .bloque.media')).map((b) => b.id);
+    try { localStorage.setItem('autofarm:ventanas', JSON.stringify({ orden, anchos })); } catch (e) {}
+  }
+  lado.querySelectorAll(':scope > .bloque .ventana-asa').forEach((asa) => {
+    asa.draggable = false;
+    asa.addEventListener('pointerdown', (evento) => {
+      evento.preventDefault();
+      const bloque = asa.closest('.bloque');
+      if (!bloque) return;
+      bloque.classList.add('moviendo');
+      const mover = (ev) => {
+        const el = document.elementFromPoint(ev.clientX, ev.clientY);
+        const destino = el && el.closest('#ventanas-scroll > .bloque');
+        if (!destino || destino === bloque || destino.contains(bloque) || bloque.contains(destino)) return;
+        const r = destino.getBoundingClientRect();
+        const antes = ev.clientY < r.top + r.height / 2;
+        destino.parentElement.insertBefore(bloque, antes ? destino : destino.nextSibling);
+      };
+      const soltar = () => {
+        document.removeEventListener('pointermove', mover);
+        document.removeEventListener('pointerup', soltar);
+        bloque.classList.remove('moviendo');
+        guardar();
+      };
+      document.addEventListener('pointermove', mover);
+      document.addEventListener('pointerup', soltar, { once: true });
+    });
+  });
+})();
+</script>
+
+<script id="iteracion5-js">
+(function () {
+  'use strict';
+  const lado = document.getElementById('vision-lado');
+  const zona = document.getElementById('ventanas-scroll') || lado;
+  if (!lado) return;
+
+  function guardar() {
+    const orden = Array.from(zona.querySelectorAll(':scope > .bloque')).map((b) => b.id).filter(Boolean);
+    const anchos = Array.from(zona.querySelectorAll(':scope > .bloque.media')).map((b) => b.id);
+    try { localStorage.setItem('autofarm:ventanas', JSON.stringify({ orden, anchos })); } catch (e) {}
+  }
+
+  function arrastrar(bloque, evento, desdeAsa) {
+    return;
+    if (window.innerWidth <= 860) return;
+    if (evento.button !== undefined && evento.button !== 0) return;
+    const objetivo = evento.target;
+    if (!desdeAsa && objetivo.closest('button, input, select, a, textarea')) return;
+    const inicioX = evento.clientX;
+    const inicioY = evento.clientY;
+    let activo = false;
+
+    const mover = (ev) => {
+      if (!activo) {
+        if (Math.hypot(ev.clientX - inicioX, ev.clientY - inicioY) < 6) return;
+        activo = true;
+        bloque.classList.add('moviendo');
+      }
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      const destino = el && el.closest('#ventanas-scroll > .bloque');
+      if (!destino || destino === bloque || destino.contains(bloque) || bloque.contains(destino)) return;
+      const r = destino.getBoundingClientRect();
+      const antes = ev.clientY < r.top + r.height / 2;
+      destino.parentElement.insertBefore(bloque, antes ? destino : destino.nextSibling);
+    };
+    const soltar = () => {
+      document.removeEventListener('pointermove', mover);
+      document.removeEventListener('pointerup', soltar);
+      bloque.classList.remove('moviendo');
+      if (activo) {
+        const evitar = (e) => { e.stopPropagation(); e.preventDefault(); };
+        document.addEventListener('click', evitar, { capture: true, once: true });
+        setTimeout(() => document.removeEventListener('click', evitar, true), 0);
+        guardar();
+      }
+    };
+    document.addEventListener('pointermove', mover);
+    document.addEventListener('pointerup', soltar, { once: true });
+  }
+
+  zona.querySelectorAll(':scope > .bloque').forEach((bloque) => {
+    let asa = bloque.querySelector('.ventana-asa');
+    if (asa) {
+      // Clonar el asa para descartar el manejador anterior y quedarnos con uno solo.
+      const nueva = asa.cloneNode(true);
+      asa.replaceWith(nueva);
+      asa = nueva;
+      asa.draggable = false;
+      asa.addEventListener('pointerdown', (e) => { e.preventDefault(); arrastrar(bloque, e, true); });
+    }
+    bloque.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('button, input, select, a, textarea, label')) return;
+      arrastrar(bloque, e);
+    });
+  });
+})();
+</script>
+
+<script id="iteracion7-js">
+(function () {
+  'use strict';
+  const dialogo = document.getElementById('info-dialog');
+  if (dialogo && dialogo.parentElement !== document.body) document.body.appendChild(dialogo);
+  const abrir = document.getElementById('abrir-info');
+  const cerrar = document.getElementById('cerrar-info');
+  if (!dialogo || !abrir) return;
+  abrir.addEventListener('click', () => dialogo.showModal());
+  if (cerrar) cerrar.addEventListener('click', () => dialogo.close());
+  dialogo.addEventListener('click', (evento) => {
+    if (evento.target === dialogo) dialogo.close();
+  });
+})();
+</script>
+
+<script id="iteracion8-js">
+(function () {
+  'use strict';
+  const zona = document.getElementById('ventanas-scroll');
+  const pie = document.getElementById('fila-final');
+  if (zona && pie) zona.append(pie);
+})();
 </script>
 </body>
 </html>
